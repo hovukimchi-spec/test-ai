@@ -6,18 +6,29 @@ import json, math, os
 FLOORS = ['23','22','21','20','19','18','17','16','15','14','12A','12','11','10','9','8','7','6','5','4','3','2','1']
 # Số căn/tầng = số BOX lớn nhất trên mỗi dòng của bản vẽ (trích tự động từ PDF -> homes_from_drawing.json)
 HOMES_PER_FLOOR = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'homes_from_drawing.json')))
-# Tầng đặt tủ (đọc từ sổ tay): tủ ở tầng cao nhất của cụm, phục vụ các tầng bên dưới tới tủ kế tiếp
-CABINET_FLOORS = {
-    'A': ['23', '21', '18', '15', '12', '9', '7', '5', '2'],
-    'B': ['23', '20', '17', '14', '11', '8', '5', '2'],
+# Tủ: tên theo tầng đặt (theo sổ tay thi công) -> các tầng tủ gom (theo bản vẽ gốc: mỗi ODF phục vụ dòng box của tầng đặt ODF + dòng trên + dòng dưới)
+CABINET_ZONES = {
+    'A': {'23': ['23'], '21': ['22', '21', '20'], '18': ['19', '18', '17'], '15': ['16', '15', '14'], '12': ['12A', '12', '11'],
+          '9': ['10', '9', '8'], '7': ['7', '6', '5'], '5': ['4', '3'], '2': ['2', '1']},
+    'B': {'23': ['23', '22'], '20': ['21', '20', '19'], '17': ['18', '17', '16'], '14': ['15', '14', '12A'], '11': ['12', '11', '10'],
+          '8': ['9', '8', '7'], '5': ['6', '5', '4'], '2': ['3', '2', '1']},
 }
-# Nhóm tủ -> 1 cáp trục 24FO (liệt kê từ trên xuống; tủ cuối = tủ hub, thấp nhất)
+# Đánh số cáp trục: TR-x1 = tầng thấp. Mỗi nhóm liệt kê từ trên xuống; tủ cuối nhóm = tủ hub (thấp nhất, sợi 1-8)
 TRUNK_GROUPS = {
-    'A': [['23', '21', '18'], ['15', '12', '9'], ['7', '5', '2']],
-    'B': [['23', '20', '17'], ['14', '11', '8'], ['5', '2']],
+    'A': [['7', '5', '2'], ['15', '12', '9'], ['23', '21', '18']],
+    'B': [['5', '2'], ['14', '11', '8'], ['23', '20', '17']],
 }
-# ODF 48FO ở Phòng máy: mỗi ODF hàn 2 cáp trục 24FO (khay TRÁI = tháp A, khay PHẢI = tháp B)
-ODFS = [('ODF-02', 'TR-A3', 'TR-B3'), ('ODF-08/09', 'TR-A2', 'TR-B2'), ('ODF-17/18', 'TR-A1', 'TR-B1')]
+# ODF 48FO ở Phòng máy, xếp chồng từ THẤP lên CAO; mỗi ODF: khay TRÁI = tháp A, khay PHẢI = tháp B
+ODFS = [('ODF-02', 'TR-A1', 'TR-B1'), ('ODF-17/18', 'TR-A3', 'TR-B3'), ('ODF-08/09', 'TR-A2', 'TR-B2')]
+# Đối chiếu: ODF trong bản vẽ gốc (tên ODF, tầng đặt, các tầng gom)
+DRAWING_ODF = {
+    'A': [('ODF24FO-09', '23', ['23']), ('ODF96FO-08', '21', ['22', '21', '20']), ('ODF96FO-07', '18', ['19', '18', '17']),
+          ('ODF96FO-06', '15', ['16', '15', '14']), ('ODF96FO-05', '12', ['12A', '12', '11']), ('ODF96FO-04', '9', ['10', '9', '8']),
+          ('ODF96FO-03', '6', ['7', '6', '5']), ('ODF96FO-02', '4', ['4', '3']), ('ODF96FO-01', '2', ['2', '1'])],
+    'B': [('ODF96FO-17', '23', ['23', '22']), ('ODF96FO-16', '20', ['21', '20', '19']), ('ODF96FO-15', '17', ['18', '17', '16']),
+          ('ODF96FO-14', '14', ['15', '14', '12A']), ('ODF96FO-13', '11', ['12', '11', '10']), ('ODF96FO-12', '8', ['9', '8', '7']),
+          ('ODF96FO-11', '5', ['6', '5', '4']), ('ODF96FO-10', '2', ['3', '2', '1'])],
+}
 TRUNK_FO = 24
 FO_PER_CABINET = 8
 CAB_SLOTS = 4          # vị trí splitter 1:16 tối đa trong tủ
@@ -48,12 +59,8 @@ def build():
     for name, ta, tb in ODFS:
         odf_of[ta] = (name, 'Trái'); odf_of[tb] = (name, 'Phải')
     for t in 'AB':
-        cabfl = CABINET_FLOORS[t]
-        zones = {}
-        for i, cf in enumerate(cabfl):
-            start = FLOORS.index(cf)
-            end = FLOORS.index(cabfl[i + 1]) if i + 1 < len(cabfl) else len(FLOORS)
-            zones[cf] = FLOORS[start:end]
+        zones = CABINET_ZONES[t]
+        assert sorted(sum(zones.values(), []), key=FLOORS.index) == FLOORS, 'Các cụm phải phủ đủ mọi tầng'
         for gi, grp in enumerate(TRUNK_GROUPS[t]):
             tid = f'TR-{t}{gi + 1}'
             odf, tray = odf_of[tid]

@@ -29,7 +29,7 @@ h2{font-size:13px;margin:0 0 8px;color:var(--navy);text-transform:uppercase;lett
 .strip{width:11px;flex:none;position:relative;cursor:pointer}
 .strip i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#fff;border:2px solid var(--ink)}
 .strip.hub i{width:13px;height:13px;margin:-6.5px;background:var(--ink)}
-.cab{width:92px;flex:none;margin:0 6px;font-size:10px;font-weight:700;text-align:center;line-height:23px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.cab{width:128px;flex:none;margin:0 6px;font-size:10px;font-weight:700;text-align:center;line-height:23px;border-radius:5px;cursor:pointer;white-space:nowrap}
 .cab.sub{border-radius:0;font-weight:400;color:#0006;cursor:default}
 .apts{display:flex}
 .apt{width:23px;height:21px;margin:1px;border-radius:3px;font-size:9px;color:#0008;text-align:center;line-height:21px;cursor:pointer;border:1px solid transparent}
@@ -97,7 +97,7 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;b
   <div class="side">
     <div class="card" id="info"></div>
     <div class="card" id="help"><h2>Cách đọc</h2>
-      <div class="muted">Mỗi ô nhỏ là 1 BOX/căn hộ (số lượng theo bản vẽ, 9–27/tầng). Dải dọc màu <b style="color:#2f6fde">xanh</b>/<b style="color:#e8710a">cam</b>/<b style="color:#1e9e5a">lục</b> là 3 cáp trục 24FO của mỗi tháp, chấm tròn = tủ trên trục, chấm đặc = tủ hub (nơi cáp trục xuống Phòng Máy).<br><br>
+      <div class="muted">Mỗi tủ ghi rõ gom bao nhiêu tầng (vd "gom 2T"); hàng "│ A5" là tầng thuộc cụm tủ đó. Mỗi ô nhỏ là 1 BOX/căn hộ (số lượng theo bản vẽ, 9–27/tầng). Dải dọc màu <b style="color:#2f6fde">xanh</b>/<b style="color:#e8710a">cam</b>/<b style="color:#1e9e5a">lục</b> là 3 cáp trục 24FO của mỗi tháp, chấm tròn = tủ trên trục, chấm đặc = tủ hub (nơi cáp trục xuống Phòng Máy).<br><br>
       Bấm căn hộ để xem toàn bộ đường quang tới PON. Bấm tủ / trục / PON để xem phạm vi ảnh hưởng và dùng <b>Giả lập sự cố</b>.</div></div>
   </div>
 </main>
@@ -130,13 +130,14 @@ function buildTower(t){
   const top=Object.fromEntries(trs.map(tr=>[tr.id,Math.min(...tr.cabs.map(id=>FLOORS.indexOf(cabBy[id].floor)))]));
   let h=`<div class="tower"><div style="font-weight:700;margin:0 0 4px 34px">THÁP ${t}</div>`;
   FLOORS.forEach((fl,fi)=>{
-    const cab=cabs.find(c=>c.zone.includes(fl)), isCab=cab.floor===fl;
-    h+=`<div class="trow ${isCab?'zone-top':''}"><div class="flo">${fl}F</div>`;
+    const zc=cabs.find(c=>c.zone.includes(fl)), loc=cabs.find(c=>c.floor===fl), isCab=!!loc, cab=loc||zc;
+    const zoneTop=zc.zone[0]===fl;
+    h+=`<div class="trow ${zoneTop?'zone-top':''}"><div class="flo">${fl}F</div>`;
     trs.forEach((tr,k)=>{
       const on=fi>=top[tr.id], here=isCab&&tr.cabs.includes(cab.id), hub=here&&tr.hub===fl;
       h+=`<div class="strip ${hub?'hub':''}" data-tr="${tr.id}" style="${on?'background:'+TCOL[k]:''}" title="${tr.id}">${here?'<i></i>':''}</div>`;
     });
-    h+=`<div class="cab ${isCab?'':'sub'}" data-cab="${cab.id}" id="cab-${isCab?cab.id:''}" ${isCab?`title="${cab.id}"`:''}>${isCab?`${cab.id} · ${cab.nspl}×1:16`:'│'}</div><div class="apts">`;
+    h+=`<div class="cab ${isCab?'':'sub'}" data-cab="${cab.id}" id="cab-${isCab?cab.id:''}" ${isCab?`title="${cab.id} gom ${cab.zone.length} tầng (${cab.zone.join(', ')})"`:''}>${isCab?`${cab.id} · ${cab.nspl}×1:16 · gom ${cab.zone.length}T`:'│ '+zc.id.slice(3)}</div><div class="apts">`;
     for(let a=1;a<=DATA.perFloor[t][fl];a++){const code=`${t}-${fl}-${pad(a)}`;h+=`<div class="apt" data-c="${code}" title="${code}">${pad(a)}</div>`}
     h+='</div></div>';
   });
@@ -246,7 +247,7 @@ function info(){
   }else{
     const sc=scopeOf(sel);let title='',rows='';
     if(sel.t==='cab'){const c=cabBy[sel.id];title='Tủ '+c.id;
-      rows=`<tr><td>Vị trí</td><td>tầng ${c.floor}, phục vụ ${c.zone.join(', ')}</td></tr><tr><td>Cáp trục</td><td>${c.trunk} · sợi ${c.fiber_from}-${c.fiber_to}${c.hub?' (HUB)':''}</td></tr>`+
+      rows=`<tr><td>Vị trí</td><td>tủ đặt tầng ${c.floor} (sổ tay)</td></tr><tr><td>Gom</td><td><b>${c.zone.length} tầng</b>: ${c.zone.join(', ')} · ${c.homes} hộ</td></tr><tr><td>Bản vẽ gốc</td><td>${c.drawing?c.drawing.odf+' @ tầng '+c.drawing.floor+(c.drawing.floor===c.floor?' (khớp)':' ⚠ lệch tầng đặt'):'—'}</td></tr><tr><td>Cáp trục</td><td>${c.trunk} · sợi ${c.fiber_from}-${c.fiber_to}${c.hub?' (HUB)':''}</td></tr>`+
       DATA.spls.filter(s=>s.cab===c.id).map(s=>`<tr><td>${s.id.slice(-2)}</td><td>sợi ${s.fiber} · PON-${pad(s.pon)} · ${s.n}/16 hộ</td></tr>`).join('');}
     if(sel.t==='tr'){const t=trBy[sel.id];title='Cáp trục '+t.id+' (24FO)';
       rows=`<tr><td>Tủ</td><td>${t.cabs.join(', ')}</td></tr><tr><td>Hub</td><td>tầng ${t.hub}</td></tr><tr><td>Sợi dùng</td><td>${DATA.spls.filter(s=>s.trunk===t.id).length}/24</td></tr>`;}

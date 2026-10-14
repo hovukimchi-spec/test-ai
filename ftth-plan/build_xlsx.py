@@ -54,7 +54,7 @@ def widths(ws, ws_w):
 
 wb = Workbook()
 wsT = wb.active; wsT.title = S_TQ
-wsD = wb.create_sheet(S_SD); wsC = wb.create_sheet(S_TU); wsK = wb.create_sheet(S_ST)
+wsD = wb.create_sheet(S_SD); wsC = wb.create_sheet(S_TU); wsX = wb.create_sheet('Đối chiếu bản vẽ'); wsK = wb.create_sheet(S_ST)
 wsO = wb.create_sheet(S_ODF); wsO48 = wb.create_sheet(S_O48); wsH = wb.create_sheet(S_TB); wsS = wb.create_sheet(S_TC)
 wsQ = wb.create_sheet(S_QC); wsV = wb.create_sheet(S_VT); wsG = wb.create_sheet(S_VH)
 
@@ -210,10 +210,21 @@ for t in trunks:
         r += 1
 widths(wsK, [10, 6, 16, 12, 14, 12, 16, 18, 12, 16, 10, 12]); wsK.freeze_panes = 'A5'; wsK.auto_filter.ref = f'A4:L{r - 1}'
 
+
+def drawing_match(c):
+    """Tìm ODF trong bản vẽ gốc có cùng cụm tầng gom với tủ c."""
+    return next((d for d in M.DRAWING_ODF[c['tower']] if d[2] == c['zone']), None)
+
+def cmp_status(c):
+    d = drawing_match(c)
+    if not d: return 'KHÔNG KHỚP cụm tầng'
+    if d[1] == c['floor']: return f'Khớp ({d[0]} @ tầng {d[1]})'
+    return f'LỆCH tầng đặt: sổ tay {c["floor"]}F, bản vẽ {d[1]}F ({d[0]})'
+
 # =============== TỦ PHỐI QUANG ===============
 title(wsC, 'Danh mục tủ phối quang (17 tủ)', 'Số hộ / sử dụng / hoạt động tự cập nhật từ sheet "Thuê bao".')
 cols = ['Mã tủ', 'Tháp', 'Tầng đặt', 'Các tầng phục vụ', 'Số căn hộ', 'Splitter 1:16 lắp', 'Vị trí trống', 'Số cổng khả dụng',
-        '% sử dụng cổng', 'Hoạt động', 'Cáp trục', 'Dải sợi (8FO)', 'Vai trò', 'PON cấp nguồn']
+        '% sử dụng cổng', 'Hoạt động', 'Cáp trục', 'Dải sợi (8FO)', 'Vai trò', 'PON cấp nguồn', 'Số tầng gom', 'Đối chiếu bản vẽ gốc']
 header(wsC, 4, cols, h=36)
 for i, c in enumerate(cabs):
     r = 5 + i
@@ -221,20 +232,20 @@ for i, c in enumerate(cabs):
     pons = sorted({f"PON-{s['pon']:02d}" for s in spls if s['cab'] == c['id']})
     vals = [c['id'], c['tower'], c['floor'], ', '.join(c['zone']), f"=COUNTIF({HR('E')},A{r})", c['nspl'],
             M.CAB_SLOTS - c['nspl'], f'=F{r}*{M.SPL_CAB}', f'=E{r}/H{r}', f"=COUNTIFS({HR('E')},A{r},{HR('N')},\"Hoạt động\")",
-            c['trunk'], f"{c['fiber_from']}-{c['fiber_to']}", 'HUB (cáp trục 24FO về PM)' if c['hub'] else 'Tủ nhánh (cáp 8FO xuống hub)', ', '.join(pons)]
-    for k, v in enumerate(vals, 1): body(wsC, r, k, v, center=k not in (4, 13, 14), bg=bg if k == 1 else None, bold=(k == 1), fmt='0%' if k == 9 else None)
-widths(wsC, [11, 6, 9, 20, 10, 12, 9, 11, 11, 10, 10, 12, 28, 18])
+            c['trunk'], f"{c['fiber_from']}-{c['fiber_to']}", 'HUB (cáp trục 24FO về PM)' if c['hub'] else 'Tủ nhánh (cáp 8FO xuống hub)', ', '.join(pons), len(c['zone']), cmp_status(c)]
+    for k, v in enumerate(vals, 1): body(wsC, r, k, v, center=k not in (4, 13, 14, 16), bg=bg if k == 1 else None, bold=(k == 1), fmt='0%' if k == 9 else None)
+widths(wsC, [11, 6, 9, 20, 10, 12, 9, 11, 11, 10, 10, 12, 28, 18, 10, 46])
 wsC.freeze_panes = 'B5'
 wsC.conditional_formatting.add('I5:I21', DataBarRule(start_type='num', start_value=0, end_type='num', end_value=1, color='5B9BD5'))
 wsC.conditional_formatting.add('I5:I21', CellIsRule(operator='greaterThan', formula=['0.95'], font=Font(color='C00000', bold=True)))
 body(wsC, 22, 1, 'Tổng', True, True)
-for c in range(2, 15): body(wsC, 22, c, None)
+for c in range(2, 17): body(wsC, 22, c, None)
 for col in 'EFGHJ': body(wsC, 22, ord(col) - 64, f'=SUM({col}5:{col}21)', True, True)
 body(wsC, 22, 9, '=E22/H22', True, True, '0%')
 
 # =============== SƠ ĐỒ TRỤC ===============
 title(wsD, 'Sơ đồ trục thông tầng – Tháp A & Tháp B (số hoá từ sổ tay)',
-      'Mỗi tủ đặt ở tầng đậm màu, phục vụ các tầng cùng màu bên dưới. Cột "Trục" = cáp trục 24FO chạy dọc hộp kỹ thuật xuống Phòng Máy.')
+      'Ô đậm = tủ đặt tại tầng đó (ghi "gom nT/số hộ": gom n tầng); các hàng "│ TU-xx" là tầng thuộc cụm tủ đó. ⚠ = tủ đặt khác tầng gom (xem sheet "Đối chiếu bản vẽ"). Cột Trục 1-3 = cáp trục 24FO TR-x1 (thấp) … TR-x3 (cao).')
 blocks = {'A': 2, 'B': 12}
 hdr = ['Tầng', 'Trục 1', 'Trục 2', 'Trục 3', 'Tủ', 'Số hộ', 'PON', 'Splitter']
 trunk_colors = {0: '2F6FDE', 1: 'E8710A', 2: '1E9E5A'}
@@ -249,25 +260,27 @@ for t, c0 in blocks.items():
     for fi, fl in enumerate(M.FLOORS):
         r = 6 + fi
         body(wsD, r, c0, f'{fl}F', True, True, bg=GREY)
-        cab = next(c for c in tcabs if fl in c['zone'])
-        ci = tcabs.index(cab)
+        cab = next(c for c in tcabs if fl in c['zone'])          # tủ gom tầng này
+        loc = next((c for c in tcabs if c['floor'] == fl), None)  # tủ đặt tại tầng này
+        ci = tcabs.index(loc or cab)
         bg = hue(ci, len(tcabs), 0.55, 0.86)
-        is_cab = (cab['floor'] == fl)
         for k, tr in enumerate(tr_list):
             top = min(M.FLOORS.index(c['floor']) for c in cabs if c['id'] in tr['cabs'])
             cell = body(wsD, r, c0 + 1 + k, None, center=True)
             cell.border = Border(left=Side(style='thin', color='FFFFFF'), right=Side(style='thin', color='FFFFFF'))
             if M.FLOORS.index(fl) >= top:
                 cell.fill = fill(trunk_colors[k])
-                if is_cab and cab['id'] in tr['cabs']:
+                if loc and loc['id'] in tr['cabs']:
                     cell.value = '●'; cell.font = Font(name=F, color='FFFFFF', bold=True, size=11)
-        tcell = body(wsD, r, c0 + 4, f"{cab['id']}  ({cab['nspl']}×1:16)" if is_cab else '│ ' + cab['id'], True if is_cab else False, True,
-                     bg=bg if is_cab else None, color='000000' if is_cab else '808080')
-        if not is_cab: tcell.fill = fill(hue(ci, len(tcabs), 0.35, 0.95))
+        if loc:
+            lab = f"{loc['id']}  ({loc['nspl']}×1:16)" + ('' if fl in loc['zone'] else '  ⚠')
+            body(wsD, r, c0 + 4, lab, True, True, bg=bg)
+        else:
+            body(wsD, r, c0 + 4, '│ ' + cab['id'], False, True, bg=hue(tcabs.index(cab), len(tcabs), 0.35, 0.95), color='808080')
         body(wsD, r, c0 + 5, M.HOMES_PER_FLOOR[t][fl], center=True)
-        pons = sorted({s['pon'] for s in spls if s['cab'] == cab['id']})
-        body(wsD, r, c0 + 6, ('PON-' + ','.join(f'{p:02d}' for p in pons)) if is_cab else '', center=True, bg=bg if is_cab else None)
-        body(wsD, r, c0 + 7, f"{cab['homes']} hộ" if is_cab else '', center=True, bg=bg if is_cab else None)
+        pons = sorted({s['pon'] for s in spls if loc and s['cab'] == loc['id']})
+        body(wsD, r, c0 + 6, ('PON-' + ','.join(f'{p:02d}' for p in pons)) if loc else '', center=True, bg=bg if loc else None)
+        body(wsD, r, c0 + 7, f"gom {len(loc['zone'])}T/{loc['homes']}" if loc else '', center=True, bg=bg if loc else None)
     r = 6 + len(M.FLOORS)
     wsD.merge_cells(start_row=r, start_column=c0, end_row=r, end_column=c0 + 7)
     x = wsD.cell(row=r, column=c0, value='▼ PHÒNG MÁY (hầm B1): ODF 48FO + 16 splitter 1:4 + OLT 16 PON')
@@ -276,7 +289,7 @@ for t, c0 in blocks.items():
         wsD.cell(row=r + 1, column=c0 + 1 + k, value=tr['id'][3:]).font = Font(name=F, size=8, bold=True, color=trunk_colors[k])
         wsD.cell(row=r + 1, column=c0 + 1 + k).alignment = Alignment(horizontal='center')
 for rr in range(6, 6 + len(M.FLOORS)): wsD.row_dimensions[rr].height = 18
-wsD.cell(row=6 + len(M.FLOORS) + 3, column=2, value='Chú giải: ● = tủ trên trục; 3 màu xanh/cam/lục = 3 cáp trục 24FO của mỗi tháp (mỗi cáp chia 3×8FO cho 3 tủ). Tầng 13 không có (12A thay thế).').font = Font(name=F, size=9, italic=True)
+wsD.cell(row=6 + len(M.FLOORS) + 3, column=2, value='Chú giải: ● = tủ trên trục; 3 màu xanh/cam/lục = 3 cáp trục 24FO của mỗi tháp (TR-x1 = cụm tầng thấp; mỗi cáp chia 8FO/tủ). Tầng 13 không có (12A thay thế).').font = Font(name=F, size=9, italic=True)
 
 # =============== TỔNG QUAN ===============
 title(wsT, 'Hệ thống phối quang FTTH – Chung cư Phố Đông (Tháp A + B)', 'Kiến trúc: ONU căn hộ ─1FO─ Splitter 1:16 (tủ) ─ cáp trục 24FO (8FO/tủ) ─ ODF PM ─ Splitter 1:4 ─ PON  ⇒  1:64 / PON')
@@ -385,16 +398,48 @@ bom = [('Tủ phối quang (4 vị trí splitter)', f"=COUNTA({q(S_TU)}!A5:A21)"
 for a, b, c_, d in bom:
     body(wsV, r, 2, a); body(wsV, r, 3, b, center=True, fmt='#,##0'); body(wsV, r, 4, c_, center=True); body(wsV, r, 5, d); r += 1
 
+# =============== ĐỐI CHIẾU BẢN VẼ ===============
+title(wsX, 'Đối chiếu: sổ tay thi công ↔ bản vẽ gốc (sơ đồ nguyên lý PDF)', 'Sổ tay cho biết tầng đặt tủ + nhóm cáp trục; bản vẽ gốc cho biết mỗi ODF/tủ gom những tầng nào (ODF phục vụ dòng box của tầng đặt + 1 dòng trên + 1 dòng dưới).')
+header(wsX, 4, ['Tháp', 'Tủ (sổ tay)', 'Tầng đặt (sổ tay)', 'ODF bản vẽ gốc', 'Tầng đặt (bản vẽ gốc)', 'Các tầng gom (bản vẽ gốc)', 'Số tầng gom',
+                'Số căn hộ', 'Splitter 1:16', 'Cáp trục', 'Kết quả đối chiếu'], h=36)
+for i, c in enumerate(cabs):
+    r = 5 + i
+    d = drawing_match(c)
+    res = cmp_status(c)
+    vals = [c['tower'], c['id'], f"{c['floor']}F", d[0] if d else '—', f"{d[1]}F" if d else '—', ', '.join(c['zone']), len(c['zone']),
+            f"=COUNTIF({HR('E')},B{r})", c['nspl'], c['trunk'], res]
+    for k, v in enumerate(vals, 1):
+        body(wsX, r, k, v, center=k not in (6, 11), bold=(k == 2), bg=('FFE4B5' if res.startswith('LỆCH') else None))
+widths(wsX, [7, 12, 12, 15, 13, 24, 9, 10, 10, 10, 54])
+wsX.freeze_panes = 'C5'
+n0 = 5 + len(cabs) + 1
+notes = [
+ 'KẾT QUẢ ĐỐI CHIẾU',
+ '• Tháp B: 8/8 tủ khớp hoàn toàn (tầng đặt và cụm gom): 23 (23-22) · 20 (21-19) · 17 (18-16) · 14 (15-12A) · 11 (12-10) · 8 (9-7) · 5 (6-4) · 2 (3-1).',
+ '• Tháp A: 7/9 tủ khớp. LỆCH 2 tủ: sổ tay ghi tủ 7F và 5F, bản vẽ gốc đặt ODF ở 6F (gom 7-6-5) và 4F (gom 4-3). Cần kiểm tra thực địa tủ nằm ở tầng nào.',
+ '• Mô hình dùng tên tủ theo sổ tay (TU-A7, TU-A5) nhưng cụm gom theo bản vẽ gốc: TU-A7 gom 7-6-5, TU-A5 gom 4-3, TU-A2 gom 2-1 (tầng 2 gom 2 tầng, 39 hộ).',
+ '• Sổ tay chưa thể hiện nhóm gom tầng → lấy từ bản vẽ gốc. Riêng tủ A23: bản vẽ gốc dùng ODF24FO-09 (chỉ 24FO) và chỉ phục vụ tầng 23 (14 hộ) nên lắp 1 splitter.',
+ '• Nhóm 3 tủ/cáp trục: chỉ có trong sổ tay (bản vẽ gốc không vẽ). Đánh số mới: TR-A1 = A7-A5-A2 (thấp), TR-A2 = A15-A12-A9, TR-A3 = A23-A21-A18; TR-B1 = B5-B2, TR-B2 = B14-B11-B8, TR-B3 = B23-B20-B17.',
+ '• Cả hai bản đều không có tầng 13 (dùng 12A). Số tầng: 23 tầng mỗi tháp, bản vẽ gốc: hàng box nằm trên đường nét đứt ghi tên tầng.',
+ '• Quy tắc số splitter: ceil(số hộ / 16) → 33-48 hộ lắp 3, >48 hộ lắp 4 (hiện không tủ nào >48; TU-B2 đúng 48 hộ, đầy 3 splitter).',
+]
+for i, t_ in enumerate(notes):
+    c = wsX.cell(row=n0 + i, column=1, value=t_)
+    wsX.merge_cells(start_row=n0 + i, start_column=1, end_row=n0 + i, end_column=11)
+    c.alignment = Alignment(wrap_text=True, vertical='top')
+    if i == 0: c.font = Font(name=F, bold=True, color='FFFFFF'); c.fill = fill(NAVY)
+    else: c.font = Font(name=F, size=10); wsX.row_dimensions[n0 + i].height = 30
+
 # =============== VẬN HÀNH ===============
 title(wsG, 'Quy ước & quy trình vận hành')
 widths(wsG, [3, 120])
 text = [
  ('QUY ƯỚC ĐẶT TÊN', None),
  ('Căn hộ: <Tháp>-<Tầng>-<Căn>  vd A-18-05.  Tủ: TU-<Tháp><Tầng> vd TU-A18.  Splitter 1:16: TU-A18/S2.  Cáp trục: TR-A1 (3 cáp/tháp).', 1),
- ('PM (hầm B1): PON-01…16 ↔ splitter 1:4 "S4-01…16" (dùng 3 cổng, cổng 4 dự phòng; cổng đánh số 1-64) ↔ ODF 48FO: ODF-02 (trục 2), ODF-08/09 (trục 8/9), ODF-17/18 (trục 17/18). Khay TRÁI = Tháp A, PHẢI = Tháp B.', 1),
+ ('PM (hầm B1): PON-01…16 ↔ splitter 1:4 "S4-01…16" (dùng 3 cổng, cổng 4 dự phòng; cổng đánh số 1-64) ↔ ODF 48FO: ODF-02 (trục 2, thấp nhất), ODF-17/18, ODF-08/09 (xếp chồng từ thấp lên cao). Khay TRÁI = Tháp A, PHẢI = Tháp B.', 1),
  ('Khay ODF: 4 hàng × 6 cột coupler, đánh số từ DƯỚI lên và TRÁI qua; mỗi hàng = 1 ống đệm 6 sợi. Coupler k ↔ sợi k của cáp trục 24FO.  Ghi nhãn cả 2 đầu mọi sợi và mọi cổng.', 1),
  ('Cáp 24FO = 4 ống đệm (1 xanh dương, 2 cam, 3 xanh lá, 4 nâu) × 6 sợi (xanh dương, cam, xanh lá, nâu, xám, trắng): sợi 1-6 ống 1, 7-12 ống 2, 13-18 ống 3, 19-24 ống 4.', 1),
- ('Cáp trục 24FO, đếm từ dưới lên: sợi 1-8 → tủ hub (thấp nhất), 9-16 → tủ giữa (cáp nhánh 8FO), 17-24 → tủ trên cùng. Trong mỗi tủ, splitter Sk dùng sợi thứ k trong dải của tủ.', 1),
+ ('Cáp trục TR-x1 = cụm tầng thấp (A: A2-A5-A7; B: B2-B5), TR-x2 = cụm giữa, TR-x3 = cụm cao.  Mỗi cáp 24FO đếm từ dưới lên: sợi 1-8 → tủ hub (thấp nhất), 9-16 → tủ giữa (cáp nhánh 8FO), 17-24 → tủ trên cùng. Trong mỗi tủ, splitter Sk dùng sợi thứ k trong dải của tủ.', 1),
  ('QUY TRÌNH CẤP MỚI 1 KHÁCH', None),
  ('1) Tra căn hộ ở sheet "Tra cứu" → biết tủ, splitter, cổng.   2) Kéo 1FO từ BOX căn hộ về tủ, đấu vào đúng cổng splitter, dán nhãn mã căn hộ.', 1),
  ('3) Đo công suất tại ONU (-8…-27 dBm).   4) Cập nhật Trạng thái = Hoạt động, ghi serial ONU, ngày lắp.   5) Kiểm tra % tải PON ở Tổng quan (<90%).', 1),
@@ -406,7 +451,7 @@ text = [
  ('• Công cụ: OPM (đo công suất), VFL (tìm đứt/uốn), OTDR từ PM với tia 1310/1550 qua splitter thì đo từng nhánh, bắt đầu từ ODF.', 1),
   ('THÔNG SỐ ĐÃ CHỐT & GIẢ ĐỊNH (sửa trong model.py rồi chạy lại)', None),
  ('• Số căn/tầng = số BOX lớn nhất trên dòng của tầng đó trong bản vẽ (tầng 2: A 27, B 22; tầng 3: A 20, B 17; tầng 1: A 12, B 9; tầng 4-12: 14-15) → tổng 676 căn.  Bản vẽ: hàng box nằm NGAY TRÊN đường nét đứt ghi tên tầng.', 1),
- ('• Thứ tự đếm: từ dưới lên (căn, splitter, tủ, sợi); đổ đầy từng splitter 16 cổng.  Cổng PM cấp theo ODF từ dưới lên (02 → 08/09 → 17/18), khay trái (A) trước phải (B).', 1),
+ ('• Thứ tự đếm: từ dưới lên (căn, splitter, tủ, sợi); đổ đầy từng splitter 16 cổng.  Cổng PM cấp theo thứ tự xếp chồng ODF từ thấp lên cao (ODF-02 → ODF-17/18 → ODF-08/09), khay trái (A) trước phải (B).', 1),
  ('• 48 splitter 1:16 = 48 cổng PM dùng (3 cổng × 16 PON); 16 cổng dự phòng (cổng 4, 8, …, 64) là phần dự phòng duy nhất: PON đã hết chỗ cho thêm tủ.', 1),
  ('• Mã căn hộ <Tháp>-<Tầng>-<Box> do mình đặt; thay bằng mã thật nếu có.   • Tầng 13 không có (12A).   • Phòng máy hầm B1.', 1),
 ]
@@ -418,10 +463,10 @@ for t_, lvl in text:
     else:
         c.font = Font(name=F, size=10); c.alignment = Alignment(wrap_text=True, vertical='top'); wsG.row_dimensions[r].height = 30; r += 1
 
-for ws, col in [(wsT, NAVY), (wsD, '2F6FDE'), (wsC, '2F6FDE'), (wsK, '2F6FDE'), (wsO, '2F6FDE'), (wsO48, '2F6FDE'), (wsH, '1E9E5A'), (wsS, 'E8710A'), (wsQ, '8E44AD'), (wsV, '8E44AD'), (wsG, '8C959F')]:
+for ws, col in [(wsT, NAVY), (wsD, '2F6FDE'), (wsC, '2F6FDE'), (wsX, 'C00000'), (wsK, '2F6FDE'), (wsO, '2F6FDE'), (wsO48, '2F6FDE'), (wsH, '1E9E5A'), (wsS, 'E8710A'), (wsQ, '8E44AD'), (wsV, '8E44AD'), (wsG, '8C959F')]:
     ws.sheet_properties.tabColor = col
 wsD.sheet_view.zoomScale = 90
-for ws in (wsT, wsD, wsC, wsK, wsO, wsO48, wsH, wsS, wsQ, wsV, wsG):
+for ws in (wsT, wsD, wsC, wsX, wsK, wsO, wsO48, wsH, wsS, wsQ, wsV, wsG):
     ws.page_setup.orientation = 'landscape'; ws.page_setup.fitToWidth = 1; ws.page_setup.fitToHeight = 0
     ws.sheet_properties.pageSetUpPr.fitToPage = True
 wb.save('FTTH_PhoDong_PhoiQuang.xlsx')

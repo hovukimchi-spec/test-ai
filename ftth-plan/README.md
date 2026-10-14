@@ -7,3 +7,6 @@
 | `model.py` | Cấu hình duy nhất (số hộ/tầng, tầng đặt tủ, nhóm trục, số splitter). Sửa rồi chạy `python3 build_xlsx.py && python3 build_html.py` |
 
 Kiến trúc: ONU –1FO– splitter 1:16 (tủ) – cáp trục 24FO (4 ống × 6 sợi; 8FO/tủ) – ODF 48FO (hầm B1) – splitter 1:4 (dùng 3, dự phòng 1) – PON. Số căn/tầng lấy từ bản vẽ (`homes_from_drawing.json`), tổng 676 căn, 48 splitter 1:16.
+
+## Đối chiếu sổ tay ↔ bản vẽ gốc
+Xem sheet "Đối chiếu bản vẽ". Tháp B khớp 8/8; tháp A lệch 2 tủ (sổ tay 7F/5F, bản vẽ gốc ODF ở 6F/4F). Cụm gom tầng lấy từ bản vẽ gốc.
