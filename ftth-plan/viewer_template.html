@@ -5,73 +5,76 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FTTH Phố Đông – Sơ đồ phối quang</title>
 <style>
-:root{--bg:#f4f6fa;--card:#fff;--ink:#1b2430;--mute:#667085;--line:#d9dee7;--navy:#1f3a5f;--blue:#2f6fde;--red:#d92d20;--green:#1e9e5a;--amber:#e8a30a}
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1b2430;--mute:#667085;--line:#d9dee7;--navy:#1f3a5f;--blue:#2f6fde;--red:#d92d20;--cw:18px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 system-ui,"Segoe UI",Roboto,Arial,sans-serif}
 header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-header h1{font-size:16px;margin:0;font-weight:700}
-header .sp{flex:1}
-header input,header select,header button,.btn{font:inherit;border-radius:6px;border:1px solid #fff3;padding:5px 9px}
-header input,header select{background:#fff;color:var(--ink);border:0}
-header button,.btn{background:#ffffff22;color:#fff;cursor:pointer}
-header button:hover,.btn:hover{background:#ffffff44}
+header h1{font-size:16px;margin:0;font-weight:700}header .sp{flex:1}
+header input,header select,header button{font:inherit;border-radius:6px;border:0;padding:5px 9px}
+header input,header select{background:#fff;color:var(--ink)}
+header button{background:#ffffff22;color:#fff;cursor:pointer}header button:hover{background:#ffffff44}
 .kpis{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;min-width:104px}
-.kpi b{display:block;font-size:20px;color:var(--navy)}.kpi span{color:var(--mute);font-size:11px}
-main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;padding:0 16px 24px;align-items:start}
-@media(max-width:1250px){main{grid-template-columns:1fr}.side{position:static!important}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 12px;min-width:104px}
+.kpi b{display:block;font-size:19px;color:var(--navy)}.kpi span{color:var(--mute);font-size:11px}
+.wrap{padding:0 16px 24px;display:flex;flex-direction:column;gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
 h2{font-size:13px;margin:0 0 8px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
-.towers{display:flex;flex-wrap:wrap;gap:16px;overflow-x:auto}
-.tower{min-width:0}
+/* info band */
+#info{position:sticky;top:0;z-index:30;box-shadow:0 4px 12px #0002;min-height:74px}
+#info .ttl{font-weight:700;color:var(--navy);margin-right:10px;white-space:nowrap}
+#info .row1{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.step{border-left:3px solid var(--blue);background:#f4f7fd;border-radius:4px;padding:3px 9px;font-size:12px;min-width:150px}
+.step b{color:#102a56}.step small{display:block;color:var(--mute);font-size:11px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px}
+.st{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto}
+.st button,.btn2{border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;font:inherit}
+.st button.on{border-color:#000;box-shadow:0 0 0 1px #000}.btn2.red{background:var(--red);border-color:var(--red);color:#fff}
+.banner{background:#fff1f0;border:1px solid #ffb4ab;color:#8a1c12;border-radius:8px;padding:6px 10px;margin-top:6px}
+table.kv{border-collapse:collapse;font-size:12px}table.kv td{padding:2px 10px 2px 0;vertical-align:top}table.kv td:first-child{color:var(--mute)}
+.muted{color:var(--mute)}
+/* towers */
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;margin-bottom:8px;color:var(--mute)}.legend span{display:flex;align-items:center;gap:4px}
+.chip{display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #0004;flex:none}
+.towers{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tower{min-width:0;overflow:hidden}.tower>h3{margin:0 0 4px 34px;font-size:13px}
 .trow{display:flex;align-items:stretch;height:23px}
 .flo{width:34px;font-size:11px;color:var(--mute);text-align:right;padding-right:6px;line-height:23px;flex:none}
 .strip{width:11px;flex:none;position:relative;cursor:pointer}
 .strip i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#fff;border:2px solid var(--ink)}
 .strip.hub i{width:13px;height:13px;margin:-6.5px;background:var(--ink)}
-.cab{width:128px;flex:none;margin:0 6px;font-size:10px;font-weight:700;text-align:center;line-height:23px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.cab{width:100px;flex:none;margin:0 6px;font-size:10px;font-weight:700;text-align:center;line-height:23px;border-radius:5px;cursor:pointer;white-space:nowrap;overflow:hidden}
 .cab.sub{border-radius:0;font-weight:400;color:#0006;cursor:default}
 .apts{display:flex}
-.apt{width:23px;height:21px;margin:1px;border-radius:3px;font-size:9px;color:#0008;text-align:center;line-height:21px;cursor:pointer;border:1px solid transparent}
+.apt{flex:none;width:calc(var(--cw) - 2px);height:21px;margin:1px;border-radius:3px;font-size:9px;color:#0008;text-align:center;line-height:21px;cursor:pointer;overflow:hidden}
+.nonum .apt{font-size:0}
 .apt:hover{outline:2px solid var(--ink);z-index:2}
 .zone-top{border-top:1px solid var(--line)}
-.dim{opacity:.18}
-.sel{outline:2px solid #000;z-index:3;position:relative}
+.dim{opacity:.18}.sel{outline:2px solid #000;z-index:3;position:relative}
 .fault{background:repeating-linear-gradient(45deg,#d92d20,#d92d20 3px,#ffb4ab 3px,#ffb4ab 6px)!important;color:#fff}
 .strip.on,.cab.on{box-shadow:0 0 0 2px #000}
-.pm{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
-.pon{border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer;background:#fff}
+/* PM levels */
+.lvl{border:1px solid var(--line);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.lvlhead{background:#eef2f9;padding:4px 10px;font-weight:700;color:var(--navy);font-size:12px;display:flex;justify-content:space-between}
+.halves{display:grid;grid-template-columns:1fr 1fr}
+.half{padding:8px;min-width:0}.half+.half{border-left:2px dashed var(--line)}
+.half>h4{margin:0 0 6px;font-size:11px;color:var(--mute);font-weight:600}
+.hbody{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.tray{display:grid;grid-template-columns:repeat(6,32px);gap:2px;flex:none}
+.cp{height:30px;border-radius:3px;font-size:9px;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222}
+.cp.free{background:#f4f4f4!important;color:#aaa;cursor:default}.cp.on{outline:2px solid #000;position:relative;z-index:2}.cp.dim{opacity:.2}
+.pons{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:150px}
+.pon{border:1px solid var(--line);border-radius:8px;padding:5px 7px;cursor:pointer;background:#fff;flex:1 1 140px;max-width:210px;min-width:0}
 .pon.on{box-shadow:0 0 0 2px #000}.pon.dim{opacity:.3}
-.odfs{display:flex;flex-wrap:wrap;gap:14px}.odf{border:1px solid var(--line);border-radius:8px;padding:8px}.odf h4{margin:0 0 6px;font-size:12px}
+.pon h4{margin:0 0 3px;font-size:11.5px;display:flex;justify-content:space-between}
+.bar{height:5px;background:#e8ebf1;border-radius:3px;overflow:hidden;margin-bottom:3px}.bar u{display:block;height:100%;background:var(--blue)}
+.out{display:flex;gap:4px;align-items:center;font-size:10px;white-space:nowrap;overflow:hidden;padding:1px 3px;border-radius:4px;color:#333}
+.out:hover{background:#eef3ff}.out.on{background:#fff3b0}.out em{color:var(--mute);font-style:normal;margin-left:auto}
+/* ODF96 */
 .odf96{display:grid;grid-template-columns:repeat(24,minmax(30px,1fr));gap:2px;overflow-x:auto}
 .c96{height:34px;border-radius:3px;font-size:8.5px;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222;min-width:30px}
 .c96.free{background:#f1f1f1!important;color:#aaa;cursor:default}.c96.in{font-weight:700;border:1px solid #000}.c96.on{outline:2px solid #000;position:relative;z-index:2}.c96.dim{opacity:.2}
-.trays{display:flex;gap:10px}.tray{display:grid;grid-template-columns:repeat(6,34px);gap:2px}.tray>div.t{grid-column:1/-1;font-size:10px;color:var(--mute)}
-.cp{height:30px;border-radius:3px;font-size:9px;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222}
-.cp.free{background:#f4f4f4!important;color:#aaa;cursor:default}.cp.on{outline:2px solid #000;position:relative;z-index:2}.cp.dim{opacity:.2}
-.pon h4{margin:0 0 3px;font-size:12px;display:flex;justify-content:space-between}
-.bar{height:6px;background:#e8ebf1;border-radius:3px;overflow:hidden;margin-bottom:4px}.bar u{display:block;height:100%;background:var(--blue)}
-.out{display:flex;gap:5px;align-items:center;font-size:10.5px;padding:1px 3px;border-radius:4px;color:#333}
-.out:hover{background:#eef3ff}.out.on{background:#fff3b0}
-.chip{display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #0004;flex:none}
-.out em{color:var(--mute);font-style:normal;margin-left:auto}
-.side{position:sticky;top:8px;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 16px);overflow:auto}
-.path{margin:0;padding:0;list-style:none}
-.path li{position:relative;padding:3px 0 8px 22px;border-left:2px solid var(--blue);margin-left:6px}
-.path li:before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--blue);border:2px solid #fff}
-.path li:last-child{border-left-color:transparent}
-.path small{display:block;color:var(--mute)}
-.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;color:#fff}
-.st{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.st button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font:inherit}
-.st button.on{border-color:#000;box-shadow:0 0 0 1px #000}
-.btn2{border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font:inherit}
-.btn2.red{background:var(--red);border-color:var(--red);color:#fff}
-.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;margin-bottom:8px;color:var(--mute)}
-.legend span{display:flex;align-items:center;gap:4px}
-table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;border-bottom:1px solid var(--line);text-align:left}
-.banner{background:#fff1f0;border:1px solid #ffb4ab;color:#8a1c12;border-radius:8px;padding:8px 10px;margin-bottom:8px}
-.muted{color:var(--mute)}
+@media(max-width:900px){.towers,.halves{grid-template-columns:1fr}.half+.half{border-left:0;border-top:2px dashed var(--line)}}
 </style>
 </head>
 <body>
@@ -83,28 +86,18 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;b
     <select id="mode"><option value="pon">PON</option><option value="cab">Tủ phối quang</option><option value="spl">Splitter 1:16</option><option value="status">Trạng thái</option></select>
   </label>
   <span class="sp"></span>
-  <button id="reset">Bỏ chọn</button>
-  <button id="exp">Xuất CSV trạng thái</button>
-  <button id="imp">Nhập CSV</button><input id="file" type="file" accept=".csv,text/csv" hidden>
+  <button id="reset">Bỏ chọn</button><button id="exp">Xuất CSV trạng thái</button><button id="imp">Nhập CSV</button><input id="file" type="file" accept=".csv,text/csv" hidden>
 </header>
 <div class="kpis" id="kpis"></div>
-<main>
-  <div>
-    <div class="card"><h2>Trục thông tầng (bấm vào căn hộ / tủ / đường trục)</h2>
-      <div class="legend" id="legend"></div>
-      <div class="towers" id="towers"></div>
-    </div>
-    <div class="card" style="margin-top:12px"><h2>Phòng máy (hầm B1) · 16 PON ↔ 16 splitter 1:4 (3 dùng + 1 dự phòng)</h2><div class="pm" id="pm"></div></div>
-    <div class="card" style="margin-top:12px"><h2>ODF 96FO (cắm splitter 1:4) · 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải</h2><div class="odf96" id="odf96"></div>
-    <h2 style="margin-top:14px">ODF 48FO trục · khay trái = Tháp A, khay phải = Tháp B (đếm từ dưới lên, từ trái qua)</h2><div class="odfs" id="odfs"></div></div>
+<div class="wrap">
+  <div class="card" id="info"></div>
+  <div class="card"><h2>Trục thông tầng · Tháp A (trái) · Tháp B (phải)</h2>
+    <div class="legend" id="legend"></div>
+    <div class="towers" id="towers"></div>
   </div>
-  <div class="side">
-    <div class="card" id="info"></div>
-    <div class="card" id="help"><h2>Cách đọc</h2>
-      <div class="muted">Mỗi tủ ghi rõ gom bao nhiêu tầng (vd "gom 2T"); hàng "│ A5" là tầng thuộc cụm tủ đó. Mỗi ô nhỏ là 1 BOX/căn hộ (số lượng theo bản vẽ, 9–27/tầng). Dải dọc màu <b style="color:#2f6fde">xanh</b>/<b style="color:#e8710a">cam</b>/<b style="color:#1e9e5a">lục</b> là 3 cáp trục 24FO của mỗi tháp, chấm tròn = tủ trên trục, chấm đặc = tủ hub (nơi cáp trục xuống Phòng Máy).<br><br>
-      Bấm căn hộ để xem toàn bộ đường quang tới PON. Bấm tủ / trục / PON để xem phạm vi ảnh hưởng và dùng <b>Giả lập sự cố</b>.</div></div>
-  </div>
-</main>
+  <div class="card"><h2>Phòng máy (hầm B1) · PON + ODF 48FO xếp chồng theo tầng (cao ở trên) · khay trái = Tháp A, phải = Tháp B</h2><div id="levels"></div></div>
+  <div class="card"><h2>ODF 96FO (cắm splitter 1:4) · 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải · ra: cổng 1-64 · vào (OLT): cổng 73-88</h2><div class="odf96" id="odf96"></div></div>
+</div>
 <script>
 const DATA=/*DATA*/null;
 const FLOORS=DATA.floors, STATUS=['Chưa lắp','Đã đấu nối','Hoạt động','Sự cố'];
@@ -127,68 +120,78 @@ const splCol=s=>{const sp=splBy[s];return `hsl(${Math.round((cabIdx[sp.cab]*7%17
 const pad=n=>String(n).padStart(2,'0');
 const coup=n=>[Math.floor((n-1)/6)+1,(n-1)%6+1];
 const pos96=p=>[Math.floor((p-1)/24)+1,(p-1)%24+1];
+const tubeOf=n=>Math.floor((n-1)/6);
 
-// ---------- build static DOM ----------
 $('#codes').innerHTML=DATA.homes.map(h=>`<option value="${h.code}">`).join('');
+
+// ---------- towers ----------
 function buildTower(t){
   const cabs=DATA.cabinets.filter(c=>c.tower===t), trs=DATA.trunks.filter(x=>x.tower===t);
   const top=Object.fromEntries(trs.map(tr=>[tr.id,Math.min(...tr.cabs.map(id=>FLOORS.indexOf(cabBy[id].floor)))]));
-  let h=`<div class="tower"><div style="font-weight:700;margin:0 0 4px 34px">THÁP ${t}</div>`;
+  let h=`<div class="tower"><h3>THÁP ${t}</h3>`;
   FLOORS.forEach((fl,fi)=>{
     const zc=cabs.find(c=>c.zone.includes(fl)), loc=cabs.find(c=>c.floor===fl), isCab=!!loc, cab=loc||zc;
-    const zoneTop=zc.zone[0]===fl;
-    h+=`<div class="trow ${zoneTop?'zone-top':''}"><div class="flo">${fl}F</div>`;
+    h+=`<div class="trow ${zc.zone[0]===fl?'zone-top':''}"><div class="flo">${fl}F</div>`;
     trs.forEach((tr,k)=>{
       const on=fi>=top[tr.id], here=isCab&&tr.cabs.includes(cab.id), hub=here&&tr.hub===fl;
       h+=`<div class="strip ${hub?'hub':''}" data-tr="${tr.id}" style="${on?'background:'+TCOL[k]:''}" title="${tr.id}">${here?'<i></i>':''}</div>`;
     });
-    h+=`<div class="cab ${isCab?'':'sub'}" data-cab="${cab.id}" id="cab-${isCab?cab.id:''}" ${isCab?`title="${cab.id} gom ${cab.zone.length} tầng (${cab.zone.join(', ')})"`:''}>${isCab?`${cab.id} · ${cab.nspl}×1:16 · gom ${cab.zone.length}T`:'│ '+zc.id.slice(3)}</div><div class="apts">`;
+    h+=`<div class="cab ${isCab?'':'sub'}" data-cab="${cab.id}" id="cab-${isCab?cab.id:''}" ${isCab?`title="${cab.id} · ${cab.nspl} splitter 1:16 · gom ${cab.zone.length} tầng (${cab.zone.join(', ')}) · ${cab.homes} hộ"`:''}>${isCab?`${cab.id.slice(3)} · ${cab.nspl}×16 · ${cab.zone.length}T`:'│ '+zc.id.slice(3)}</div><div class="apts">`;
     for(let a=1;a<=DATA.perFloor[t][fl];a++){const code=`${t}-${fl}-${pad(a)}`;h+=`<div class="apt" data-c="${code}" title="${code}">${pad(a)}</div>`}
     h+='</div></div>';
   });
   return h+'</div>';
 }
 $('#towers').innerHTML=buildTower('A')+buildTower('B');
-
-function buildPM(){
-  let h='';
-  for(let p=1;p<=DATA.nPon;p++){
-    h+=`<div class="pon" data-pon="${p}"><h4><span>PON-${pad(p)}</span><span class="muted">S4-${pad(p)} · vào P${DATA.inBase+p}</span></h4><div class="bar"><u></u></div>`;
-    for(let o=1;o<=DATA.splPM;o++){
-      const s=DATA.spls.find(x=>x.pmspl===p&&x.pmloc===o), g=(p-1)*DATA.splPM+o;
-      h+=s?`<div class="out" data-spl="${s.id}"><b>${g}</b><i class="chip" style="background:${FHEX[(s.fiber-1)%6]}"></i>${s.trunk}/${pad(s.fiber)} → ${s.id.slice(3)}<em>${s.n}</em></div>`
-          :`<div class="out muted"><b>${g}</b> dự phòng PON</div>`;
-    }
-    h+='</div>';
-  }
-  $('#pm').innerHTML=h;
+function fit(){
+  const tw=$('#towers').firstElementChild.clientWidth, fixed=34+33+100+12+6;
+  const cw=Math.max(9,Math.min(26,Math.floor((tw-fixed)/27)));
+  const el=$('#towers');el.style.setProperty('--cw',cw+'px');el.classList.toggle('nonum',cw<17);
 }
-buildPM();
-function buildODF(){
+window.addEventListener('resize',fit);
+
+// ---------- PM levels: ODF 48 stacked (top = highest floors), PON cards split A | B ----------
+const ponInfo={};
+for(let p=1;p<=DATA.nPon;p++){
+  const outs=DATA.spls.filter(s=>s.pmspl===p).sort((a,b)=>a.pmloc-b.pmloc);
+  if(!outs.length)continue;
+  const cnt={A:0,B:0};outs.forEach(s=>cnt[s.cab[3]]++);
+  ponInfo[p]={outs,odf:outs[0].odf,tower:cnt.B>cnt.A?'B':'A'};
+}
+function buildLevels(){
   let h='';
-  DATA.odfs.forEach(o=>{
-    h+=`<div class="odf"><h4>${o.name} · 48FO</h4><div class="trays">`;
+  [...DATA.odfs].reverse().forEach(o=>{
+    h+=`<div class="lvl"><div class="lvlhead"><span>${o.name} · 48FO</span><span class="muted" style="font-weight:400">${o.trunks.join(' + ')}</span></div><div class="halves">`;
     o.trunks.forEach(tid=>{
-      const tr=trBy[tid];
-      h+=`<div><div style="font-size:10px;color:var(--mute);margin-bottom:2px">Khay ${tr.tray} · Tháp ${tr.tower} · ${tid}</div><div class="tray">`;
+      const tr=trBy[tid],t=tr.tower;
+      h+=`<div class="half"><h4>Khay ${tr.tray} · Tháp ${t} · ${tid} (24FO)</h4><div class="hbody"><div class="tray">`;
       for(let r=4;r>=1;r--)for(let c=1;c<=6;c++){
         const n=(r-1)*6+c,s=DATA.spls.find(x=>x.trunk===tid&&x.fiber===n);
         h+=s?`<div class="cp" data-spl="${s.id}" style="background:${TUBEHEX[r-1]}" title="${tid}/${n} → ${s.id} · PON-${pad(s.pon)} · P96#${s.pmout}"><b>${n}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="cp free" title="${tid}/${n} dự phòng">${n}</div>`;
       }
-      h+='</div></div>';
+      h+='</div><div class="pons">';
+      Object.keys(ponInfo).map(Number).filter(p=>ponInfo[p].odf===o.name&&ponInfo[p].tower===t).forEach(p=>{
+        h+=`<div class="pon" data-pon="${p}"><h4><span>PON-${pad(p)}</span><span class="muted">S4-${pad(p)} · vào P${DATA.inBase+p}</span></h4><div class="bar"><u></u></div>`;
+        for(let k=1;k<=DATA.splPM;k++){
+          const s=ponInfo[p].outs.find(x=>x.pmloc===k),g=(p-1)*DATA.splPM+k;
+          h+=s?`<div class="out" data-spl="${s.id}"><b>${g}</b><i class="chip" style="background:${FHEX[(s.fiber-1)%6]}"></i>${s.trunk}/${pad(s.fiber)} → ${s.id.slice(3)}<em>${s.n}</em></div>`:`<div class="out muted"><b>${g}</b> dự phòng</div>`;
+        }
+        h+='</div>';
+      });
+      h+='</div></div></div>';
     });
     h+='</div></div>';
   });
-  $('#odfs').innerHTML=h;
+  $('#levels').innerHTML=h;
 }
-buildODF();
+buildLevels();
 (function(){
   let h='';
   for(let r=4;r>=1;r--)for(let c=1;c<=24;c++){
     const p=(r-1)*24+c;
-    if(p<=DATA.inBase){const pon=Math.floor((p-1)/4)+1,loc=(p-1)%4+1,s=DATA.spls.find(x=>x.pmspl===pon&&x.pmloc===loc);
+    if(p<=DATA.outN){const pon=Math.floor((p-1)/4)+1,loc=(p-1)%4+1,s=DATA.spls.find(x=>x.pmspl===pon&&x.pmloc===loc);
       h+=s?`<div class="c96" data-spl="${s.id}" style="background:${ponCol(pon)}" title="P${p} · PON-${pad(pon)} → ${s.id}"><b>${p}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="c96 free" title="P${p} dự phòng"><b>${p}</b>dp</div>`;
-    }else if(p<=DATA.inBase+DATA.nPon){const pon=p-DATA.inBase;h+=`<div class="c96 in" data-pon="${pon}" style="background:${ponCol(pon)}" title="P${p} · vào splitter S4-${pad(pon)} · OLT PON-${pad(pon)}"><b>${p}</b>IN·P${pad(pon)}</div>`}
+    }else if(p>DATA.inBase&&p<=DATA.inBase+DATA.nPon){const pon=p-DATA.inBase;h+=`<div class="c96 in" data-pon="${pon}" style="background:${ponCol(pon)}" title="P${p} · vào splitter S4-${pad(pon)} · OLT PON-${pad(pon)}"><b>${p}</b>IN·P${pad(pon)}</div>`}
     else h+=`<div class="c96 free"><b>${p}</b></div>`;
   }
   $('#odf96').innerHTML=h;
@@ -197,95 +200,97 @@ buildODF();
 // ---------- scope / selection ----------
 function scopeOf(s){
   if(!s)return null;
-  const H=DATA.homes;let f=()=>false;
+  let f=()=>false;
   if(s.t==='apt')f=h=>h.code===s.id;
   if(s.t==='cab')f=h=>h.cab===s.id;
   if(s.t==='spl')f=h=>h.spl===s.id;
   if(s.t==='tr')f=h=>h.trunk===s.id;
   if(s.t==='pon')f=h=>h.pon===+s.id;
-  return new Set(H.filter(f).map(h=>h.code));
+  return new Set(DATA.homes.filter(f).map(h=>h.code));
 }
 function pathHome(c){const h=homeBy[c];return {h,cab:cabBy[h.cab],spl:splBy[h.spl],tr:trBy[h.trunk]}}
 function refresh(){
   const mode=$('#mode').value, sc=scopeOf(sel);
-  const hi=sel&&sel.t==='apt'?pathHome(sel.id):null;
   document.querySelectorAll('.apt').forEach(el=>{
     const c=el.dataset.c,h=homeBy[c];let bg;
     if(mode==='pon')bg=ponCol(h.pon);else if(mode==='cab')bg=cabCol(h.cab);else if(mode==='spl')bg=splCol(h.spl);else bg=ST_COL[stOf(c)];
     el.style.background=bg;
-    el.classList.toggle('dim',!!sc&&!sc.has(c)&&!(hi&&h.spl===hi.spl.id&&false));
+    el.classList.toggle('dim',!!sc&&!sc.has(c));
     el.classList.toggle('sel',sel&&sel.t==='apt'&&sel.id===c);
     el.classList.toggle('fault',!!fault&&fault.has(c));
     if(fault&&fault.has(c))el.classList.remove('dim');
   });
   const cabOn=new Set(),trOn=new Set(),ponOn=new Set(),splOn=new Set();
   if(sc)sc.forEach(c=>{const h=homeBy[c];cabOn.add(h.cab);trOn.add(h.trunk);ponOn.add(h.pon);splOn.add(h.spl)});
+  const small=!!sc&&sc.size<=DATA.splCab;
   document.querySelectorAll('[id^=cab-]').forEach(el=>{const id=el.dataset.cab;if(el.classList.contains('sub'))return;el.style.background=cabCol(id);el.classList.toggle('dim',!!sc&&!cabOn.has(id));el.classList.toggle('on',sel&&sel.t==='cab'&&sel.id===id)});
   document.querySelectorAll('.strip').forEach(el=>{el.classList.toggle('dim',!!sc&&!trOn.has(el.dataset.tr));el.classList.toggle('on',sel&&sel.t==='tr'&&sel.id===el.dataset.tr)});
   document.querySelectorAll('.pon').forEach(el=>{const p=+el.dataset.pon;el.classList.toggle('dim',!!sc&&!ponOn.has(p));el.classList.toggle('on',sel&&sel.t==='pon'&&+sel.id===p);
     const n=DATA.homes.filter(h=>h.pon===p).length;el.querySelector('u').style.width=Math.min(100,n/(DATA.pmUsed*DATA.splCab)*100)+'%'});
-  document.querySelectorAll('.out[data-spl]').forEach(el=>el.classList.toggle('on',splOn.has(el.dataset.spl)&&!!sc&&sc.size<=DATA.splCab));
-  document.querySelectorAll('.c96[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',!!sc&&sc.size<=DATA.splCab&&splOn.has(el.dataset.spl))});
+  document.querySelectorAll('.out[data-spl]').forEach(el=>el.classList.toggle('on',small&&splOn.has(el.dataset.spl)));
+  document.querySelectorAll('.c96[data-spl],.cp[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',small&&splOn.has(el.dataset.spl))});
   document.querySelectorAll('.c96[data-pon]').forEach(el=>{const p=+el.dataset.pon;el.classList.toggle('dim',!!sc&&!ponOn.has(p));el.classList.toggle('on',!!sc&&ponOn.has(p)&&ponOn.size===1)});
-  document.querySelectorAll('.cp[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',!!sc&&sc.size<=DATA.splCab&&splOn.has(el.dataset.spl))});
   legend();kpis();info();
 }
 function legend(){
   const m=$('#mode').value;let h='';
   if(m==='pon')for(let p=1;p<=DATA.nPon;p++)if(DATA.homes.some(x=>x.pon===p))h+=`<span><i class="chip" style="background:${ponCol(p)}"></i>PON-${pad(p)}</span>`;
   if(m==='cab')DATA.cabinets.forEach(c=>h+=`<span><i class="chip" style="background:${cabCol(c.id)}"></i>${c.id}</span>`);
-  if(m==='spl')h='<span>Mỗi tủ 1 màu; 3 độ đậm = splitter S1 / S2 / S3 (đậm → nhạt)</span>';
+  if(m==='spl')h='<span>Mỗi tủ 1 màu; độ đậm giảm dần = splitter S1 / S2 / S3 / S4</span>';
   if(m==='status')STATUS.forEach(s=>h+=`<span><i class="chip" style="background:${ST_COL[s]}"></i>${s}</span>`);
-  $('#legend').innerHTML=h;
+  $('#legend').innerHTML=h+'<span style="margin-left:auto">Ô nhỏ = 1 BOX/căn hộ · dải dọc xanh/cam/lục = cáp trục TR-x1/x2/x3 · chấm tròn = tủ, chấm đặc = hub · "3T" = tủ gom 3 tầng</span>';
 }
 function kpis(){
   const cnt={};STATUS.forEach(s=>cnt[s]=0);DATA.homes.forEach(h=>cnt[stOf(h.code)]++);
-  const act=DATA.homes.filter(h=>stOf(h.code)==='Hoạt động');
   const ponUse=Array.from({length:DATA.nPon},(_,i)=>DATA.homes.filter(h=>h.pon===i+1).length);
   const k=[[DATA.homes.length,'căn hộ'],[cnt['Hoạt động'],'đang hoạt động'],[cnt['Đã đấu nối'],'đã đấu nối'],[cnt['Sự cố'],'sự cố'],
     [DATA.cabinets.length,'tủ phối quang'],[DATA.spls.length,'splitter 1:16'],[Math.max(...ponUse)+'/48','PON tải cao nhất'],[DATA.budget.margin.toFixed(1)+' dB','margin quang']];
   $('#kpis').innerHTML=k.map(([a,b])=>`<div class="kpi"><b>${a}</b><span>${b}</span></div>`).join('');
 }
+const step=(t,s)=>`<div class="step"><b>${t}</b><small>${s}</small></div>`;
 function info(){
   const el=$('#info');
-  if(!sel){el.innerHTML='<h2>Chi tiết</h2><div class="muted">Chưa chọn gì. Nhập mã căn hộ ở ô tìm kiếm hoặc bấm vào sơ đồ.</div>';return}
+  if(!sel){el.innerHTML='<div class="row1"><span class="ttl">Chi tiết</span><span class="muted">Gõ mã căn hộ ở ô tìm kiếm hoặc bấm vào căn hộ / tủ / dải trục / PON / ô ODF để xem đường quang và phạm vi ảnh hưởng. Dùng "Giả lập sự cố" để xem bao nhiêu hộ mất tín hiệu.</span></div>';return}
   let h='';
   if(sel.t==='apt'){
-    const {h:H,cab,spl,tr}=pathHome(sel.id);
-    const fc=FCOL[(H.fiber-1)%6],tube=TUBE[Math.floor((H.fiber-1)/6)],cp=coup(H.fiber);
-    const st=stOf(sel.id);
-    h=`<h2>Căn hộ ${H.code}</h2>
-    <ul class="path">
-    <li><b>ONU căn hộ</b> · tầng ${H.floor} căn ${pad(H.apt)}<small>Trạng thái: <span class="tag" style="background:${ST_COL[st]};color:#000">${st}</span></small></li>
-    <li><b>Cáp 1FO → ${cab.id}</b> (tầng ${cab.floor})<small>Splitter 1:16 <b>${spl.id}</b> · cổng <b>${H.port}</b>/16</small></li>
-    <li><b>Cáp trục ${tr.id} · sợi ${H.fiber}</b> <i class="chip" style="background:${FHEX[(H.fiber-1)%6]}"></i> ${fc}<small>Ống đệm ${Math.floor((H.fiber-1)/6)+1} ${tube} · dải 8FO của tủ: ${cab.fiber_from}-${cab.fiber_to}${cab.hub?' · tủ HUB':` · cáp nhánh 8FO xuống hub ${tr.cabs[tr.cabs.length-1]}`}</small></li>
-    <li><b>${tr.odf}</b> · khay <b>${tr.tray}</b> (tháp ${tr.tower})<small>hàng <b>${cp[0]}</b>, cột <b>${cp[1]}</b> (đếm từ dưới lên, từ trái qua) · sợi ${H.fiber}</small></li><li><b>ODF-96 cổng ra ${H.pmout}</b> (hàng ${pos96(H.pmout)[0]}, cột ${pos96(H.pmout)[1]})<small>dây nhảy tới ODF 48FO · đầu ra ${H.pmloc}/4 của splitter 1:4 S4-${pad(H.pmspl)}</small></li><li><b>ODF-96 cổng vào ${H.pmin}</b> (hàng ${pos96(H.pmin)[0]}, cột ${pos96(H.pmin)[1]})<small>đầu vào splitter 1:4 S4-${pad(H.pmspl)} · dây nhảy từ OLT</small></li>
-    <li><b>OLT PON-${pad(H.pon)}</b><small>Ước tính suy hao ${DATA.budget.loss.toFixed(1)} dB · quỹ ${DATA.budget.total.toFixed(1)} dB · margin ${DATA.budget.margin.toFixed(1)} dB</small></li></ul>
-    <div class="muted">Trạng thái căn hộ:</div><div class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</div>`;
+    const {h:H,cab,spl,tr}=pathHome(sel.id), st=stOf(sel.id), cp=coup(H.fiber), o=pos96(H.pmout), i=pos96(H.pmin);
+    h=`<div class="row1"><span class="ttl">Căn hộ ${H.code}</span><span class="tag" style="background:${ST_COL[st]}">${st}</span>
+      <span class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</span></div>
+    <div class="steps">
+    ${step('ONU căn hộ','tầng '+H.floor+' · box '+pad(H.apt))}
+    ${step('Cáp 1FO → '+cab.id+' (tầng '+cab.floor+')','splitter 1:16 '+spl.id+' · cổng '+H.port+'/16')}
+    ${step('Cáp trục '+tr.id+' · sợi '+H.fiber+' <i class="chip" style="background:'+FHEX[(H.fiber-1)%6]+'"></i> '+FCOL[(H.fiber-1)%6],'ống '+(tubeOf(H.fiber)+1)+' '+TUBE[tubeOf(H.fiber)]+' · dải 8FO của tủ: '+cab.fiber_from+'-'+cab.fiber_to+(cab.hub?' · tủ HUB':' · cáp nhánh 8FO xuống hub '+tr.cabs[tr.cabs.length-1]))}
+    ${step(tr.odf+' · khay '+tr.tray+' (tháp '+tr.tower+')','hàng '+cp[0]+', cột '+cp[1]+' · dây nhảy tới ODF-96')}
+    ${step('ODF-96 cổng ra '+H.pmout,'hàng '+o[0]+', cột '+o[1]+' · đầu ra '+H.pmloc+'/4 của splitter 1:4 S4-'+pad(H.pmspl))}
+    ${step('ODF-96 cổng vào '+H.pmin,'hàng '+i[0]+', cột '+i[1]+' · dây nhảy từ OLT')}
+    ${step('OLT PON-'+pad(H.pon),'suy hao ước tính '+DATA.budget.loss.toFixed(1)+' dB · margin '+DATA.budget.margin.toFixed(1)+' dB')}
+    </div>`;
   }else{
     const sc=scopeOf(sel);let title='',rows='';
     if(sel.t==='cab'){const c=cabBy[sel.id];title='Tủ '+c.id;
-      rows=`<tr><td>Vị trí</td><td>tủ đặt tầng ${c.floor} (sổ tay)</td></tr><tr><td>Gom</td><td><b>${c.zone.length} tầng</b>: ${c.zone.join(', ')} · ${c.homes} hộ</td></tr><tr><td>Bản vẽ gốc</td><td>${c.drawing?c.drawing.odf+' @ tầng '+c.drawing.floor+(c.drawing.floor===c.floor?' (khớp)':' ⚠ lệch tầng đặt'):'—'}</td></tr><tr><td>Cáp trục</td><td>${c.trunk} · sợi ${c.fiber_from}-${c.fiber_to}${c.hub?' (HUB)':''}</td></tr>`+
-      DATA.spls.filter(s=>s.cab===c.id).map(s=>`<tr><td>${s.id.slice(-2)}</td><td>sợi ${s.fiber} · PON-${pad(s.pon)} · ${s.n}/16 hộ</td></tr>`).join('');}
+      rows=`<tr><td>Vị trí</td><td>tủ đặt tầng ${c.floor} (sổ tay)</td><td>Gom</td><td><b>${c.zone.length} tầng</b>: ${c.zone.join(', ')} · ${c.homes} hộ</td><td>Bản vẽ gốc</td><td>${c.drawing?c.drawing.odf+' @ tầng '+c.drawing.floor+(c.drawing.floor===c.floor?' (khớp)':' ⚠ lệch tầng đặt'):'—'}</td></tr>
+      <tr><td>Cáp trục</td><td>${c.trunk} · sợi ${c.fiber_from}-${c.fiber_to}${c.hub?' (HUB)':''}</td><td colspan="4">${DATA.spls.filter(s=>s.cab===c.id).map(s=>`${s.id.slice(-2)}: sợi ${s.fiber} · PON-${pad(s.pon)} · ${s.n}/16`).join(' &nbsp;|&nbsp; ')}</td></tr>`;}
     if(sel.t==='tr'){const t=trBy[sel.id];title='Cáp trục '+t.id+' (24FO)';
-      rows=`<tr><td>Tủ</td><td>${t.cabs.join(', ')}</td></tr><tr><td>Hub</td><td>tầng ${t.hub}</td></tr><tr><td>Sợi dùng</td><td>${DATA.spls.filter(s=>s.trunk===t.id).length}/24</td></tr>`;}
-    if(sel.t==='spl'){const s=splBy[sel.id];title='Splitter '+s.id;rows=`<tr><td>Sợi trục</td><td>${s.trunk}/${s.fiber} (${FCOL[(s.fiber-1)%6]})</td></tr><tr><td>PM</td><td>S4-${pad(s.pmspl)} cổng ${s.pmout} · PON-${pad(s.pon)}</td></tr><tr><td>Tải</td><td>${s.n}/16 cổng</td></tr>`;}
-    if(sel.t==='pon'){title='PON-'+pad(sel.id);rows=DATA.spls.filter(s=>s.pon===+sel.id).map(s=>`<tr><td>${s.trunk}/${pad(s.fiber)}</td><td>${s.id} · ${s.n} hộ</td></tr>`).join('')+`<tr><td>Tải</td><td>${sc.size}/48 (${Math.round(sc.size/48*100)}%) · +1 cổng dự phòng</td></tr>`;}
+      rows=`<tr><td>Tủ</td><td>${t.cabs.join(', ')}</td><td>Hub</td><td>tầng ${t.hub}</td><td>ODF</td><td>${t.odf} · khay ${t.tray} · sợi dùng ${DATA.spls.filter(s=>s.trunk===t.id).length}/24</td></tr>`;}
+    if(sel.t==='spl'){const s=splBy[sel.id];title='Splitter '+s.id;
+      rows=`<tr><td>Sợi trục</td><td>${s.trunk}/${s.fiber} (${FCOL[(s.fiber-1)%6]})</td><td>ODF-96</td><td>ra cổng ${s.pmout} → vào cổng ${s.pmin} (S4-${pad(s.pmspl)})</td><td>Tải</td><td>${s.n}/16 cổng · PON-${pad(s.pon)}</td></tr>`;}
+    if(sel.t==='pon'){title='PON-'+pad(sel.id);
+      rows=`<tr><td>Vào</td><td>ODF-96 cổng ${DATA.inBase+ +sel.id}</td><td>Ra</td><td>cổng ${(sel.id-1)*4+1}-${(sel.id-1)*4+4}</td><td>Tải</td><td>${sc.size}/48 (${Math.round(sc.size/48*100)}%) · +1 cổng dự phòng</td></tr>
+      <tr><td>Nhánh</td><td colspan="5">${DATA.spls.filter(s=>s.pon===+sel.id).map(s=>`${s.trunk}/${pad(s.fiber)} → ${s.id} (${s.n})`).join(' &nbsp;|&nbsp; ')}</td></tr>`;}
     const act=[...sc].filter(c=>stOf(c)==='Hoạt động').length;
-    h=`<h2>${title}</h2><table>${rows}</table><div style="margin-top:8px"><b>${sc.size}</b> căn hộ trong phạm vi · <b>${act}</b> đang hoạt động</div>`;
+    h=`<div class="row1"><span class="ttl">${title}</span><span><b>${sc.size}</b> căn hộ trong phạm vi · <b>${act}</b> đang hoạt động</span></div><table class="kv">${rows}</table>`;
   }
-  const sc=scopeOf(sel);
-  h+=`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn2 red" id="simBtn">${fault?'Tắt giả lập':'Giả lập sự cố tại đây'}</button></div>`;
+  h+=`<div style="margin-top:6px"><button class="btn2 red" id="simBtn">${fault?'Tắt giả lập':'Giả lập sự cố tại đây'}</button></div>`;
   if(fault){const cabs=new Set(),pons=new Set();fault.forEach(c=>{cabs.add(homeBy[c].cab);pons.add(homeBy[c].pon)});
-    h=`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON<br>Gợi ý kiểm tra: ${sel.t==='apt'?'ONU / cáp 1FO / cổng splitter':sel.t==='spl'?'sợi trục, coupler ODF, patch cord 1:4':sel.t==='cab'?'cáp nhánh 8FO, mối hàn tại hub':sel.t==='tr'?'cáp trục 24FO, ODF PM':'SFP/cổng OLT, splitter 1:4'}</div>`+h;}
+    h=h.replace('<div style="margin-top:6px">',`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON. Kiểm tra: ${sel.t==='apt'?'ONU / cáp 1FO / cổng splitter':sel.t==='spl'?'sợi trục, coupler ODF, dây nhảy ODF-96→ODF-48':sel.t==='cab'?'cáp nhánh 8FO, mối hàn tại hub':sel.t==='tr'?'cáp trục 24FO, ODF 48FO':'SFP/cổng OLT, dây nhảy OLT→ODF-96, splitter 1:4'}</div><div style="margin-top:6px">`);}
   el.innerHTML=h;
   const b=$('#simBtn');if(b)b.onclick=()=>{fault=fault?null:scopeOf(sel);refresh()};
   el.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{status[sel.id]=x.dataset.st;saveSt();refresh()});
 }
 
-// ---------- events ----------
 function select(s){sel=s;fault=null;refresh()}
 document.addEventListener('click',e=>{
+  if(e.target.closest('#info')||e.target.closest('header'))return;
   const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl],.cp[data-spl],.c96[data-spl]'),p=e.target.closest('.pon,.c96[data-pon]');
   if(a)select({t:'apt',id:a.dataset.c});else if(c)select({t:'cab',id:c.dataset.cab});else if(t)select({t:'tr',id:t.dataset.tr});
   else if(o)select({t:'spl',id:o.dataset.spl});else if(p)select({t:'pon',id:p.dataset.pon});
@@ -298,7 +303,7 @@ $('#imp').onclick=()=>$('#file').click();
 $('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{let n=0;
   t.replace(/^﻿/,'').split(/\r?\n/).forEach(l=>{const [c,s]=l.split(/[,;\t]/).map(x=>x&&x.trim());if(homeBy[c]&&STATUS.includes(s)){status[c]=s;n++}});
   saveSt();refresh();alert('Đã nhập '+n+' căn hộ (CSV 2 cột: Mã căn hộ, Trạng thái – có thể copy từ sheet "Thuê bao" của Excel).')})};
-refresh();
+fit();refresh();
 </script>
 </body>
 </html>

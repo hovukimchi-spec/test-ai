@@ -12,4 +12,4 @@ Kiến trúc: ONU –1FO– splitter 1:16 (tủ) – cáp trục 24FO (4 ống �
 Xem sheet "Đối chiếu bản vẽ". Tháp B khớp 8/8; tháp A lệch 2 tủ (sổ tay 7F/5F, bản vẽ gốc ODF ở 6F/4F). Cụm gom tầng lấy từ bản vẽ gốc.
 
 ## Phòng máy (hầm B1)
-OLT PON-k → dây nhảy → ODF-96FO cổng 64+k (vào splitter 1:4) · 4 đầu ra splitter → ODF-96FO cổng 4k-3…4k (dùng 3, cổng 4 dự phòng) → dây nhảy → ODF-48FO trục (ODF-02 → ODF-08/09 → ODF-17/18, xếp từ thấp lên cao). ODF-96: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải.
+OLT PON-k → dây nhảy → ODF-96FO cổng 72+k (vào splitter 1:4) · 4 đầu ra splitter → ODF-96FO cổng 4k-3…4k (dùng 3, cổng 4 dự phòng) → dây nhảy → ODF-48FO trục (ODF-02 → ODF-08/09 → ODF-17/18, xếp từ thấp lên cao). ODF-96: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải.

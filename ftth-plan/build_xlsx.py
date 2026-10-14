@@ -61,7 +61,7 @@ wsQ = wb.create_sheet(S_QC); wsV = wb.create_sheet(S_VT); wsG = wb.create_sheet(
 # =============== THUÊ BAO ===============
 cols = ['Mã căn hộ', 'Tháp', 'Tầng', 'Box', 'Tủ phối quang', 'Splitter 1:16', 'Cổng splitter', 'Cáp trục', 'Sợi trục (1-24)',
         'Ống đệm / màu sợi', 'Splitter PM 1:4', 'ODF-96 cổng ra (1-64)', 'PON', 'Trạng thái', 'Serial ONU / Ghi chú', 'Ngày lắp',
-        'Đường quang (tự ghép)', 'ODF-48 (trục)', 'Khay', 'Coupler ODF-48 (hàng-cột)', 'ODF-96 cổng vào (65-80)']
+        'Đường quang (tự ghép)', 'ODF-48 (trục)', 'Khay', 'Coupler ODF-48 (hàng-cột)', 'ODF-96 cổng vào (73-88)']
 header(wsH, 1, cols, h=36)
 H0, H1 = 2, NH + 1
 for i, h in enumerate(homes):
@@ -123,7 +123,7 @@ wsQ['B30'].font = Font(name=F, size=9, italic=True, color='5B6573'); wsQ['B30'].
 wsQ.merge_cells('B30:E31')
 
 # =============== ODF-PM & PON ===============
-title(wsO, 'Bảng đấu nối tại Phòng máy: OLT PON → ODF-96 (vào) → Splitter 1:4 → ODF-96 (ra) → ODF 48FO → Cáp trục', 'ODF-96FO: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải. Splitter k: vào cổng 64+k, ra cổng 4k-3…4k (dùng 3 cổng, cổng thứ 4 dự phòng). Dây nhảy: OLT→cổng vào; cổng ra→ODF-48.')
+title(wsO, 'Bảng đấu nối tại Phòng máy: OLT PON → ODF-96 (vào) → Splitter 1:4 → ODF-96 (ra) → ODF 48FO → Cáp trục', 'ODF-96FO: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải. Splitter k: vào cổng 72+k (73-88), ra cổng 4k-3…4k (1-64) (dùng 3 cổng, cổng thứ 4 dự phòng). Dây nhảy: OLT→cổng vào; cổng ra→ODF-48.')
 cols = ['PON', 'Splitter PM 1:4', 'ODF-96 cổng ra (1-64)', 'Trạng thái cổng', 'ODF-48 đích', 'Khay', 'Coupler ODF-48', 'Cáp trục/sợi', 'Ống / màu', 'Tủ đích', 'Splitter 1:16 đích', 'Số căn hộ', 'Hoạt động', 'ODF-96 cổng vào (OLT)', 'Vị trí cổng ra (hàng-cột)', 'Vị trí cổng vào (hàng-cột)']
 header(wsO, 4, cols, h=30)
 sp_by_pm = {(s_['pmspl'], s_['pmloc']): s_ for s_ in spls}
@@ -155,7 +155,7 @@ wsO.conditional_formatting.add(f'D5:D{OD1}', CellIsRule(operator='equal', formul
 OR = lambda col: f"{q(S_ODF)}!${col}$5:${col}${OD1}"
 
 # =============== ODF 96FO (hình) + DÂY NHẢY ===============
-title(wsO96, 'ODF 96FO tại Phòng máy – mặt cắm splitter 1:4 (4 hàng × 24 cột)', 'Đếm từ DƯỚI lên, từ TRÁI qua phải (hàng 1 = dưới cùng: cổng 1-24). Cổng 1-64 = đầu ra splitter (4 cổng/splitter, cổng thứ 4 dự phòng); cổng 65-80 = đầu vào splitter (nối OLT); 81-96 trống.')
+title(wsO96, 'ODF 96FO tại Phòng máy – mặt cắm splitter 1:4 (4 hàng × 24 cột)', 'Đếm từ DƯỚI lên, từ TRÁI qua phải (hàng 1 = dưới cùng: cổng 1-24). Cổng 1-64 = đầu ra splitter (4 cổng/splitter, cổng thứ 4 dự phòng); cổng 65-72 trống; cổng 73-88 = đầu vào splitter (nối OLT); 89-96 trống.')
 wsO96.column_dimensions['A'].width = 9
 for c in range(2, 2 + M.ODF96_COLS): wsO96.column_dimensions[L(c)].width = 9.5
 sp_pm = {(s_['pmspl'], s_['pmloc']): s_ for s_ in spls}
@@ -165,23 +165,23 @@ for rr_ in range(1, M.ODF96_ROWS + 1):
     lab = wsO96.cell(row=row, column=1, value=f'Hàng {rr_}'); lab.font = Font(name=F, size=9, bold=True); lab.alignment = Alignment(vertical='center')
     for cc_ in range(1, M.ODF96_COLS + 1):
         p_ = (rr_ - 1) * M.ODF96_COLS + cc_
-        if p_ <= M.IN_BASE:
+        if p_ <= M.OUT_N:
             pon_, loc_ = (p_ - 1) // M.SPL_PM + 1, (p_ - 1) % M.SPL_PM + 1
             s_ = sp_pm.get((pon_, loc_))
             txt = f"{p_}\n{s_['id'][3:]}\nPON-{pon_:02d}" if s_ else f'{p_}\ndự phòng\nPON-{pon_:02d}'
             bgc = hue(pon_ - 1, M.N_PON, 0.5, 0.82) if s_ else 'EEEEEE'
-        elif p_ <= M.IN_BASE + M.N_PON:
+        elif M.IN_BASE < p_ <= M.IN_BASE + M.N_PON:
             pon_ = p_ - M.IN_BASE
             txt = f'{p_}  VÀO\nS4-{pon_:02d}\nOLT PON-{pon_:02d}'
             bgc = hue(pon_ - 1, M.N_PON, 0.65, 0.62)
         else:
             txt, bgc = f'{p_}\ntrống', 'F7F7F7'
         cell = wsO96.cell(row=row, column=1 + cc_, value=txt)
-        cell.font = Font(name=F, size=7.5, bold=(p_ <= M.IN_BASE + M.N_PON and bgc != 'EEEEEE'), color='000000' if bgc not in ('EEEEEE', 'F7F7F7') else '8A8A8A')
+        cell.font = Font(name=F, size=7.5, bold=(M.IN_BASE < p_ <= M.IN_BASE + M.N_PON), color='000000' if bgc not in ('EEEEEE', 'F7F7F7') else '8A8A8A')
         cell.fill = fill(bgc); cell.border = BORDER; cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
 for cc_ in range(1, M.ODF96_COLS + 1):
     x = wsO96.cell(row=4 + M.ODF96_ROWS, column=1 + cc_, value=f'Cột {cc_}'); x.font = Font(name=F, size=8, italic=True); x.alignment = Alignment(horizontal='center')
-wsO96.cell(row=4 + M.ODF96_ROWS + 2, column=1, value='Mỗi PON một màu: ô nhạt = đầu ra (tới ODF-48), ô đậm "VÀO" = đầu vào splitter (từ OLT). Ví dụ splitter S4-01: vào cổng 65, ra cổng 1-4; S4-02: vào 66, ra 5-8; … S4-16: vào 80, ra 61-64.').font = Font(name=F, size=9, italic=True)
+wsO96.cell(row=4 + M.ODF96_ROWS + 2, column=1, value='Mỗi PON một màu: ô nhạt = đầu ra (tới ODF-48), ô đậm "VÀO" = đầu vào splitter (từ OLT). Ví dụ splitter S4-01: vào cổng 73, ra cổng 1-4; S4-02: vào 74, ra 5-8; … S4-16: vào 88, ra 61-64.').font = Font(name=F, size=9, italic=True)
 
 title(wsPC, 'Danh sách dây nhảy tại Phòng máy (64 sợi)', 'Loại 1: OLT PON → ODF-96 cổng vào (16 sợi). Loại 2: ODF-96 cổng ra → ODF-48 trục (48 sợi). Cập nhật cột "Tình trạng" khi thi công.')
 header(wsPC, 4, ['STT', 'Loại', 'Đầu A', 'Đầu B', 'Ghi chú', 'Tình trạng'], h=26)
@@ -440,7 +440,7 @@ bom = [('Tủ phối quang (4 vị trí splitter)', f"=COUNTA({q(S_TU)}!A5:A21)"
        ('Pigtail SC/APC (đầu trục + tại tủ + thuê bao)', f"=144+COUNTA({q(S_TU)}!A5:A21)*{M.CAB_SLOTS}*2+COUNTA({HR('A')})", 'sợi', 'ước tính thô'),
        ('Mối hàn (ước tính)', f"=C{r + 9}", 'mối', 'tính xấp xỉ bằng số pigtail'),
        ('Nhãn cáp/tủ/cổng', 800, 'cái', ''),
-       ('ODF 96FO (24 cột × 4 hàng) ở PM', 1, 'bộ', 'cổng 1-64 ra splitter, 65-80 vào splitter')]
+       ('ODF 96FO (24 cột × 4 hàng) ở PM', 1, 'bộ', 'cổng 1-64 ra splitter, 73-88 vào splitter')]
 for a, b, c_, d in bom:
     body(wsV, r, 2, a); body(wsV, r, 3, b, center=True, fmt='#,##0'); body(wsV, r, 4, c_, center=True); body(wsV, r, 5, d); r += 1
 
@@ -482,8 +482,8 @@ widths(wsG, [3, 120])
 text = [
  ('QUY ƯỚC ĐẶT TÊN', None),
  ('Căn hộ: <Tháp>-<Tầng>-<Căn>  vd A-18-05.  Tủ: TU-<Tháp><Tầng> vd TU-A18.  Splitter 1:16: TU-A18/S2.  Cáp trục: TR-A1 (3 cáp/tháp).', 1),
- ('PM (hầm B1): OLT PON-k → dây nhảy → ODF-96FO cổng 64+k (vào splitter 1:4 S4-k) ; 4 đầu ra splitter → ODF-96FO cổng 4k-3…4k (dùng 3, cổng thứ 4 dự phòng) → dây nhảy → ODF 48FO trục: ODF-02, ODF-08/09, ODF-17/18 (xếp chồng từ thấp lên cao). Khay TRÁI = Tháp A, PHẢI = Tháp B.', 1),
- ('ODF-96FO: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải (hàng 1 = cổng 1-24 … hàng 4 = cổng 73-96).', 1),
+ ('PM (hầm B1): OLT PON-k → dây nhảy → ODF-96FO cổng 72+k (vào splitter 1:4 S4-k) ; 4 đầu ra splitter → ODF-96FO cổng 4k-3…4k (dùng 3, cổng thứ 4 dự phòng) → dây nhảy → ODF 48FO trục: ODF-02, ODF-08/09, ODF-17/18 (xếp chồng từ thấp lên cao). Khay TRÁI = Tháp A, PHẢI = Tháp B.', 1),
+ ('ODF-96FO: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải (hàng 1 = cổng 1-24 … hàng 4 = cổng 73-96; cổng vào splitter 73-88 nằm hàng trên cùng).', 1),
  ('Khay ODF: 4 hàng × 6 cột coupler, đánh số từ DƯỚI lên và TRÁI qua; mỗi hàng = 1 ống đệm 6 sợi. Coupler k ↔ sợi k của cáp trục 24FO.  Ghi nhãn cả 2 đầu mọi sợi và mọi cổng.', 1),
  ('Cáp 24FO = 4 ống đệm (1 xanh dương, 2 cam, 3 xanh lá, 4 nâu) × 6 sợi (xanh dương, cam, xanh lá, nâu, xám, trắng): sợi 1-6 ống 1, 7-12 ống 2, 13-18 ống 3, 19-24 ống 4.', 1),
  ('Cáp trục TR-x1 = cụm tầng thấp (A: A2-A5-A7; B: B2-B5), TR-x2 = cụm giữa, TR-x3 = cụm cao.  Mỗi cáp 24FO đếm từ dưới lên: sợi 1-8 → tủ hub (thấp nhất), 9-16 → tủ giữa (cáp nhánh 8FO), 17-24 → tủ trên cùng. Trong mỗi tủ, splitter Sk dùng sợi thứ k trong dải của tủ.', 1),

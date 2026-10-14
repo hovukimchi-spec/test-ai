@@ -42,9 +42,10 @@ FIBER_COLORS = ['Xanh dương', 'Cam', 'Xanh lá', 'Nâu', 'Xám', 'Trắng']   
 FIBER_HEX = ['#1f6fe5', '#f28c1e', '#2eaa4a', '#8a5a2b', '#8c959f', '#f5f5f5']
 TRAY_ROWS, TRAY_COLS = 4, 6
 # ODF 96FO ở PM (mặt cắm splitter 1:4): 4 hàng × 24 cột, đếm từ dưới lên, từ trái qua phải.
-# Splitter 1:4 thứ k: đầu vào -> cổng 64+k (nối OLT PON-k bằng dây nhảy); 4 đầu ra -> cổng 4k-3..4k (nối ODF 48FO trục bằng dây nhảy)
+# Splitter 1:4 thứ k: đầu vào -> cổng 72+k (nối OLT PON-k bằng dây nhảy); 4 đầu ra -> cổng 4k-3..4k (nối ODF 48FO trục bằng dây nhảy)
 ODF96_ROWS, ODF96_COLS = 4, 24
-IN_BASE = N_PON * SPL_PM   # 64
+OUT_N = N_PON * SPL_PM     # 64 cổng ra: 1-64
+IN_BASE = ODF96_COLS * 3   # 72 -> cổng vào = 72 + k (73-88, nằm hàng trên cùng)
 # -----------------------------------------------------------------------------
 
 def fidx(f):  # chỉ số tầng từ dưới lên (12A = 13, bỏ qua tầng 13)
