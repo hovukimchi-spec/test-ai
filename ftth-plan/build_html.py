@@ -13,3 +13,15 @@ data = dict(
 html = open('viewer_template.html', encoding='utf-8').read().replace('/*DATA*/null', json.dumps(data, ensure_ascii=False, separators=(',', ':')))
 open('ftth_viewer.html', 'w', encoding='utf-8').write(html)
 print(len(html) // 1024, 'KB')
+
+# Bản dán lên Artifact: bỏ doctype/html/head/body, thêm meta cho viền an toàn
+import re
+art = html
+art = re.sub(r'<!doctype html>\s*', '', art)
+art = re.sub(r'<html[^>]*>\s*<head>\s*', '', art)
+art = re.sub(r'<meta charset="utf-8">\s*', '', art)
+art = re.sub(r'<meta name="viewport"[^>]*>\s*', '', art)
+art = art.replace('</head>', '').replace('<body>', '').replace('</body>', '').replace('</html>', '')
+art = art.replace('<title>FTTH Phố Đông – Sơ đồ phối quang</title>', '<title>FTTH Phố Đông</title>\n<meta name="claude:viewport-fit-sides" content="cover">')
+open('ftth_viewer_artifact.html', 'w', encoding='utf-8').write(art.strip() + '\n')
+print('artifact', len(art) // 1024, 'KB')

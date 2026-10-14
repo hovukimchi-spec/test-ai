@@ -17,3 +17,6 @@ OLT PON-k → dây nhảy → ODF-96FO cổng 72+k (vào splitter 1:4) · 4 đ�
 ## Cập nhật: tách hạ tầng 2 tháp
 - Tháp A → PON 1-8, tháp B → PON 9-16 (mỗi PON 3 cổng 1:4, PON 8 và 16 dùng đủ 4 cổng). ODF-96 chia 2 nửa 4×12 (trái = A, phải = B): splitter k vào cổng 36+k (37-44), ra cổng 4k-3…4k.
 - Mỗi splitter 1:16 chỉ phục vụ 1 tầng (không dùng lệch tầng). TU-B2 (tầng 3/2/1) cần 5 splitter.
+
+## Xem trên điện thoại
+`ftth_viewer.html` đã responsive (iPhone: chọn Tháp A/B bằng tab, chi tiết hiện ở khung dưới màn hình, có chế độ tối). `ftth_viewer_artifact.html` là bản dùng để đăng lên Claude Artifact.
