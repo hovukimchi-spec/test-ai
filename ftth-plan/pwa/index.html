@@ -121,6 +121,7 @@ header{padding-top:calc(10px + env(safe-area-inset-top,0px))}
   <button id="reset">Bỏ chọn</button><button id="syncbtn" hidden>⟳ Đồng bộ</button><button id="exp">Đồng bộ / CSV</button><button id="imp">Nhập CSV</button><input id="file" type="file" accept=".csv,text/csv" hidden>
 </header>
 <div class="kpis gut" id="kpis"></div>
+<div id="gasbar" class="gut" hidden style="padding-block:0 6px;font-size:12px"></div>
 <div id="csvbox" hidden><div class="csvin"><b>Trạng thái căn hộ (CSV)</b><textarea id="csvta" rows="10"></textarea><hr style="border:0;border-top:1px solid var(--line);width:100%"><b>Đồng bộ từ Google Sheets (chỉ đọc)</b><div class="muted">Dán link CSV của tab trạng thái đã "Xuất bản lên web" (cần cột "Mã căn hộ" và "Trạng thái"). Khi có link, trạng thái lấy từ Google Sheets và app chỉ để xem.</div><input id="srcurl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" style="width:100%;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"><div class="csvbtn"><button class="btn2" id="srcsave">Lưu và đồng bộ</button><button class="btn2" id="srcclear">Gỡ nguồn</button></div><div class="muted" id="srcmsg"></div><hr style="border:0;border-top:1px solid var(--line);width:100%"><b>Hoặc chép / dán CSV thủ công</b><div class="csvbtn"><button class="btn2" id="csvcopy">Sao chép</button><button class="btn2" id="csvimp">Nhập từ ô trên</button><button class="btn2" id="csvclose">Đóng</button></div><div class="muted" id="csvmsg"></div></div></div>
 <div class="wrap gut">
   <div class="card" id="info"></div>
@@ -147,7 +148,9 @@ const saveSt=()=>{try{localStorage.setItem('ftth_status_v1',JSON.stringify(statu
 let remote={};try{remote=JSON.parse(localStorage.getItem('ftth_remote_v1')||'{}')}catch(e){}
 let srcUrl='';try{srcUrl=localStorage.getItem('ftth_src_v1')||''}catch(e){}
 let syncMsg='',syncAt=null;
-const stOf=c=>srcUrl?(remote[c]||'Chưa lắp'):(status[c]||'Chưa lắp');
+const GAS=(typeof google!=='undefined'&&google.script&&google.script.run)?google.script.run:null;   // chạy trong Google Apps Script web app
+let gasStatus={},gasMeta={canEdit:null,user:''},gasMsg='',gasAt=null;
+const stOf=c=>GAS?(gasStatus[c]||'Chưa lắp'):srcUrl?(remote[c]||'Chưa lắp'):(status[c]||'Chưa lắp');
 let sel=null, fault=null;
 const hsl=(i,n,l=78)=>`hsl(${Math.round(i*360/n)} 60% ${l}%)`;
 const ponCol=p=>hsl((p*5)%16,16,p%2?72:82);
@@ -303,7 +306,7 @@ function info(){
   if(sel.t==='apt'){
     const {h:H,cab,spl,tr}=pathHome(sel.id), st=stOf(sel.id), cp=coup(H.fiber), o=pos96(H.pmout), i=pos96(H.pmin);
     h=`<div class="row1"><span class="ttl">Căn hộ ${H.code}</span><span class="tag" style="background:${ST_COL[st]}">${st}</span>
-      ${srcUrl?'<span class="muted" style="margin-left:auto">Trạng thái lấy từ Google Sheets (chỉ xem)</span>':`<span class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</span>`}</div>
+      ${GAS&&gasMeta.canEdit===false?'<span class="muted" style="margin-left:auto">Bạn chỉ có quyền xem (chủ file cần chia sẻ quyền Người chỉnh sửa)</span>':(srcUrl&&!GAS)?'<span class="muted" style="margin-left:auto">Trạng thái lấy từ Google Sheets (chỉ xem)</span>':`<span class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</span>`}</div>
     <div class="steps">
     ${step('ONU căn hộ','tầng '+H.floor+' · box '+pad(H.apt))}
     ${step('Cáp 1FO → '+cab.id+' (tầng '+cab.floor+')','splitter 1:16 '+spl.id+' · cổng '+H.port+'/16')}
@@ -335,7 +338,7 @@ function info(){
   el.innerHTML=h;
   const xb=$('#xbtn');if(xb)xb.onclick=()=>{sel=null;fault=null;refresh()};
   const b=$('#simBtn');if(b)b.onclick=()=>{fault=fault?null:scopeOf(sel);refresh()};
-  el.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{status[sel.id]=x.dataset.st;saveSt();refresh()});
+  el.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{if(GAS){gasSet(sel.id,x.dataset.st)}else{status[sel.id]=x.dataset.st;saveSt();refresh()}});
 }
 
 function select(s){sel=s;fault=null;if(s&&s.t==='apt')setTab(s.id[0]);refresh()}
@@ -345,7 +348,7 @@ document.addEventListener('click',e=>{
   if(a)select({t:'apt',id:a.dataset.c});else if(c)select({t:'cab',id:c.dataset.cab});else if(t)select({t:'tr',id:t.dataset.tr});
   else if(o)select({t:'spl',id:o.dataset.spl});else if(p)select({t:'pon',id:p.dataset.pon});
 });
-$('#q').addEventListener('change',e=>{const v=e.target.value.trim().toUpperCase();if(homeBy[v]){select({t:'apt',id:v});setTimeout(()=>{const e2=document.querySelector(`.apt[data-c="${v}"]`);if(e2)e2.scrollIntoView({block:'center',inline:'center'})},50)}});
+$('#q').addEventListener('change',e=>{const v=e.target.value.trim().toUpperCase();if(homeBy[v]&&!(sel&&sel.t==='apt'&&sel.id===v)){select({t:'apt',id:v});setTimeout(()=>{const e2=document.querySelector(`.apt[data-c="${v}"]`);if(e2)e2.scrollIntoView({block:'center',inline:'center'})},50)}});
 $('#mode').onchange=refresh;$('#reset').onclick=()=>{sel=null;fault=null;$('#q').value='';refresh()};
 function csvText(){return ['Mã căn hộ,Trạng thái',...DATA.homes.map(h=>`${h.code},${stOf(h.code)}`)].join('\n')}
 function csvImport(t){let n=0;t.replace(/^\ufeff/,'').split(/\r?\n/).forEach(l=>{const [c,s]=l.split(/[,;\t]/).map(x=>x&&x.trim());if(homeBy[c]&&STATUS.includes(s)){status[c]=s;n++}});saveSt();refresh();return n}
@@ -378,7 +381,17 @@ $('#srcclear').onclick=()=>{srcUrl='';remote={};try{localStorage.removeItem('ftt
 $('#syncbtn').onclick=syncNow;
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&srcUrl&&(!syncAt||Date.now()-syncAt>60000))syncNow()});
 setInterval(()=>{if(srcUrl&&!document.hidden)syncNow()},300000);
-applySrcUi();fit();refresh();if(srcUrl)syncNow();
+function gasBar(){const b=$('#gasbar');if(!GAS){b.hidden=true;return}b.hidden=false;
+  b.innerHTML=gasMsg?`<span style="color:var(--bannerink)">⚠ ${gasMsg}</span>`:(gasAt?`<span class="muted">Đồng bộ Google Sheets lúc ${gasAt.toTimeString().slice(0,5)}${gasMeta.user?' · '+gasMeta.user:''}${gasMeta.canEdit===false?' · chỉ xem':''}</span>`:'<span class="muted">Đang tải từ Google Sheets…</span>')}
+function gasLoad(){if(!GAS)return;
+  GAS.withSuccessHandler(r=>{gasStatus=r.statuses||{};gasMeta={canEdit:r.canEdit,user:r.user||''};gasAt=new Date();gasMsg='';gasBar();refresh()})
+     .withFailureHandler(e=>{gasMsg='Không đọc được Google Sheets: '+((e&&e.message)||e);gasBar()}).getStatuses()}
+function gasSet(code,st){const prev=gasStatus[code];gasStatus[code]=st;gasMsg='';gasBar();refresh();
+  GAS.withSuccessHandler(()=>{gasAt=new Date();gasBar()})
+     .withFailureHandler(e=>{if(prev===undefined)delete gasStatus[code];else gasStatus[code]=prev;gasMsg='Không lưu được: '+((e&&e.message)||e);gasBar();refresh()}).setStatus(code,st)}
+if(GAS){$('#exp').textContent='⟳ Đồng bộ';$('#exp').onclick=gasLoad;$('#imp').hidden=true;gasLoad();setInterval(()=>{if(!document.hidden)gasLoad()},60000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)gasLoad()})}
+applySrcUi();fit();refresh();if(srcUrl&&!GAS)syncNow();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>

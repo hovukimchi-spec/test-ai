@@ -1,0 +1,42 @@
+APP FTTH TRÊN GOOGLE APPS SCRIPT (Google Sheets là nơi lưu trạng thái, ghi được từ điện thoại)
+
+Mô hình: bạn giữ file Google Sheets gốc. App chạy trên máy chủ Google (Apps Script), đọc và ghi cột "Trạng thái" thẳng vào Sheet. Ai được xem / được sửa do bạn chia sẻ file Sheets quyết định. Mọi thay đổi được ghi vào tab NhatKy (thời gian, tài khoản, mã căn hộ, trạng thái cũ, trạng thái mới).
+
+Lưu ý quan trọng: phần mã đã được thử bằng giả lập (đọc/ghi, từ chối khi sai quyền, nhật ký, giao diện khi lưu thành công / thất bại / chỉ xem), nhưng CHƯA chạy thử trên Google thật vì môi trường làm việc không truy cập được Google. Lần đầu triển khai hãy làm theo từng bước và báo lại nếu có lỗi.
+
+A. CHUẨN BỊ FILE SHEETS (làm một lần)
+1. Tải FTTH_PhoDong_PhoiQuang.xlsx lên Google Drive, mở bằng Google Sheets, chọn Tệp > Lưu dưới dạng Google Trang tính.
+2. Kiểm tra tab tên đúng là "Thuê bao", dòng 1 có cột "Mã căn hộ" và "Trạng thái".
+
+B. DÁN MÃ VÀO APPS SCRIPT
+3. Trong file Sheets: Tiện ích mở rộng > Apps Script.
+4. Ở tệp Code.gs: xóa nội dung mẫu, dán toàn bộ nội dung file Code.gs (gửi kèm).
+5. Bấm dấu + cạnh "Tệp" > HTML > đặt tên đúng là Index (không thêm đuôi). Xóa nội dung mẫu, dán toàn bộ nội dung file Index.html (gửi kèm; khoảng 180 KB, dán hơi chậm là bình thường).
+6. Bấm biểu tượng bánh răng (Cài đặt dự án) > bật "Hiện tệp kê khai appsscript.json trong trình chỉnh sửa". Quay lại Trình chỉnh sửa, mở appsscript.json, dán nội dung file appsscript.json (gửi kèm). Bấm biểu tượng lưu.
+
+C. CẤP QUYỀN VÀ TRIỂN KHAI
+7. Chọn hàm getStatuses ở thanh trên cùng > Chạy. Màn hình xin quyền hiện ra: Xem xét quyền > chọn tài khoản của bạn > "Nâng cao" > "Đi tới ... (không an toàn)" > Cho phép. (Cảnh báo "Google chưa xác minh ứng dụng" là bình thường với script do chính bạn viết.)
+8. Triển khai > Tùy chọn triển khai mới > bánh răng > Ứng dụng web. Chọn:
+   - Thực thi với tư cách: Người dùng truy cập ứng dụng web
+   - Ai có quyền truy cập: Bất kỳ ai có Tài khoản Google
+   Bấm Triển khai, sao chép "URL ứng dụng web" (dạng https://script.google.com/macros/s/.../exec).
+
+D. PHÂN QUYỀN NGƯỜI DÙNG
+9. Trong file Sheets bấm Chia sẻ, thêm email từng người:
+   - Người chỉnh sửa: được đổi trạng thái căn hộ trong app.
+   - Người xem: chỉ xem trong app (nút đổi trạng thái bị ẩn).
+   Người không được chia sẻ sẽ không đọc được dữ liệu (app báo lỗi).
+
+E. DÙNG TRÊN IPHONE
+10. Gửi URL cho mọi người. Mở bằng Safari, đăng nhập Google, bấm Cho phép ở lần đầu. Có thể bấm Chia sẻ > Thêm vào Màn hình chính để có biểu tượng mở nhanh (mở bằng Safari, không chạy offline).
+11. Trong app: gõ mã căn hộ (vd A-18-05) hoặc chạm vào ô căn hộ > chọn trạng thái. App lưu ngay vào Sheet và tự tải lại mỗi 60 giây và khi quay lại màn hình; nút "Đồng bộ" tải lại ngay.
+
+F. CẬP NHẬT APP SAU NÀY
+12. Sửa Index.html (hoặc Code.gs) trong Apps Script > Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: Phiên bản mới > Triển khai. URL giữ nguyên.
+
+G. XỬ LÝ SỰ CỐ THƯỜNG GẶP
+- "Không thấy tab Thuê bao" / "thiếu cột": đổi tên tab / tiêu đề cột đúng chính tả.
+- "Bạn chỉ có quyền xem": chủ file chia sẻ lại cho người đó quyền Người chỉnh sửa.
+- Trang trắng hoặc báo lỗi khi đang đăng nhập nhiều tài khoản Google: mở URL bằng cửa sổ riêng tư, hoặc đăng xuất bớt tài khoản.
+- Mất mạng: app Apps Script không chạy offline (cần mạng để mở và lưu). Nếu cần offline, dùng bản mini app (PWA) với chế độ đồng bộ CSV chỉ đọc.
+- Thấy dòng tab NhatKy lạ: đó là nhật ký thay đổi, có thể xóa dòng cũ khi cần.

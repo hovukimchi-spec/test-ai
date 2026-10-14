@@ -25,3 +25,7 @@ art = art.replace('</head>', '').replace('<body>', '').replace('</body>', '').re
 art = art.replace('<title>FTTH Phố Đông – Sơ đồ phối quang</title>', '<title>FTTH Phố Đông</title>\n<meta name="claude:viewport-fit-sides" content="cover">')
 open('ftth_viewer_artifact.html', 'w', encoding='utf-8').write(art.strip() + '\n')
 print('artifact', len(art) // 1024, 'KB')
+
+# Bản cho Google Apps Script web app (cùng giao diện, tự bật chế độ Sheets khi chạy trong Apps Script)
+import shutil
+shutil.copyfile('ftth_viewer.html', 'gas/Index.html')
