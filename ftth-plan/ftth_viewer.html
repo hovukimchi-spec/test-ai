@@ -108,10 +108,10 @@ table.kv{border-collapse:collapse;font-size:12px}table.kv td{padding:2px 10px 2p
     <select id="mode"><option value="pon">PON</option><option value="cab">Tủ phối quang</option><option value="spl">Splitter 1:16</option><option value="status">Trạng thái</option></select>
   </label>
   <span class="sp"></span>
-  <button id="reset">Bỏ chọn</button><button id="exp">CSV trạng thái</button><button id="imp">Nhập CSV</button><input id="file" type="file" accept=".csv,text/csv" hidden>
+  <button id="reset">Bỏ chọn</button><button id="syncbtn" hidden>⟳ Đồng bộ</button><button id="exp">Đồng bộ / CSV</button><button id="imp">Nhập CSV</button><input id="file" type="file" accept=".csv,text/csv" hidden>
 </header>
 <div class="kpis gut" id="kpis"></div>
-<div id="csvbox" hidden><div class="csvin"><b>Trạng thái căn hộ (CSV)</b><div class="muted">Sao chép để lưu, hoặc dán nội dung CSV (2 cột: Mã căn hộ, Trạng thái) rồi bấm Nhập.</div><textarea id="csvta" rows="10"></textarea><div class="csvbtn"><button class="btn2" id="csvcopy">Sao chép</button><button class="btn2" id="csvimp">Nhập từ ô trên</button><button class="btn2" id="csvclose">Đóng</button></div><div class="muted" id="csvmsg"></div></div></div>
+<div id="csvbox" hidden><div class="csvin"><b>Trạng thái căn hộ (CSV)</b><textarea id="csvta" rows="10"></textarea><hr style="border:0;border-top:1px solid var(--line);width:100%"><b>Đồng bộ từ Google Sheets (chỉ đọc)</b><div class="muted">Dán link CSV của tab trạng thái đã "Xuất bản lên web" (cần cột "Mã căn hộ" và "Trạng thái"). Khi có link, trạng thái lấy từ Google Sheets và app chỉ để xem.</div><input id="srcurl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" style="width:100%;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"><div class="csvbtn"><button class="btn2" id="srcsave">Lưu và đồng bộ</button><button class="btn2" id="srcclear">Gỡ nguồn</button></div><div class="muted" id="srcmsg"></div><hr style="border:0;border-top:1px solid var(--line);width:100%"><b>Hoặc chép / dán CSV thủ công</b><div class="csvbtn"><button class="btn2" id="csvcopy">Sao chép</button><button class="btn2" id="csvimp">Nhập từ ô trên</button><button class="btn2" id="csvclose">Đóng</button></div><div class="muted" id="csvmsg"></div></div></div>
 <div class="wrap gut">
   <div class="card" id="info"></div>
   <div class="card"><h2>Trục thông tầng · Tháp A (trái) · Tháp B (phải)</h2>
@@ -134,7 +134,10 @@ const trBy=Object.fromEntries(DATA.trunks.map(t=>[t.id,t]));
 const homeBy=Object.fromEntries(DATA.homes.map(h=>[h.code,h]));
 let status={};try{status=JSON.parse(localStorage.getItem('ftth_status_v1')||'{}')}catch(e){}
 const saveSt=()=>{try{localStorage.setItem('ftth_status_v1',JSON.stringify(status))}catch(e){}};
-const stOf=c=>status[c]||'Chưa lắp';
+let remote={};try{remote=JSON.parse(localStorage.getItem('ftth_remote_v1')||'{}')}catch(e){}
+let srcUrl='';try{srcUrl=localStorage.getItem('ftth_src_v1')||''}catch(e){}
+let syncMsg='',syncAt=null;
+const stOf=c=>srcUrl?(remote[c]||'Chưa lắp'):(status[c]||'Chưa lắp');
 let sel=null, fault=null;
 const hsl=(i,n,l=78)=>`hsl(${Math.round(i*360/n)} 60% ${l}%)`;
 const ponCol=p=>hsl((p*5)%16,16,p%2?72:82);
@@ -279,6 +282,7 @@ function kpis(){
   const ponUse=Array.from({length:DATA.nPon},(_,i)=>DATA.homes.filter(h=>h.pon===i+1).length);
   const k=[[DATA.homes.length,'căn hộ'],[cnt['Hoạt động'],'đang hoạt động'],[cnt['Đã đấu nối'],'đã đấu nối'],[cnt['Sự cố'],'sự cố'],
     [DATA.cabinets.length,'tủ phối quang'],[DATA.spls.length,'splitter 1:16'],[Math.max(...ponUse)+'/64','PON tải cao nhất'],[DATA.budget.margin.toFixed(1)+' dB','margin quang']];
+  if(srcUrl)k.push(['⟳',syncAt?'đồng bộ '+syncAt.toTimeString().slice(0,5):(syncMsg?'chưa đồng bộ':'đang đồng bộ…')]);
   $('#kpis').innerHTML=k.map(([a,b])=>`<div class="kpi"><b>${a}</b><span>${b}</span></div>`).join('');
 }
 const step=(t,s)=>`<div class="step"><b>${t}</b><small>${s}</small></div>`;
@@ -289,7 +293,7 @@ function info(){
   if(sel.t==='apt'){
     const {h:H,cab,spl,tr}=pathHome(sel.id), st=stOf(sel.id), cp=coup(H.fiber), o=pos96(H.pmout), i=pos96(H.pmin);
     h=`<div class="row1"><span class="ttl">Căn hộ ${H.code}</span><span class="tag" style="background:${ST_COL[st]}">${st}</span>
-      <span class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</span></div>
+      ${srcUrl?'<span class="muted" style="margin-left:auto">Trạng thái lấy từ Google Sheets (chỉ xem)</span>':`<span class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</span>`}</div>
     <div class="steps">
     ${step('ONU căn hộ','tầng '+H.floor+' · box '+pad(H.apt))}
     ${step('Cáp 1FO → '+cab.id+' (tầng '+cab.floor+')','splitter 1:16 '+spl.id+' · cổng '+H.port+'/16')}
@@ -341,7 +345,30 @@ $('#csvcopy').onclick=()=>{const ta=$('#csvta');ta.select();let ok=false;try{nav
 $('#csvimp').onclick=()=>{const n=csvImport($('#csvta').value);$('#csvmsg').textContent='Đã nhập '+n+' căn hộ.'};
 $('#imp').onclick=()=>$('#file').click();
 $('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{const n=csvImport(t);$('#csvta').value=csvText();$('#csvmsg').textContent='Đã nhập '+n+' căn hộ từ tệp.';$('#csvbox').hidden=false})};
-fit();refresh();
+function parseCSV(t){t=t.replace(/^\ufeff/,'');const rows=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}else if(ch==='"')q=true;else if(ch===','||ch==='\t'){row.push(f);f=''}else if(ch==='\n'){row.push(f);rows.push(row);row=[];f=''}else if(ch!=='\r')f+=ch}row.push(f);rows.push(row);return rows}
+function setSrcMsg(m){syncMsg=m;const e=$('#srcmsg');if(e)e.textContent=m}
+async function syncNow(){
+  if(!srcUrl)return;setSrcMsg('Đang đồng bộ…');
+  try{
+    const r=await fetch(srcUrl,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+    const rows=parseCSV(await r.text());if(!rows.length)throw new Error('tệp rỗng');
+    const hdr=rows[0].map(x=>x.trim().toLowerCase());
+    const ic=hdr.findIndex(x=>['mã căn hộ','ma can ho','code'].includes(x)),is=hdr.findIndex(x=>['trạng thái','trang thai','status'].includes(x));
+    if(ic<0||is<0)throw new Error('không thấy cột "Mã căn hộ" và "Trạng thái" ở dòng đầu');
+    const m={};let n=0,bad=0;
+    rows.slice(1).forEach(r=>{const c=(r[ic]||'').trim().toUpperCase(),v=(r[is]||'').trim();if(!homeBy[c])return;const st=STATUS.find(x=>x.toLowerCase()===v.toLowerCase());if(st){m[c]=st;n++}else if(v)bad++});
+    remote=m;try{localStorage.setItem('ftth_remote_v1',JSON.stringify(m))}catch(e){}
+    syncAt=new Date();setSrcMsg(`Đã đồng bộ ${n} căn hộ lúc ${syncAt.toTimeString().slice(0,5)}`+(bad?` (${bad} dòng có trạng thái lạ, bỏ qua)`:''));
+  }catch(e){setSrcMsg('Không đồng bộ được: '+e.message+(Object.keys(remote).length?' — đang dùng dữ liệu lưu lần trước':''))}
+  refresh();
+}
+function applySrcUi(){$('#syncbtn').hidden=!srcUrl;$('#srcurl').value=srcUrl}
+$('#srcsave').onclick=()=>{srcUrl=$('#srcurl').value.trim();try{localStorage.setItem('ftth_src_v1',srcUrl)}catch(e){}applySrcUi();if(srcUrl)syncNow();else refresh()};
+$('#srcclear').onclick=()=>{srcUrl='';remote={};try{localStorage.removeItem('ftth_src_v1');localStorage.removeItem('ftth_remote_v1')}catch(e){}$('#srcurl').value='';setSrcMsg('Đã gỡ nguồn, quay về trạng thái lưu trên máy.');applySrcUi();refresh()};
+$('#syncbtn').onclick=syncNow;
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&srcUrl&&(!syncAt||Date.now()-syncAt>60000))syncNow()});
+setInterval(()=>{if(srcUrl&&!document.hidden)syncNow()},300000);
+applySrcUi();fit();refresh();if(srcUrl)syncNow();
 </script>
 </body>
 </html>
