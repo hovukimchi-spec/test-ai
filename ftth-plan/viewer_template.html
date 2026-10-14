@@ -43,6 +43,9 @@ h2{font-size:13px;margin:0 0 8px;color:var(--navy);text-transform:uppercase;lett
 .pon{border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer;background:#fff}
 .pon.on{box-shadow:0 0 0 2px #000}.pon.dim{opacity:.3}
 .odfs{display:flex;flex-wrap:wrap;gap:14px}.odf{border:1px solid var(--line);border-radius:8px;padding:8px}.odf h4{margin:0 0 6px;font-size:12px}
+.odf96{display:grid;grid-template-columns:repeat(24,minmax(30px,1fr));gap:2px;overflow-x:auto}
+.c96{height:34px;border-radius:3px;font-size:8.5px;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222;min-width:30px}
+.c96.free{background:#f1f1f1!important;color:#aaa;cursor:default}.c96.in{font-weight:700;border:1px solid #000}.c96.on{outline:2px solid #000;position:relative;z-index:2}.c96.dim{opacity:.2}
 .trays{display:flex;gap:10px}.tray{display:grid;grid-template-columns:repeat(6,34px);gap:2px}.tray>div.t{grid-column:1/-1;font-size:10px;color:var(--mute)}
 .cp{height:30px;border-radius:3px;font-size:9px;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222}
 .cp.free{background:#f4f4f4!important;color:#aaa;cursor:default}.cp.on{outline:2px solid #000;position:relative;z-index:2}.cp.dim{opacity:.2}
@@ -92,7 +95,8 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;b
       <div class="towers" id="towers"></div>
     </div>
     <div class="card" style="margin-top:12px"><h2>Phòng máy (hầm B1) · 16 PON ↔ 16 splitter 1:4 (3 dùng + 1 dự phòng)</h2><div class="pm" id="pm"></div></div>
-    <div class="card" style="margin-top:12px"><h2>ODF 48FO · khay trái = Tháp A, khay phải = Tháp B (đếm từ dưới lên, từ trái qua)</h2><div class="odfs" id="odfs"></div></div>
+    <div class="card" style="margin-top:12px"><h2>ODF 96FO (cắm splitter 1:4) · 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải</h2><div class="odf96" id="odf96"></div>
+    <h2 style="margin-top:14px">ODF 48FO trục · khay trái = Tháp A, khay phải = Tháp B (đếm từ dưới lên, từ trái qua)</h2><div class="odfs" id="odfs"></div></div>
   </div>
   <div class="side">
     <div class="card" id="info"></div>
@@ -122,6 +126,7 @@ const cabCol=id=>hsl((cabIdx[id]*7)%17,17,76);
 const splCol=s=>{const sp=splBy[s];return `hsl(${Math.round((cabIdx[sp.cab]*7%17)*360/17)} 60% ${88-sp.idx*10}%)`};
 const pad=n=>String(n).padStart(2,'0');
 const coup=n=>[Math.floor((n-1)/6)+1,(n-1)%6+1];
+const pos96=p=>[Math.floor((p-1)/24)+1,(p-1)%24+1];
 
 // ---------- build static DOM ----------
 $('#codes').innerHTML=DATA.homes.map(h=>`<option value="${h.code}">`).join('');
@@ -148,7 +153,7 @@ $('#towers').innerHTML=buildTower('A')+buildTower('B');
 function buildPM(){
   let h='';
   for(let p=1;p<=DATA.nPon;p++){
-    h+=`<div class="pon" data-pon="${p}"><h4><span>PON-${pad(p)}</span><span class="muted">S4-${pad(p)} · 1:4</span></h4><div class="bar"><u></u></div>`;
+    h+=`<div class="pon" data-pon="${p}"><h4><span>PON-${pad(p)}</span><span class="muted">S4-${pad(p)} · vào P${DATA.inBase+p}</span></h4><div class="bar"><u></u></div>`;
     for(let o=1;o<=DATA.splPM;o++){
       const s=DATA.spls.find(x=>x.pmspl===p&&x.pmloc===o), g=(p-1)*DATA.splPM+o;
       h+=s?`<div class="out" data-spl="${s.id}"><b>${g}</b><i class="chip" style="background:${FHEX[(s.fiber-1)%6]}"></i>${s.trunk}/${pad(s.fiber)} → ${s.id.slice(3)}<em>${s.n}</em></div>`
@@ -168,7 +173,7 @@ function buildODF(){
       h+=`<div><div style="font-size:10px;color:var(--mute);margin-bottom:2px">Khay ${tr.tray} · Tháp ${tr.tower} · ${tid}</div><div class="tray">`;
       for(let r=4;r>=1;r--)for(let c=1;c<=6;c++){
         const n=(r-1)*6+c,s=DATA.spls.find(x=>x.trunk===tid&&x.fiber===n);
-        h+=s?`<div class="cp" data-spl="${s.id}" style="background:${TUBEHEX[r-1]}" title="${tid}/${n} → ${s.id} · PON-${pad(s.pon)}"><b>${n}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="cp free" title="${tid}/${n} dự phòng">${n}</div>`;
+        h+=s?`<div class="cp" data-spl="${s.id}" style="background:${TUBEHEX[r-1]}" title="${tid}/${n} → ${s.id} · PON-${pad(s.pon)} · P96#${s.pmout}"><b>${n}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="cp free" title="${tid}/${n} dự phòng">${n}</div>`;
       }
       h+='</div></div>';
     });
@@ -177,6 +182,17 @@ function buildODF(){
   $('#odfs').innerHTML=h;
 }
 buildODF();
+(function(){
+  let h='';
+  for(let r=4;r>=1;r--)for(let c=1;c<=24;c++){
+    const p=(r-1)*24+c;
+    if(p<=DATA.inBase){const pon=Math.floor((p-1)/4)+1,loc=(p-1)%4+1,s=DATA.spls.find(x=>x.pmspl===pon&&x.pmloc===loc);
+      h+=s?`<div class="c96" data-spl="${s.id}" style="background:${ponCol(pon)}" title="P${p} · PON-${pad(pon)} → ${s.id}"><b>${p}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="c96 free" title="P${p} dự phòng"><b>${p}</b>dp</div>`;
+    }else if(p<=DATA.inBase+DATA.nPon){const pon=p-DATA.inBase;h+=`<div class="c96 in" data-pon="${pon}" style="background:${ponCol(pon)}" title="P${p} · vào splitter S4-${pad(pon)} · OLT PON-${pad(pon)}"><b>${p}</b>IN·P${pad(pon)}</div>`}
+    else h+=`<div class="c96 free"><b>${p}</b></div>`;
+  }
+  $('#odf96').innerHTML=h;
+})();
 
 // ---------- scope / selection ----------
 function scopeOf(s){
@@ -209,6 +225,8 @@ function refresh(){
   document.querySelectorAll('.pon').forEach(el=>{const p=+el.dataset.pon;el.classList.toggle('dim',!!sc&&!ponOn.has(p));el.classList.toggle('on',sel&&sel.t==='pon'&&+sel.id===p);
     const n=DATA.homes.filter(h=>h.pon===p).length;el.querySelector('u').style.width=Math.min(100,n/(DATA.pmUsed*DATA.splCab)*100)+'%'});
   document.querySelectorAll('.out[data-spl]').forEach(el=>el.classList.toggle('on',splOn.has(el.dataset.spl)&&!!sc&&sc.size<=DATA.splCab));
+  document.querySelectorAll('.c96[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',!!sc&&sc.size<=DATA.splCab&&splOn.has(el.dataset.spl))});
+  document.querySelectorAll('.c96[data-pon]').forEach(el=>{const p=+el.dataset.pon;el.classList.toggle('dim',!!sc&&!ponOn.has(p));el.classList.toggle('on',!!sc&&ponOn.has(p)&&ponOn.size===1)});
   document.querySelectorAll('.cp[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',!!sc&&sc.size<=DATA.splCab&&splOn.has(el.dataset.spl))});
   legend();kpis();info();
 }
@@ -241,7 +259,7 @@ function info(){
     <li><b>ONU căn hộ</b> · tầng ${H.floor} căn ${pad(H.apt)}<small>Trạng thái: <span class="tag" style="background:${ST_COL[st]};color:#000">${st}</span></small></li>
     <li><b>Cáp 1FO → ${cab.id}</b> (tầng ${cab.floor})<small>Splitter 1:16 <b>${spl.id}</b> · cổng <b>${H.port}</b>/16</small></li>
     <li><b>Cáp trục ${tr.id} · sợi ${H.fiber}</b> <i class="chip" style="background:${FHEX[(H.fiber-1)%6]}"></i> ${fc}<small>Ống đệm ${Math.floor((H.fiber-1)/6)+1} ${tube} · dải 8FO của tủ: ${cab.fiber_from}-${cab.fiber_to}${cab.hub?' · tủ HUB':` · cáp nhánh 8FO xuống hub ${tr.cabs[tr.cabs.length-1]}`}</small></li>
-    <li><b>${tr.odf}</b> · khay <b>${tr.tray}</b> (tháp ${tr.tower})<small>hàng <b>${cp[0]}</b>, cột <b>${cp[1]}</b> (đếm từ dưới lên, từ trái qua) · sợi ${H.fiber}</small></li><li><b>Splitter 1:4 S4-${pad(H.pmspl)}</b><small>cổng ra <b>${H.pmout}</b> (1-64)</small></li>
+    <li><b>${tr.odf}</b> · khay <b>${tr.tray}</b> (tháp ${tr.tower})<small>hàng <b>${cp[0]}</b>, cột <b>${cp[1]}</b> (đếm từ dưới lên, từ trái qua) · sợi ${H.fiber}</small></li><li><b>ODF-96 cổng ra ${H.pmout}</b> (hàng ${pos96(H.pmout)[0]}, cột ${pos96(H.pmout)[1]})<small>dây nhảy tới ODF 48FO · đầu ra ${H.pmloc}/4 của splitter 1:4 S4-${pad(H.pmspl)}</small></li><li><b>ODF-96 cổng vào ${H.pmin}</b> (hàng ${pos96(H.pmin)[0]}, cột ${pos96(H.pmin)[1]})<small>đầu vào splitter 1:4 S4-${pad(H.pmspl)} · dây nhảy từ OLT</small></li>
     <li><b>OLT PON-${pad(H.pon)}</b><small>Ước tính suy hao ${DATA.budget.loss.toFixed(1)} dB · quỹ ${DATA.budget.total.toFixed(1)} dB · margin ${DATA.budget.margin.toFixed(1)} dB</small></li></ul>
     <div class="muted">Trạng thái căn hộ:</div><div class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</div>`;
   }else{
@@ -268,7 +286,7 @@ function info(){
 // ---------- events ----------
 function select(s){sel=s;fault=null;refresh()}
 document.addEventListener('click',e=>{
-  const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl],.cp[data-spl]'),p=e.target.closest('.pon');
+  const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl],.cp[data-spl],.c96[data-spl]'),p=e.target.closest('.pon,.c96[data-pon]');
   if(a)select({t:'apt',id:a.dataset.c});else if(c)select({t:'cab',id:c.dataset.cab});else if(t)select({t:'tr',id:t.dataset.tr});
   else if(o)select({t:'spl',id:o.dataset.spl});else if(p)select({t:'pon',id:p.dataset.pon});
 });
