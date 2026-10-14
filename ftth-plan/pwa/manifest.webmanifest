@@ -1,0 +1,30 @@
+{
+ "name": "FTTH Phố Đông – Sơ đồ phối quang",
+ "short_name": "FTTH Phố Đông",
+ "description": "Tra đường quang căn hộ, tủ, ODF, PON",
+ "start_url": "./index.html",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#0f1620",
+ "theme_color": "#1f3a5f",
+ "lang": "vi",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
