@@ -13,3 +13,7 @@ Xem sheet "Đối chiếu bản vẽ". Tháp B khớp 8/8; tháp A lệch 2 tủ
 
 ## Phòng máy (hầm B1)
 OLT PON-k → dây nhảy → ODF-96FO cổng 72+k (vào splitter 1:4) · 4 đầu ra splitter → ODF-96FO cổng 4k-3…4k (dùng 3, cổng 4 dự phòng) → dây nhảy → ODF-48FO trục (ODF-02 → ODF-08/09 → ODF-17/18, xếp từ thấp lên cao). ODF-96: 4 hàng × 24 cột, đếm từ dưới lên, trái qua phải.
+
+## Cập nhật: tách hạ tầng 2 tháp
+- Tháp A → PON 1-8, tháp B → PON 9-16 (mỗi PON 3 cổng 1:4, PON 8 và 16 dùng đủ 4 cổng). ODF-96 chia 2 nửa 4×12 (trái = A, phải = B): splitter k vào cổng 36+k (37-44), ra cổng 4k-3…4k.
+- Mỗi splitter 1:16 chỉ phục vụ 1 tầng (không dùng lệch tầng). TU-B2 (tầng 3/2/1) cần 5 splitter.

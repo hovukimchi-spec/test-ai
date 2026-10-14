@@ -31,7 +31,8 @@ DRAWING_ODF = {
 }
 TRUNK_FO = 24
 FO_PER_CABINET = 8
-CAB_SLOTS = 4          # vị trí splitter 1:16 tối đa trong tủ
+CAB_SLOTS = 4          # số vị trí splitter 1:16 chuẩn của tủ
+MAX_SPL = 5            # tối đa cho phép (cần tủ 5 vị trí) khi muốn mỗi splitter chỉ phục vụ 1 tầng
 SPL_CAB = 16
 SPL_PM = 4             # splitter 1:4 ở PM
 PM_USED = 3            # mỗi splitter 1:4: dùng 3 cổng, dự phòng cổng thứ 4
@@ -41,11 +42,11 @@ TUBE_COLORS = ['Xanh dương', 'Cam', 'Xanh lá', 'Nâu']                       
 FIBER_COLORS = ['Xanh dương', 'Cam', 'Xanh lá', 'Nâu', 'Xám', 'Trắng']      # 6 màu sợi / ống
 FIBER_HEX = ['#1f6fe5', '#f28c1e', '#2eaa4a', '#8a5a2b', '#8c959f', '#f5f5f5']
 TRAY_ROWS, TRAY_COLS = 4, 6
-# ODF 96FO ở PM (mặt cắm splitter 1:4): 4 hàng × 24 cột, đếm từ dưới lên, từ trái qua phải.
-# Splitter 1:4 thứ k: đầu vào -> cổng 72+k (nối OLT PON-k bằng dây nhảy); 4 đầu ra -> cổng 4k-3..4k (nối ODF 48FO trục bằng dây nhảy)
-ODF96_ROWS, ODF96_COLS = 4, 24
-OUT_N = N_PON * SPL_PM     # 64 cổng ra: 1-64
-IN_BASE = ODF96_COLS * 3   # 72 -> cổng vào = 72 + k (73-88, nằm hàng trên cùng)
+# ODF 96FO ở PM chia 2 nửa: TRÁI = tháp A, PHẢI = tháp B. Mỗi nửa 4 hàng × 12 cột = 48 cổng, đếm từ dưới lên, trái qua phải (mỗi nửa đếm lại từ 1).
+# Splitter 1:4 thứ k của mỗi nửa (k = 1..8): đầu vào -> cổng 36+k (37-44, hàng trên cùng, nối OLT bằng dây nhảy); 4 đầu ra -> cổng 4k-3..4k (nối ODF 48FO bằng dây nhảy)
+ODF96_ROWS, ODF96_COLS = 4, 12
+IN_LOCAL = ODF96_COLS * 3    # 36
+PON_PER_TOWER = 8            # PON 1-8 = tháp A, PON 9-16 = tháp B
 # -----------------------------------------------------------------------------
 
 def fidx(f):  # chỉ số tầng từ dưới lên (12A = 13, bỏ qua tầng 13)
@@ -55,7 +56,7 @@ def fiber_color(n): return FIBER_COLORS[(n - 1) % 6]
 def fiber_tube(n): return (n - 1) // 6 + 1
 def tube_color(n): return TUBE_COLORS[fiber_tube(n) - 1]
 def pos96(p):
-    """Vị trí cổng p trên ODF 96FO: (hàng từ dưới, cột từ trái)."""
+    """Vị trí cổng p (1-48) trong một nửa ODF 96FO: (hàng từ dưới, cột từ trái)."""
     return (p - 1) // ODF96_COLS + 1, (p - 1) % ODF96_COLS + 1
 
 def coupler(n):
@@ -75,37 +76,56 @@ def build():
             odf, tray = odf_of[tid]
             trunks.append(dict(id=tid, tower=t, hub=grp[-1], cabs=[f'TU-{t}{f}' for f in grp], fo=TRUNK_FO, odf=odf, tray=tray))
             for slot, cf in enumerate(reversed(grp)):      # từ dưới lên: tủ hub = sợi 1-8
-                hl = [(f, a) for f in reversed(zones[cf]) for a in range(1, HOMES_PER_FLOOR[t][f] + 1)]
-                n = len(hl)
-                nspl = math.ceil(n / SPL_CAB)
-                assert nspl <= CAB_SLOTS and nspl <= FO_PER_CABINET, (t, cf, n)
+                n = sum(HOMES_PER_FLOOR[t][f] for f in zones[cf])
+                # Mỗi splitter chỉ phục vụ 1 tầng (cáp 1FO tới căn hộ đã đặt cố định theo tầng); tầng >16 hộ chiếm nhiều splitter.
+                # Nếu cách này vượt số vị trí splitter của tủ thì đổ đầy liên tiếp từ dưới lên.
+                aligned = sum(math.ceil(HOMES_PER_FLOOR[t][f] / SPL_CAB) for f in zones[cf])
+                groups = []   # mỗi phần tử = danh sách (tầng, căn) của 1 splitter
+                if aligned <= MAX_SPL:
+                    for f in reversed(zones[cf]):
+                        hl_f = [(f, a) for a in range(1, HOMES_PER_FLOOR[t][f] + 1)]
+                        k_ = math.ceil(len(hl_f) / SPL_CAB); base_, extra_ = divmod(len(hl_f), k_); pos_ = 0   # chia đều cho các splitter của tầng
+                        for j in range(k_):
+                            sz = base_ + (1 if j < extra_ else 0); groups.append(hl_f[pos_:pos_ + sz]); pos_ += sz
+                    mode = 'tầng'
+                else:
+                    hl = [(f, a) for f in reversed(zones[cf]) for a in range(1, HOMES_PER_FLOOR[t][f] + 1)]
+                    for i in range(0, len(hl), SPL_CAB): groups.append(hl[i:i + SPL_CAB])
+                    mode = 'liên tiếp'
+                nspl = len(groups)
+                assert nspl <= MAX_SPL and nspl <= FO_PER_CABINET, (t, cf, n)
                 cabinets.append(dict(id=f'TU-{t}{cf}', tower=t, floor=cf, zone=zones[cf], trunk=tid, slot=slot + 1, nspl=nspl, homes=n,
-                                     fiber_from=FO_PER_CABINET * slot + 1, fiber_to=FO_PER_CABINET * (slot + 1), hub=(cf == grp[-1])))
-                pos = 0
-                for s in range(nspl):                       # đổ đầy từng splitter 16 cổng, từ dưới lên
-                    cnt = min(SPL_CAB, n - pos)
-                    spls.append(dict(id=f'TU-{t}{cf}/S{s + 1}', cab=f'TU-{t}{cf}', idx=s + 1, fiber=FO_PER_CABINET * slot + s + 1,
-                                     trunk=tid, n=cnt, odf=odf, tray=tray))
-                    for k, (f, a) in enumerate(hl[pos:pos + cnt]):
-                        homes.append(dict(code=f'{t}-{f}-{a:02d}', tower=t, floor=f, apt=a, cab=f'TU-{t}{cf}', spl=f'TU-{t}{cf}/S{s + 1}', port=k + 1))
-                    pos += cnt
-    # thứ tự cấp cổng PM: theo ODF từ dưới lên (02 -> 08/09 -> 17/18), khay trái (A) rồi phải (B), sợi tăng dần
-    order = []
-    for name, ta, tb in ODFS:
-        for tid in (ta, tb):
-            order += sorted([s for s in spls if s['trunk'] == tid], key=lambda s: s['fiber'])
-    n = 0
-    for sp in order:
-        pon = n // PM_USED + 1
-        loc = n % PM_USED + 1
-        sp.update(pon=pon, pmspl=pon, pmloc=loc, pmout=(pon - 1) * SPL_PM + loc, pmin=IN_BASE + pon)
-        n += 1
-    assert n <= N_PON * PM_USED, f'Cần {n} cổng 1:4, PM chỉ có {N_PON * PM_USED}'
+                                     fiber_from=FO_PER_CABINET * slot + 1, fiber_to=FO_PER_CABINET * (slot + 1), hub=(cf == grp[-1]), split_mode=mode, slots=max(CAB_SLOTS, nspl)))
+                for si, g in enumerate(groups):
+                    spls.append(dict(id=f'TU-{t}{cf}/S{si + 1}', cab=f'TU-{t}{cf}', idx=si + 1, fiber=FO_PER_CABINET * slot + si + 1,
+                                     trunk=tid, n=len(g), odf=odf, tray=tray, floors=sorted({f for f, _ in g}, key=FLOORS.index)))
+                    for k, (f, a) in enumerate(g):
+                        homes.append(dict(code=f'{t}-{f}-{a:02d}', tower=t, floor=f, apt=a, cab=f'TU-{t}{cf}', spl=f'TU-{t}{cf}/S{si + 1}', port=k + 1))
+    # Cấp cổng PM tách riêng từng tháp: tháp A -> PON 1-8, tháp B -> PON 9-16; theo trục từ thấp lên cao (TR-x1 -> x3), sợi tăng dần.
+    # Mỗi PON dùng 3 cổng 1:4; nếu tháp cần nhiều hơn 8x3 thì dùng thêm cổng thứ 4 của các PON cuối.
+    for ti, t in enumerate('AB'):
+        order = sorted([s_ for s_ in spls if s_['cab'][3] == t], key=lambda s_: (s_['trunk'], s_['fiber']))
+        cap = PON_PER_TOWER
+        extra = max(0, len(order) - cap * PM_USED)
+        assert extra <= cap, f'Tháp {t} cần {len(order)} cổng, tối đa {cap * SPL_PM}'
+        counts = [PM_USED] * cap
+        for i in range(extra): counts[cap - 1 - i] += 1
+        if len(order) < cap * PM_USED:
+            rest = len(order); counts = []
+            for _ in range(cap):
+                c = min(PM_USED, rest); counts.append(c); rest -= c
+        pos = 0
+        for k, c in enumerate(counts, 1):
+            for loc in range(1, c + 1):
+                sp = order[pos]; pos += 1
+                pon = ti * cap + k
+                sp.update(pon=pon, pmspl=pon, pmloc=loc, pmhalf=t, pmk=k, pmout=(k - 1) * SPL_PM + loc, pmin=IN_LOCAL + k)
+        assert pos == len(order)
     spls.sort(key=lambda s: (s['cab'][3], FLOORS.index(s['cab'][4:]), s['idx']))
     sp_by = {s['id']: s for s in spls}
     for h in homes:
         s = sp_by[h['spl']]
-        h.update({k: s[k] for k in ('trunk', 'fiber', 'pmspl', 'pmloc', 'pmout', 'pmin', 'pon', 'odf', 'tray')})
+        h.update({k: s[k] for k in ('trunk', 'fiber', 'pmspl', 'pmloc', 'pmhalf', 'pmk', 'pmout', 'pmin', 'pon', 'odf', 'tray')})
     homes.sort(key=lambda h: (h['tower'], FLOORS.index(h['floor']), h['apt']))
     cabinets.sort(key=lambda c: (c['tower'], FLOORS.index(c['floor'])))
     return dict(cabinets=cabinets, trunks=trunks, spls=spls, homes=homes)
