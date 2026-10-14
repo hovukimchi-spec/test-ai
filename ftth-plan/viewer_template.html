@@ -42,6 +42,10 @@ h2{font-size:13px;margin:0 0 8px;color:var(--navy);text-transform:uppercase;lett
 .pm{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
 .pon{border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer;background:#fff}
 .pon.on{box-shadow:0 0 0 2px #000}.pon.dim{opacity:.3}
+.odfs{display:flex;flex-wrap:wrap;gap:14px}.odf{border:1px solid var(--line);border-radius:8px;padding:8px}.odf h4{margin:0 0 6px;font-size:12px}
+.trays{display:flex;gap:10px}.tray{display:grid;grid-template-columns:repeat(6,34px);gap:2px}.tray>div.t{grid-column:1/-1;font-size:10px;color:var(--mute)}
+.cp{height:30px;border-radius:3px;font-size:9px;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0002;color:#222}
+.cp.free{background:#f4f4f4!important;color:#aaa;cursor:default}.cp.on{outline:2px solid #000;position:relative;z-index:2}.cp.dim{opacity:.2}
 .pon h4{margin:0 0 3px;font-size:12px;display:flex;justify-content:space-between}
 .bar{height:6px;background:#e8ebf1;border-radius:3px;overflow:hidden;margin-bottom:4px}.bar u{display:block;height:100%;background:var(--blue)}
 .out{display:flex;gap:5px;align-items:center;font-size:10.5px;padding:1px 3px;border-radius:4px;color:#333}
@@ -87,12 +91,13 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;b
       <div class="legend" id="legend"></div>
       <div class="towers" id="towers"></div>
     </div>
-    <div class="card" style="margin-top:12px"><h2>Phòng máy · 16 PON ↔ 16 splitter 1:4 ↔ ODF</h2><div class="pm" id="pm"></div></div>
+    <div class="card" style="margin-top:12px"><h2>Phòng máy (hầm B1) · 16 PON ↔ 16 splitter 1:4 (3 dùng + 1 dự phòng)</h2><div class="pm" id="pm"></div></div>
+    <div class="card" style="margin-top:12px"><h2>ODF 48FO · khay trái = Tháp A, khay phải = Tháp B (đếm từ dưới lên, từ trái qua)</h2><div class="odfs" id="odfs"></div></div>
   </div>
   <div class="side">
     <div class="card" id="info"></div>
     <div class="card" id="help"><h2>Cách đọc</h2>
-      <div class="muted">Mỗi ô nhỏ là 1 căn hộ (14 căn/tầng). Dải dọc màu <b style="color:#2f6fde">xanh</b>/<b style="color:#e8710a">cam</b>/<b style="color:#1e9e5a">lục</b> là 3 cáp trục 24FO của mỗi tháp, chấm tròn = tủ trên trục, chấm đặc = tủ hub (nơi cáp trục xuống Phòng Máy).<br><br>
+      <div class="muted">Mỗi ô nhỏ là 1 BOX/căn hộ (số lượng theo bản vẽ, 9–27/tầng). Dải dọc màu <b style="color:#2f6fde">xanh</b>/<b style="color:#e8710a">cam</b>/<b style="color:#1e9e5a">lục</b> là 3 cáp trục 24FO của mỗi tháp, chấm tròn = tủ trên trục, chấm đặc = tủ hub (nơi cáp trục xuống Phòng Máy).<br><br>
       Bấm căn hộ để xem toàn bộ đường quang tới PON. Bấm tủ / trục / PON để xem phạm vi ảnh hưởng và dùng <b>Giả lập sự cố</b>.</div></div>
   </div>
 </main>
@@ -100,7 +105,7 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:3px 5px;b
 const DATA=/*DATA*/null;
 const FLOORS=DATA.floors, STATUS=['Chưa lắp','Đã đấu nối','Hoạt động','Sự cố'];
 const ST_COL={'Chưa lắp':'#e4e7ec','Đã đấu nối':'#f9d46b','Hoạt động':'#5cc28a','Sự cố':'#ef6b5f'};
-const FCOL=DATA.fiberColors, FHEX=DATA.fiberHex, TCOL=['#2f6fde','#e8710a','#1e9e5a'];
+const FCOL=DATA.fiberColors, FHEX=DATA.fiberHex, TUBE=DATA.tubeColors, TUBEHEX=['#cfe0fb','#fde3c6','#cdefd6','#e6d5c6'], TCOL=['#2f6fde','#e8710a','#1e9e5a'];
 const $=s=>document.querySelector(s);
 const cabBy=Object.fromEntries(DATA.cabinets.map(c=>[c.id,c]));
 const splBy=Object.fromEntries(DATA.spls.map(s=>[s.id,s]));
@@ -116,6 +121,7 @@ const cabIdx={};DATA.cabinets.forEach((c,i)=>cabIdx[c.id]=i);
 const cabCol=id=>hsl((cabIdx[id]*7)%17,17,76);
 const splCol=s=>{const sp=splBy[s];return `hsl(${Math.round((cabIdx[sp.cab]*7%17)*360/17)} 60% ${88-sp.idx*10}%)`};
 const pad=n=>String(n).padStart(2,'0');
+const coup=n=>[Math.floor((n-1)/6)+1,(n-1)%6+1];
 
 // ---------- build static DOM ----------
 $('#codes').innerHTML=DATA.homes.map(h=>`<option value="${h.code}">`).join('');
@@ -143,15 +149,33 @@ function buildPM(){
   for(let p=1;p<=DATA.nPon;p++){
     h+=`<div class="pon" data-pon="${p}"><h4><span>PON-${pad(p)}</span><span class="muted">S4-${pad(p)} · 1:4</span></h4><div class="bar"><u></u></div>`;
     for(let o=1;o<=DATA.splPM;o++){
-      const s=DATA.spls.find(x=>x.pmspl===p&&x.pmout===o);
-      h+=s?`<div class="out" data-spl="${s.id}"><i class="chip" style="background:${FHEX[(s.fiber-1)%12]}"></i>${s.trunk}/${pad(s.fiber)} → ${s.id.slice(3)}<em>${s.n}</em></div>`
-          :`<div class="out muted">cổng ${o}: dự phòng</div>`;
+      const s=DATA.spls.find(x=>x.pmspl===p&&x.pmloc===o), g=(p-1)*DATA.splPM+o;
+      h+=s?`<div class="out" data-spl="${s.id}"><b>${g}</b><i class="chip" style="background:${FHEX[(s.fiber-1)%6]}"></i>${s.trunk}/${pad(s.fiber)} → ${s.id.slice(3)}<em>${s.n}</em></div>`
+          :`<div class="out muted"><b>${g}</b> dự phòng PON</div>`;
     }
     h+='</div>';
   }
   $('#pm').innerHTML=h;
 }
 buildPM();
+function buildODF(){
+  let h='';
+  DATA.odfs.forEach(o=>{
+    h+=`<div class="odf"><h4>${o.name} · 48FO</h4><div class="trays">`;
+    o.trunks.forEach(tid=>{
+      const tr=trBy[tid];
+      h+=`<div><div style="font-size:10px;color:var(--mute);margin-bottom:2px">Khay ${tr.tray} · Tháp ${tr.tower} · ${tid}</div><div class="tray">`;
+      for(let r=4;r>=1;r--)for(let c=1;c<=6;c++){
+        const n=(r-1)*6+c,s=DATA.spls.find(x=>x.trunk===tid&&x.fiber===n);
+        h+=s?`<div class="cp" data-spl="${s.id}" style="background:${TUBEHEX[r-1]}" title="${tid}/${n} → ${s.id} · PON-${pad(s.pon)}"><b>${n}</b>${s.id.replace('TU-','').replace('/S','·')}</div>`:`<div class="cp free" title="${tid}/${n} dự phòng">${n}</div>`;
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  });
+  $('#odfs').innerHTML=h;
+}
+buildODF();
 
 // ---------- scope / selection ----------
 function scopeOf(s){
@@ -182,8 +206,9 @@ function refresh(){
   document.querySelectorAll('[id^=cab-]').forEach(el=>{const id=el.dataset.cab;if(el.classList.contains('sub'))return;el.style.background=cabCol(id);el.classList.toggle('dim',!!sc&&!cabOn.has(id));el.classList.toggle('on',sel&&sel.t==='cab'&&sel.id===id)});
   document.querySelectorAll('.strip').forEach(el=>{el.classList.toggle('dim',!!sc&&!trOn.has(el.dataset.tr));el.classList.toggle('on',sel&&sel.t==='tr'&&sel.id===el.dataset.tr)});
   document.querySelectorAll('.pon').forEach(el=>{const p=+el.dataset.pon;el.classList.toggle('dim',!!sc&&!ponOn.has(p));el.classList.toggle('on',sel&&sel.t==='pon'&&+sel.id===p);
-    const n=DATA.homes.filter(h=>h.pon===p).length;el.querySelector('u').style.width=Math.min(100,n/(DATA.splPM*DATA.splCab)*100)+'%'});
+    const n=DATA.homes.filter(h=>h.pon===p).length;el.querySelector('u').style.width=Math.min(100,n/(DATA.pmUsed*DATA.splCab)*100)+'%'});
   document.querySelectorAll('.out[data-spl]').forEach(el=>el.classList.toggle('on',splOn.has(el.dataset.spl)&&!!sc&&sc.size<=DATA.splCab));
+  document.querySelectorAll('.cp[data-spl]').forEach(el=>{el.classList.toggle('dim',!!sc&&!splOn.has(el.dataset.spl));el.classList.toggle('on',!!sc&&sc.size<=DATA.splCab&&splOn.has(el.dataset.spl))});
   legend();kpis();info();
 }
 function legend(){
@@ -199,7 +224,7 @@ function kpis(){
   const act=DATA.homes.filter(h=>stOf(h.code)==='Hoạt động');
   const ponUse=Array.from({length:DATA.nPon},(_,i)=>DATA.homes.filter(h=>h.pon===i+1).length);
   const k=[[DATA.homes.length,'căn hộ'],[cnt['Hoạt động'],'đang hoạt động'],[cnt['Đã đấu nối'],'đã đấu nối'],[cnt['Sự cố'],'sự cố'],
-    [DATA.cabinets.length,'tủ phối quang'],[DATA.spls.length,'splitter 1:16'],[Math.max(...ponUse)+'/64','PON tải cao nhất'],[DATA.budget.margin.toFixed(1)+' dB','margin quang']];
+    [DATA.cabinets.length,'tủ phối quang'],[DATA.spls.length,'splitter 1:16'],[Math.max(...ponUse)+'/48','PON tải cao nhất'],[DATA.budget.margin.toFixed(1)+' dB','margin quang']];
   $('#kpis').innerHTML=k.map(([a,b])=>`<div class="kpi"><b>${a}</b><span>${b}</span></div>`).join('');
 }
 function info(){
@@ -208,14 +233,14 @@ function info(){
   let h='';
   if(sel.t==='apt'){
     const {h:H,cab,spl,tr}=pathHome(sel.id);
-    const fc=FCOL[(H.fiber-1)%12],tube=H.fiber>12?'Cam':'Xanh dương';
+    const fc=FCOL[(H.fiber-1)%6],tube=TUBE[Math.floor((H.fiber-1)/6)],cp=coup(H.fiber);
     const st=stOf(sel.id);
     h=`<h2>Căn hộ ${H.code}</h2>
     <ul class="path">
     <li><b>ONU căn hộ</b> · tầng ${H.floor} căn ${pad(H.apt)}<small>Trạng thái: <span class="tag" style="background:${ST_COL[st]};color:#000">${st}</span></small></li>
     <li><b>Cáp 1FO → ${cab.id}</b> (tầng ${cab.floor})<small>Splitter 1:16 <b>${spl.id}</b> · cổng <b>${H.port}</b>/16</small></li>
-    <li><b>Cáp trục ${tr.id} · sợi ${H.fiber}</b> <i class="chip" style="background:${FHEX[(H.fiber-1)%12]}"></i> ${fc}<small>Ống đệm ${tube} · dải 8FO của tủ: ${cab.fiber_from}-${cab.fiber_to}${cab.hub?' · tủ HUB':` · cáp nhánh 8FO xuống hub ${tr.cabs[tr.cabs.length-1]}`}</small></li>
-    <li><b>ODF Phòng Máy</b> cổng ${tr.id}/${pad(H.fiber)}<small>nhảy sang splitter 1:4 <b>S4-${pad(H.pmspl)}</b> cổng ra <b>${H.pmout}</b></small></li>
+    <li><b>Cáp trục ${tr.id} · sợi ${H.fiber}</b> <i class="chip" style="background:${FHEX[(H.fiber-1)%6]}"></i> ${fc}<small>Ống đệm ${Math.floor((H.fiber-1)/6)+1} ${tube} · dải 8FO của tủ: ${cab.fiber_from}-${cab.fiber_to}${cab.hub?' · tủ HUB':` · cáp nhánh 8FO xuống hub ${tr.cabs[tr.cabs.length-1]}`}</small></li>
+    <li><b>${tr.odf}</b> · khay <b>${tr.tray}</b> (tháp ${tr.tower})<small>hàng <b>${cp[0]}</b>, cột <b>${cp[1]}</b> (đếm từ dưới lên, từ trái qua) · sợi ${H.fiber}</small></li><li><b>Splitter 1:4 S4-${pad(H.pmspl)}</b><small>cổng ra <b>${H.pmout}</b> (1-64)</small></li>
     <li><b>OLT PON-${pad(H.pon)}</b><small>Ước tính suy hao ${DATA.budget.loss.toFixed(1)} dB · quỹ ${DATA.budget.total.toFixed(1)} dB · margin ${DATA.budget.margin.toFixed(1)} dB</small></li></ul>
     <div class="muted">Trạng thái căn hộ:</div><div class="st">${STATUS.map(s=>`<button data-st="${s}" class="${s===st?'on':''}">${s}</button>`).join('')}</div>`;
   }else{
@@ -225,15 +250,15 @@ function info(){
       DATA.spls.filter(s=>s.cab===c.id).map(s=>`<tr><td>${s.id.slice(-2)}</td><td>sợi ${s.fiber} · PON-${pad(s.pon)} · ${s.n}/16 hộ</td></tr>`).join('');}
     if(sel.t==='tr'){const t=trBy[sel.id];title='Cáp trục '+t.id+' (24FO)';
       rows=`<tr><td>Tủ</td><td>${t.cabs.join(', ')}</td></tr><tr><td>Hub</td><td>tầng ${t.hub}</td></tr><tr><td>Sợi dùng</td><td>${DATA.spls.filter(s=>s.trunk===t.id).length}/24</td></tr>`;}
-    if(sel.t==='spl'){const s=splBy[sel.id];title='Splitter '+s.id;rows=`<tr><td>Sợi trục</td><td>${s.trunk}/${s.fiber} (${FCOL[(s.fiber-1)%12]})</td></tr><tr><td>PM</td><td>S4-${pad(s.pmspl)} cổng ${s.pmout} · PON-${pad(s.pon)}</td></tr><tr><td>Tải</td><td>${s.n}/16 cổng</td></tr>`;}
-    if(sel.t==='pon'){title='PON-'+pad(sel.id);rows=DATA.spls.filter(s=>s.pon===+sel.id).map(s=>`<tr><td>${s.trunk}/${pad(s.fiber)}</td><td>${s.id} · ${s.n} hộ</td></tr>`).join('')+`<tr><td>Tải</td><td>${sc.size}/64 (${Math.round(sc.size/64*100)}%)</td></tr>`;}
+    if(sel.t==='spl'){const s=splBy[sel.id];title='Splitter '+s.id;rows=`<tr><td>Sợi trục</td><td>${s.trunk}/${s.fiber} (${FCOL[(s.fiber-1)%6]})</td></tr><tr><td>PM</td><td>S4-${pad(s.pmspl)} cổng ${s.pmout} · PON-${pad(s.pon)}</td></tr><tr><td>Tải</td><td>${s.n}/16 cổng</td></tr>`;}
+    if(sel.t==='pon'){title='PON-'+pad(sel.id);rows=DATA.spls.filter(s=>s.pon===+sel.id).map(s=>`<tr><td>${s.trunk}/${pad(s.fiber)}</td><td>${s.id} · ${s.n} hộ</td></tr>`).join('')+`<tr><td>Tải</td><td>${sc.size}/48 (${Math.round(sc.size/48*100)}%) · +1 cổng dự phòng</td></tr>`;}
     const act=[...sc].filter(c=>stOf(c)==='Hoạt động').length;
     h=`<h2>${title}</h2><table>${rows}</table><div style="margin-top:8px"><b>${sc.size}</b> căn hộ trong phạm vi · <b>${act}</b> đang hoạt động</div>`;
   }
   const sc=scopeOf(sel);
   h+=`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn2 red" id="simBtn">${fault?'Tắt giả lập':'Giả lập sự cố tại đây'}</button></div>`;
   if(fault){const cabs=new Set(),pons=new Set();fault.forEach(c=>{cabs.add(homeBy[c].cab);pons.add(homeBy[c].pon)});
-    h=`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON<br>Gợi ý kiểm tra: ${sel.t==='apt'?'ONU / cáp 1FO / cổng splitter':sel.t==='spl'?'sợi trục, adapter ODF, patch cord 1:4':sel.t==='cab'?'cáp nhánh 8FO, mối hàn tại hub':sel.t==='tr'?'cáp trục 24FO, ODF PM':'SFP/cổng OLT, splitter 1:4'}</div>`+h;}
+    h=`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON<br>Gợi ý kiểm tra: ${sel.t==='apt'?'ONU / cáp 1FO / cổng splitter':sel.t==='spl'?'sợi trục, coupler ODF, patch cord 1:4':sel.t==='cab'?'cáp nhánh 8FO, mối hàn tại hub':sel.t==='tr'?'cáp trục 24FO, ODF PM':'SFP/cổng OLT, splitter 1:4'}</div>`+h;}
   el.innerHTML=h;
   const b=$('#simBtn');if(b)b.onclick=()=>{fault=fault?null:scopeOf(sel);refresh()};
   el.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{status[sel.id]=x.dataset.st;saveSt();refresh()});
@@ -242,7 +267,7 @@ function info(){
 // ---------- events ----------
 function select(s){sel=s;fault=null;refresh()}
 document.addEventListener('click',e=>{
-  const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl]'),p=e.target.closest('.pon');
+  const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl],.cp[data-spl]'),p=e.target.closest('.pon');
   if(a)select({t:'apt',id:a.dataset.c});else if(c)select({t:'cab',id:c.dataset.cab});else if(t)select({t:'tr',id:t.dataset.tr});
   else if(o)select({t:'spl',id:o.dataset.spl});else if(p)select({t:'pon',id:p.dataset.pon});
 });

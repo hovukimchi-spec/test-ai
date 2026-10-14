@@ -6,4 +6,4 @@
 | `ftth_viewer.html` | Công cụ xem trực quan (mở bằng trình duyệt, chạy offline): tìm căn hộ → đường quang tới PON, giả lập sự cố, tô màu theo PON/tủ/splitter/trạng thái |
 | `model.py` | Cấu hình duy nhất (số hộ/tầng, tầng đặt tủ, nhóm trục, số splitter). Sửa rồi chạy `python3 build_xlsx.py && python3 build_html.py` |
 
-Kiến trúc: ONU –1FO– splitter 1:16 (tủ) – cáp trục 24FO (3 tủ × 8FO) – ODF PM – splitter 1:4 – PON ⇒ 1:64/PON.
+Kiến trúc: ONU –1FO– splitter 1:16 (tủ) – cáp trục 24FO (4 ống × 6 sợi; 8FO/tủ) – ODF 48FO (hầm B1) – splitter 1:4 (dùng 3, dự phòng 1) – PON. Số căn/tầng lấy từ bản vẽ (`homes_from_drawing.json`), tổng 676 căn, 48 splitter 1:16.
