@@ -56,3 +56,11 @@
 - Nguồn chuẩn khi sai lệch: BBNT (đo), file chiều dài, hay ODF? Đề xuất: BBNT cho chiều dài đoạn, file chiều dài cho từng cáp, ODF cho cổng.
 - Bảo vệ ring dùng giao thức gì (ERPS/MPLS)? Các cặp sợi ring là 2FO/đoạn đúng không?
 - Tham số quỹ suy hao (dB/km, mối hàn, đầu nối) và quy ước màu sợi/ống (A–E trong sơ đồ MX nghĩa là gì: ring hay nhóm dịch vụ?).
+
+## 6. Quy ước đã chốt (từ người dùng)
+- Có đúng **8 ring**. Ring = các sợi cáp vật lý. Bảo vệ **1+1**: mỗi CSG nhận tín hiệu từ 2 trạm cấp 1 qua **2 cặp 2FO** (hai hướng).
+- Ràng buộc vật lý: hai cặp FO của cùng một CSG **không đi chung sợi/cáp, chung lề, chung đường** (path diversity). Mô hình cần kiểm tra ràng buộc này.
+- Nhãn trong sơ đồ MX: **cùng nhãn = cùng nhóm hàn với nhau**.
+  - Nhãn A xuất hiện 8 sợi ở mỗi đầu cáp: hàn theo thứ tự, A1↔A1, A2↔A2...
+  - Cùng nhãn ở hai đầu cáp khác số sợi (vd 12FO có 2 sợi B, 6FO có 2 sợi B): sợi B nhỏ hàn sợi B nhỏ theo thứ tự tăng dần.
+  - Số sợi cùng nhãn hai đầu khác nhau → cảnh báo.
