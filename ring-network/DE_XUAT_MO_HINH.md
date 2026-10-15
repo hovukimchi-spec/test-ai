@@ -28,10 +28,10 @@
 4. **Đoạn 34 (NBE12→HNB059)**: core #1 1,664 dB vs core #2 3,069 dB (lệch gần gấp đôi). **Đoạn 9**: 0,227 vs 0,604 dB.
 5. Ngưỡng "cho phép" 17 dB / 12,1 dB không nhất quán: đoạn 20 (9,63 km) và 16 (8,45 km) dùng 12,1; các đoạn >10 km dùng 17. Nên tính từ quỹ suy hao thay vì gõ tay.
 6. Đoạn 35 (HNB048→NBE22) dài 17,69 km, đoạn 33 dài 16,34 km: đây là các đoạn đóng vòng dài nhất, quyết định suy hao ring khi đứt/đảo hướng.
-7. Số liệu độ dài cáp theo mét (file chiều dài) khác BBNT (vd HNB066–HNB016: 500/600 m vs 0,456–0,501 km). Chưa rõ nguồn nào là chuẩn.
-8. ODF AGG ghi nhiều giá trị OTDR theo ngày (10–11/2020) lệch nhau, nhiều cổng ghi "hư" (vd cổng 17, 23 bên NB; cổng 11 bên NVT): cần xác nhận cổng hỏng còn dùng được không.
+7. Số liệu độ dài cáp theo mét (file chiều dài) khác BBNT (vd HNB066–HNB016: Sheet1 ghi 500 m, BBNT 0,456 km HĐ / 0,501 km đo; HNB038–HNB016 ghi 600 m vs 0,517/0,618 km). Chưa rõ nguồn nào là chuẩn.
+8. ODF AGG ghi nhiều giá trị OTDR theo ngày (10–11/2020) lệch nhau, một số ô ghi "hư"/"Hư" ở ODF-01 bên Nguyễn Bình: cần xác nhận cổng hỏng còn dùng được không (chưa đối chiếu từng cổng).
 9. ODF CSG: nhiều chỗ ghi "To HNB027" ở cả HNB031 và HNB020 (copy-paste), HNB014/054/006/091/048/060/059 chưa ghi đầu cáp.
-10. Tên MX trùng/nhầm: `MX_NVT_03A` xuất hiện 2 lần cùng toạ độ; `MX_HTP-03B` lặp 3 lần; một số sơ đồ ghi "chỉ số" trống.
+10. Tên MX trùng/nhầm: `MX_NVT_03A` xuất hiện 2 lần cùng toạ độ (nghi một cái là 03B); `MX_HTP-03B` lặp ở nhiều vị trí trong sơ đồ; một số sơ đồ ghi "chỉ số" trống.
 
 ## 3. Mô hình dữ liệu đề xuất (một file `model.py`, mọi thứ đọc từ đây)
 - **Node**: id (AGG-HCMNBE12, CSG-HNB066...), loại (AGG/CSG/MX), toạ độ, địa chỉ.
