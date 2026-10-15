@@ -115,4 +115,5 @@ Cách hiểu đúng: "1 sợi cáp" = **một cáp vật lý gồm nhiều core*
 - **R6**: HNB020→HNB031 cũng đi hai lề.
 - `MX_NVT_03A`/`03B` là hai măng xông ở hai bên lề, qua đó cáp chuyển từ lề này sang lề kia (tên trùng trong file MX là do ghi nhầm).
 - Hệ quả: đây chính là điều kiện vật lý "hai hướng không chung lề". Trong mô hình mỗi cáp có thuộc tính `lề` (trái/phải) và hai hướng của một CSG phải khác lề; đoạn đứt trên một lề chỉ ảnh hưởng hướng đi theo lề đó.
-- Cần xác nhận: "nb51" ở R2 có phải HNB054 không; MX1 = MX_NVT_01 và MX2 = MX_NVT_02A/02B không.
+- Đã xác nhận: "nb51" là gõ nhầm của HNB054; MX1 = MX_NVT_01, MX2 = MX_NVT_02A/02B.
+- **Cáp trục lề trái từ AGG (NBE12) đi qua MX_NVT_01 → MX_NVT_02A → MX_NVT_03A là một cáp dùng chung**: R2 dùng một số core của cáp này cho HNB054 và HNB006, R1 dùng core khác của cùng cáp để đi tới MX_NVT_03A rồi tiếp tục sang HNB059. Đây là trường hợp "các ring chạy chung cáp" được phép (mục 9): mỗi link dùng 2 core riêng, bảng hàn tại từng MX quyết định core nào rẽ vào CSG, core nào đi thẳng.
