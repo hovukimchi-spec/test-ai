@@ -48,7 +48,7 @@
 3. **Thay "cs" (chỉ số mét đầu cáp) thành bảng chỉ số 2 đầu của từng cáp**, để đổi OTDR ↔ vị trí thực địa ra đúng đoạn và MX gần nhất. Cần cho cả hai đầu, hiện nhiều ô trống.
 4. **Tính độ dài quang từ cáp + slack**: đo OTDR − tổng cáp vật lý = slack ước tính tại từng MX; đưa vào ngưỡng cảnh báo (>25%).
 5. **Quỹ suy hao tự tính**: 0,35 dB/km (1310) hoặc 0,25 dB/km (1550), 0,1 dB/mối hàn, 0,5 dB/đầu nối + margin 3 dB; cảnh báo khi đo > tính hoặc lệch core#1/#2 > 0,5 dB. (Tham số này là giả định, cần bạn xác nhận.)
-6. **Giả lập đứt cáp theo ring**: đứt đoạn k → các CSG còn lại vẫn nối về AGG kia theo hướng ngược; tính quỹ suy hao hướng dài nhất (ví dụ R1 khi đứt gần NBE12 thì HNB059 phải đi qua 048 → NBE22, ~25 km).
+6. **Giả lập đứt cáp theo ring**: đứt đoạn k → xác định CSG nào còn link về AGG nào; suy hao luôn tính theo từng đoạn giữa hai trạm liền kề (mỗi trạm có SFP riêng), không cộng dồn (xem mục 9).
 7. **Cảnh báo kiểu dữ liệu**: trạng thái cổng ODF dùng danh sách chọn (dùng/trống/hư/mượn), không ghi chữ tự do.
 
 ## 5. Cần bạn xác nhận
@@ -69,7 +69,7 @@
 - Ngưỡng theo chiều dài tuyến, ứng với SFP 10/40/80 km của MobiFone: **< 10 km: 12,1 dB; 10–40 km: 17 dB; > 40 km: 27 dB.**
 - Lệch suy hao giữa hai core chấp nhận **≤ 2 dB**.
 - Kết quả kiểm tra BBNT theo quy ước: cả 37 đoạn khớp ngưỡng; chỉ **đoạn 31 (HNB054→HNB006)** có lệch core 2,02 dB (vượt nhẹ 2 dB).
-- (Đã thay thế bằng phân tích đứt-một-đoạn ở mục 9; con số "29,9 km/13,7 dB" trước đây là cả vòng, không phải đường thực tế khi đứt.)
+- Suy hao tính **theo từng đoạn giữa hai trạm liền kề** (CSG–CSG hoặc CSG–AGG), không cộng dồn cả ring, vì mỗi trạm có SFP thu/phát riêng về hai hướng (xem mục 9).
 - Ví dụ "khác lề": `MX_NVT_03A` và `MX_NVT_03B` là hai măng xông ở hai bên lề đường (file ghi nhầm trùng tên); đấu hai hướng cần tách như vậy.
 - Một số CSG là trạm cấp 3 (last-mile), **chỉ có một hướng đến**, triển khai cùng đợt, không bảo vệ 1+1.
 - Ghi chú DWDM, VNN, TTC trong ODF/MX là **quỹ core trống cho đối tác** dùng trên một đoạn nào đó; mô hình gắn "đối tác" vào sợi và đoạn.
@@ -105,20 +105,14 @@ Toạ độ AGG-NBE22 trong BBNT (10,69881) lệch KML (10,685521): BBNT chép n
 - Nhóm kênh của **HNB066 và HNB005 đã chuyển sang đường khác thiết kế** nên chiều dài thực tăng. Đoạn 1 (NBE12→066) và đoạn 5 (NBE12→005) dùng chiều dài KML cộng slack (~8%) khi tính quỹ suy hao.
 - **BBNT chỉ mang tính chất con số thống nhất**, không phải kết quả đo đáng tin tuyệt đối. Nguồn tham chiếu vật lý: KML + slack; BBNT dùng đối soát hợp đồng.
 
-**Đứt một đoạn bất kỳ: CSG đi đường dài nhất về AGG còn lại**
-| Ring | Tổng km | Đứt đoạn | CSG nặng nhất | Đường mới (km) | Suy hao (dB) | Ngưỡng | Dư |
-|---|---|---|---|---|---|---|---|
-| R1 | 29,9 | 34 | HNB059 | 25,2 | 10,6 | 17 | 6,4 |
-| R2 | 20,4 | 30 | HNB054 | 19,4 | 10,7 | 17 | 6,3 |
-| R3 | 21,3 | 28 | HNB094 | 13,6 | 4,9 | 17 | 12,1 |
-| R4 | 22,1 | 24 | HNB073 | 12,6 | 4,5 | 17 | 12,5 |
-| R5 | 26,3 | 16 | HNB012 | 17,8 | 6,7 | 17 | 10,3 |
-| R6 | 12,2 | 15 | HNB020 | 10,0 | 3,1 | 17 | 13,9 (sát mốc 10 km) |
-| R7 | 20,2 | 9 | HNB013 | 19,5 | 7,4 | 17 | 9,6 |
-| R8 | 19,3 | 4 | HNB038 | 16,6 | 6,6 | 17 | 10,4 |
-Suy hao lấy core cao hơn trong BBNT (đoạn 1, 5 quy đổi theo chiều dài KML). Chưa tính mối hàn/đầu nối bổ sung.
+**Quỹ suy hao (người dùng đính chính)**: mỗi trạm có SFP thu/phát về hai hướng, nên quỹ suy hao tính riêng cho **từng đoạn giữa hai trạm liền kề**, không cộng dồn chiều dài ring. Khi một đoạn đứt, các đoạn còn lại giữ nguyên suy hao và ngưỡng (theo chiều dài từng đoạn). Do đó bảng "đường mới dài nhất khi đứt cáp" tôi đưa trước đó **không áp dụng và đã bỏ**. Đoạn dài nhất là #35 (HNB048→NBE22, 17,7 km đo; KML 16,1 km): nhóm 10–40 km, ngưỡng 17 dB, suy hao đo 8,1 dB.
+Việc cần kiểm tra khi giả lập đứt: (1) mỗi CSG còn ít nhất một link về một AGG; (2) trạm nhánh cụt mất kết nối; (3) từng đoạn so với ngưỡng theo chiều dài của chính nó.
 
-## 10. Đoạn "hai lề" (người dùng bổ sung)
-- **HNB020 → HNB031** (đoạn 14, R6) đi **hai lề đường**, mỗi lề một sợi. Tức hai core của cặp 2FO nằm trên hai tuyến cáp vật lý khác nhau (một bên mỗi lề).
-- **Khoảng HNB006 → HNB060** (trục phía nam, thuộc R1/R2) cũng đi hai lề, mỗi lề một sợi. Phạm vi chính xác từng đoạn cần xác nhận (nghi gồm 006→091, 091→NBE22 một phần, 059→060 và các đoạn R1 cùng hành lang).
-- Hệ quả cho mô hình: một đoạn dịch vụ có thể gồm **hai cáp vật lý song song** (lề A, lề B), mỗi cáp mang một core. Khi đó chiều dài và suy hao của core #1 và core #2 có thể khác nhau (đoạn băng đường thêm cáp); đứt một lề chỉ mất một core nhưng link hai chiều vẫn mất; ghi nhận trạng thái theo từng core.
+## 10. Đường đi theo lề đường (người dùng bổ sung, thay thế bản ghi trước)
+Cách hiểu đúng: "1 sợi cáp" = **một cáp vật lý gồm nhiều core** (6–24 core trong dự án này); mỗi link dùng **2 core**. "Hai lề" = **hai hướng của một ring đi hai phía lề đường khác nhau** (khác lề), chứ không phải tách hai core của một đoạn.
+- **R2 (054–006–091)**: AGG → MX1 → HNB054 → MX1 → MX2 → HNB006 → MX2 → **lề trái** → MX_NVT_03A → HNB091 → MX_NVT_03B → **lề phải** → MX → cáp về AGG.
+- **R1 (059–060–048)**: AGG → **lề trái** → MX_NVT_03A → lề trái → HNB059 → lề trái → HNB060 → **lề phải** → HNB048 → lề phải → MX_NVT_03B → cáp về AGG.
+- **R6**: HNB020→HNB031 cũng đi hai lề.
+- `MX_NVT_03A`/`03B` là hai măng xông ở hai bên lề, qua đó cáp chuyển từ lề này sang lề kia (tên trùng trong file MX là do ghi nhầm).
+- Hệ quả: đây chính là điều kiện vật lý "hai hướng không chung lề". Trong mô hình mỗi cáp có thuộc tính `lề` (trái/phải) và hai hướng của một CSG phải khác lề; đoạn đứt trên một lề chỉ ảnh hưởng hướng đi theo lề đó.
+- Cần xác nhận: "nb51" ở R2 có phải HNB054 không; MX1 = MX_NVT_01 và MX2 = MX_NVT_02A/02B không.
