@@ -1,0 +1,45 @@
+loai,stt,ten_mx,dau_cap,thiet_ke_hoac_phat_sinh,ghi_chu
+mx_thiet_ke,1,vào trạm 91 từ Long Thới,3,4,
+mx_thiet_ke,2,vào trạm 91 đi NQT,3,4,
+mx_thiet_ke,3,bờ sông Đào Sư Tích,2,4,
+mx_thiet_ke,4,thẳng LVL ,2,8,hết 950m
+mx_thiet_ke,5,thẳng Ng V.Linh,2,8,đầu cầu 1
+mx_thiet_ke,6,thẳng Ng V.Linh,2,8,đầu cầu 2
+mx_thiet_ke,7,thẳng Phạm Hùng,2,8,hết 2100
+mx_thiet_ke,8,phối Phạm Hùng,3,8,phối vào HNB012
+mx_thiet_ke,9,bờ sông Phạm Hùng,2,6,
+mx_thiet_ke,10,chân cầu phú xuân,3,12,phối vào HNB066
+mx_thiet_ke,11,Ngã ba HTP-PHL,2,12,thẳng
+mx_thiet_ke,12,thẳng gần cầu Phước Long PHL,2,12,hết cáp 3km
+mx_thiet_ke,13,ngã ba LVL- Đào Sư Tích,4,12,
+mx_thiet_ke,14,rẽ băng sông  ĐST,3,12,
+mx_thiet_ke,15,đầu hẽm 1534 LVL,3,12,phối vào HNB018
+mx_thiet_ke,16,nhập dài Long thới hướng NVT,2,12,
+mx_thiet_ke,17,ngã ba NB-Phạm Thị Kỳ,3,12,phối vào HNB086
+mx_thiet_ke,18,hẽm 256 NB,3,12,phối vào HNB027
+mx_thiet_ke,19,Nhập dài SG mới hướng NB,2,12,
+mx_thiet_ke,20,thẳng cầu vượt NVT,2,12,
+mx_thiet_ke,21,ngã ba NVT-NQT phía Ủy ban,4,18,bẻ ra làm lại 6 core
+mx_thiet_ke,22,ngã ba NVT-NQT phía trường học,3,18,bẻ ra làm lại 6 core
+mx_thiet_ke,23,ngã ba LVL- Trần Thị Liền,5,14,
+mx_thiet_ke,24,ngã ba HTP-NB,4,14,
+mx_thiet_ke,25,chân cầu vượt NVT,3,14,phối vào HNB054
+mx_thiet_ke,26,Nhập dài SG mới hướng PHL,3,18,
+mx_thiet_ke,27,Đầu hẽm 1806 HTP,4,18,
+mx_thiet_ke,28,ngã 4 PHL-LVL,4,20,
+mx_thiet_ke,29,ngã 4 NB -LVL,4,30,
+mx_thiet_ke,30,nhập dài Long thới hướng NB,3,30,
+mx_thiet_ke,31,thẳng trạm 48-60,2,6,tuyến 4km
+mx_thiet_ke,32,thẳng trạm 60-59,2,6,tuyến 3km
+mx_thiet_ke,33,thẳng Ngô Quang Thắm,2,12,hết 3km
+mx_thiet_ke,34,thẳng Ngô Quang Thắm,2,12,nối vào ngầm
+mx_thiet_ke,35,nối NQT-LVL,2,12,ngầm qua treo
+mx_phat_sinh,1,thẳng trạm 13-21,2,8,2 đầu kéo dư về SG mới
+mx_phat_sinh,2,thẳng trạm 62-21,2,8,bên hông trường học
+mx_phat_sinh,3,thẳng  trạm 66-16,2,6,đầu cầu Phú Xuân để cáp sai
+mx_phat_sinh,4,phủ  PHL xe máng,2,24,2x12
+mx_phat_sinh,5,thẳng tiệm nhôm LVL,2,12,nối cáp ngắn 878m
+mx_phat_sinh,6,thẳng trạm 11-56,2,6,"đợi mua cáp, nối 400+480"
+mx_phat_sinh,7,thẳng ng bình 12FO,2,12,đoạn 12FO đi ĐST
+mx_phat_sinh,8,thẳng ng bình 24FO,2,72,3 MX thẳng 24x3
+mx_phat_sinh,9,thẳng HTP ,2,12,từ SG mới đi NB
