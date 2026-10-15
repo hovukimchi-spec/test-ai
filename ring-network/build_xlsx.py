@@ -410,6 +410,27 @@ for i,r in enumerate(d['ledger'],dr0):
     QC.cell(i,5).fill=GOOD if r['status'].startswith('dùng') else BAD if r['status']=='HƯ' else WARN if r['status'].startswith('có nhãn') else PatternFill()
 box(QC,dr0,dr0+len(d['ledger'])-1,1,8);QC.freeze_panes='A5';QC.auto_filter.ref=f'A{dr0-1}:H{dr0+len(d["ledger"])-1}'
 
+# ---------------- Hồ sơ cáp (xử lý sự cố) ----------------
+HC=sheet('Hồ sơ cáp')
+title(HC,'Hồ sơ cáp: mã cáp, core đang chạy / hư / trống — dùng khi đo kiểm và xử lý sự cố','Core đang chạy theo đường đi người dùng mô tả; "nhãn chưa gán" = sơ đồ MX gán nhóm/trạm nhưng chưa mô tả link; "trống" = chưa dùng, chưa nhãn, không hư. Mã cáp lấy từ sổ độ dài (ô trống = sổ chưa ghi, cần bổ sung).')
+header(HC,4,['Mã nội bộ','Mã cáp (sổ)','FO','Từ','Đến','Dài (m)','cs đầu','cs cuối','Dòng sổ','Core đang chạy (link)','Core hư','Core có nhãn, chưa gán','Trạm ghi trong nhãn','Core trống','Hệ quả khi đứt cáp'],[9,24,5,34,34,9,8,8,8,34,9,18,36,12,48])
+for i,p in enumerate(d['cable_profiles'],5):
+    vals=[p['id'],p['ma_cap'],p['fo'],p['frm'],p['to'],p['len_m'],p['cs_dau'],p['cs_cuoi'],p['so_row'],p['run'],p['hu'],p['lab'],p['lab_stations'],p['free'],p['effect']]
+    for j,v in enumerate(vals,1):
+        x=HC.cell(i,j,model._f(v) if j in(7,8) and model._f(v) is not None else v);x.alignment=Alignment(wrap_text=True,vertical='top')
+    if p['effect'].startswith('MẤT'):HC.cell(i,15).fill=BAD
+    if p['hu']!='—':HC.cell(i,11).fill=WARN
+    if p['ma_cap'].startswith('('):HC.cell(i,2).fill=INP
+hl=4+len(d['cable_profiles']);box(HC,5,hl,1,15);HC.freeze_panes='B5';HC.auto_filter.ref=f'A4:O{hl}'
+TC=sheet('Tra cứu cáp')
+title(TC,'Tra cứu cáp khi có sự cố','Chọn mã nội bộ ở ô vàng (C01…) hoặc xem bảng Hồ sơ cáp.')
+TC['A4']='Mã nội bộ';TC['B4']='C04';TC['B4'].fill=INP;TC['A4'].font=Font(bold=True)
+dv3=DataValidation(type='list',formula1=f"='Hồ sơ cáp'!$A$5:$A${hl}");TC.add_data_validation(dv3);dv3.add('B4')
+labels_=[('Mã cáp (sổ)','B'),('Số FO','C'),('Từ','D'),('Đến','E'),('Dài (m)','F'),('Chỉ số mét đầu','G'),('Chỉ số mét cuối','H'),('Dòng sổ cáp','I'),('Core đang chạy (link)','J'),('Core hư','K'),('Core có nhãn, chưa gán','L'),('Trạm ghi trong nhãn','M'),('Core trống','N'),('Hệ quả khi đứt cáp','O')]
+for k,(t_,col) in enumerate(labels_,6):
+    TC.cell(k,1,t_).font=Font(bold=True);c=TC.cell(k,2,f"=INDEX('Hồ sơ cáp'!{col}$5:{col}${hl},MATCH($B$4,'Hồ sơ cáp'!$A$5:$A${hl},0))&\"\"");c.alignment=Alignment(wrap_text=True,vertical='top')
+TC.column_dimensions['A'].width=26;TC.column_dimensions['B'].width=80;box(TC,6,5+len(labels_),1,2)
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -432,7 +453,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Hồ sơ cáp','Tra cứu cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True

@@ -139,3 +139,10 @@ Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model
 - Link R2-04 (HNB091 → NBE22) đã đi đến ODF-02 NBE22: tổng cáp 16 023 m so với OTDR ghi trên ODF AGG 16 028 m (lệch 5 m). Nhãn khớp sơ đồ MX tại NVT_02B (A), LVL-05 (1,2↔19,20, nhãn D), NB-01 (19,20↔1,2, nhãn B). Các MX còn lại (NVT_03B, NB-02/03/04, HTP-03B) chưa có nhãn nên mối hàn được dựng từ mô tả.
 - `data/cables.json`: 17 cáp vật lý (đã dùng trong R2) kèm chiều dài và đầu cáp tương ứng trong sơ đồ MX. MX thẳng giữa NB-04 và HTP-03B là giả định theo sổ cáp (777 + 640 m).
 - Quỹ core (`model.core_ledger`): mỗi core ở trạng thái dùng cho link nào / hư / có nhãn chưa gán link / trống. Gợi ý loại trừ: HNB048 dùng cùng tuyến với HNB091 ở core kế tiếp (trục NVT_02B→LVL-05 core 3,4; cáp 24FO TPKL core 21,22).
+
+## 14. Ring R1 và hồ sơ cáp phục vụ xử lý sự cố
+- R1 (059–060–048) đã lần đủ 4 link: đoạn dùng chung dùng cặp 3,4; cáp 6FO chạy riêng dùng 1,2. Tổng cáp khớp OTDR: R1-01 4668/4672 m, R1-02 3086/3082, R1-03 4405/4410, R1-04 17 153/17 153 m (ODF AGG).
+- MX thẳng HTP xác nhận: hết đoạn 600 m từ SG mới trên đường HTP (10.680424, 106.748376).
+- Mỗi cáp vật lý có mã nội bộ (C01…C21), mã cáp theo sổ (`ma_cap`), chỉ số mét hai đầu, dòng sổ cáp; `model.cable_profiles` liệt kê core đang chạy / hư / có nhãn chưa gán / trống và hệ quả khi đứt (sheet `Hồ sơ cáp`, `Tra cứu cáp`; tab "Cáp" trong HTML).
+- Cáp chưa có mã trong sổ (cần bổ sung): C05, C06, C09, C12–C16.
+- Quan sát: cáp vào trạm C03 (HNB054) và C05 (HNB006) mang cả hai cặp link của trạm đó (1,2 và 3,4) nên một lần đứt cô lập trạm; các cáp trục chung (C01, C02, C09–C17) mang đồng thời link R1 và R2 (mỗi ring chỉ mất một hướng).

@@ -7,7 +7,8 @@
   "to": "MX nhập đài Long Thới–NVT",
   "len_m": 150,
   "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 31
  },
  {
   "id": "C02",
@@ -19,7 +20,8 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 680 m",
   "ends": {
    "MX_NVT_01": "MX_NVT_01|AD154"
-  }
+  },
+  "so_row": 53
  },
  {
   "id": "C03",
@@ -31,7 +33,8 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
   "ends": {
    "MX_NVT_01": "MX_NVT_01|AQ154"
-  }
+  },
+  "so_row": 56
  },
  {
   "id": "C04",
@@ -44,7 +47,8 @@
   "ends": {
    "MX_NVT_01": "MX_NVT_01|AD167",
    "MX_NVT_02A": "MX_NVT_02A|AD174"
-  }
+  },
+  "so_row": 54
  },
  {
   "id": "C05",
@@ -56,7 +60,8 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 220 m",
   "ends": {
    "MX_NVT_02A": "MX_NVT_02A|AQ187"
-  }
+  },
+  "so_row": 57
  },
  {
   "id": "C06",
@@ -69,7 +74,8 @@
   "ends": {
    "MX_NVT_02A": "MX_NVT_02A|AD187",
    "MX_NVT_03A": "MX_NVT_03A|AD193"
-  }
+  },
+  "so_row": 55
  },
  {
   "id": "C07",
@@ -79,7 +85,8 @@
   "to": "HNB091",
   "len_m": 545,
   "src": "Sổ độ dài cáp (Tổng Hợp): 545 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 58
  },
  {
   "id": "C08",
@@ -89,7 +96,8 @@
   "to": "MX_NVT_03B",
   "len_m": 550,
   "src": "Sổ độ dài cáp (Tổng Hợp): 550 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 59
  },
  {
   "id": "C09",
@@ -102,7 +110,8 @@
   "ends": {
    "MX_NVT_02B": "MX_NVT_02B|H187",
    "MX_NVT_03B": "MX_NVT_03B|H193"
-  }
+  },
+  "so_row": 64
  },
  {
   "id": "C10",
@@ -115,7 +124,8 @@
   "ends": {
    "MX_NVT_02B": "MX_NVT_02B|H174",
    "MX_LVL-05": "MX_LVL-05|AP86"
-  }
+  },
+  "so_row": 65
  },
  {
   "id": "C11",
@@ -128,7 +138,8 @@
   "ends": {
    "MX_LVL-05": "MX_LVL-05|AD103",
    "MX_NB-01": "MX_NB-01|AD109"
-  }
+  },
+  "so_row": 32
  },
  {
   "id": "C12",
@@ -140,7 +151,8 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 1040 m (NB Phạm Thị Kỳ → nhập đài Long Thới-NB)",
   "ends": {
    "MX_NB-01": "MX_NB-01|BD112"
-  }
+  },
+  "so_row": 22
  },
  {
   "id": "C13",
@@ -150,7 +162,8 @@
   "to": "MX_NB-03",
   "len_m": 1408,
   "src": "Sổ độ dài cáp (Tổng Hợp): 1408 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 21
  },
  {
   "id": "C14",
@@ -160,27 +173,30 @@
   "to": "MX_NB-04",
   "len_m": 1092,
   "src": "Sổ độ dài cáp (Tổng Hợp): 1092 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 20
  },
  {
   "id": "C15",
   "name": "12FO NB-04 → MX thẳng HTP",
   "fo": 12,
   "frm": "MX_NB-04",
-  "to": "MX thẳng HTP (giữa NB-04 và HTP-03B)",
+  "to": "MX thẳng HTP",
   "len_m": 777,
-  "src": "Sổ độ dài cáp (Tổng Hợp): 777 m (giả định MX thẳng ở giữa, theo sổ cáp)",
-  "ends": {}
+  "src": "Sổ độ dài cáp (Tổng Hợp): 777 m (MX thẳng HTP: hết đoạn 600 m từ SG mới trên đường HTP; người dùng xác nhận)",
+  "ends": {},
+  "so_row": 19
  },
  {
   "id": "C16",
   "name": "12FO MX thẳng HTP → HTP-03B",
   "fo": 12,
-  "frm": "MX thẳng HTP (giữa NB-04 và HTP-03B)",
+  "frm": "MX thẳng HTP",
   "to": "MX_HTP-03B",
   "len_m": 640,
   "src": "Sổ độ dài cáp (Tổng Hợp): 640 m",
-  "ends": {}
+  "ends": {},
+  "so_row": 18
  },
  {
   "id": "C17",
@@ -190,6 +206,51 @@
   "to": "ODF-02 NBE22",
   "len_m": 260,
   "src": "Sổ độ dài cáp (Tổng Hợp): 260 m",
+  "ends": {},
+  "so_row": 17
+ },
+ {
+  "id": "C18",
+  "name": "FOCAL 2020 vào HNB059 (6FO)",
+  "fo": 6,
+  "frm": "MX_NVT_03A",
+  "to": "HNB059",
+  "len_m": 1933,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1933 m",
+  "so_row": 60,
+  "ends": {}
+ },
+ {
+  "id": "C19",
+  "name": "FOCAL 2020 HNB059 → HNB060 (6FO)",
+  "fo": 6,
+  "frm": "HNB059",
+  "to": "HNB060",
+  "len_m": 3086,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 3086 m",
+  "so_row": 61,
+  "ends": {}
+ },
+ {
+  "id": "C20",
+  "name": "FOCAL 2020 HNB060 → HNB048 (6FO)",
+  "fo": 6,
+  "frm": "HNB060",
+  "to": "HNB048",
+  "len_m": 4405,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 4405 m",
+  "so_row": 62,
+  "ends": {}
+ },
+ {
+  "id": "C21",
+  "name": "FOCAL 2020 HNB048 → MX_NVT_03B (6FO)",
+  "fo": 6,
+  "frm": "HNB048",
+  "to": "MX_NVT_03B",
+  "len_m": 1680,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1680 m",
+  "so_row": 63,
   "ends": {}
  }
 ]

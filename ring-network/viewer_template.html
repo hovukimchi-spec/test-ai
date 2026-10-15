@@ -5,7 +5,7 @@
 :root[data-theme=dark]{--bg:#12151c;--fg:#e8ebf1;--card:#1c212b;--mut:#98a2b3;--line:#323a4a;--acc:#8fb4ff;--ok:#41c785;--warn:#f0b429;--bad:#ff6b6b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;padding-bottom:env(safe-area-inset-bottom)}
 header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-h1{font-size:16px;margin:0;flex:1}button,select,input{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+h1{font-size:16px;margin:0;flex:1}select{max-width:100%}button,select,input{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 nav{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line)}
 nav button{white-space:nowrap}main{padding:10px 12px}.pane{display:none}.pane.on{display:block}
@@ -34,6 +34,7 @@ small,.mut{color:var(--mut)}@media(min-width:900px){main{max-width:1100px;margin
 <section class="pane" id="p-seg"><div class="card" style="overflow:auto"><table id="segT"></table></div></section>
 <section class="pane" id="p-odf"><div class="row"><select id="odfSel"></select></div><div class="card" id="odfOut"></div></section>
 <section class="pane" id="p-otdr"><div class="card"><div class="row"><select id="oSeg"></select><select id="oFrom"></select><input id="oM" type="number" inputmode="numeric" placeholder="OTDR (m)" style="width:110px"><button id="oGo">Tìm</button></div><div id="oOut" class="mut">Chọn đoạn, đầu đo và khoảng cách OTDR (m).</div></div></section>
+<section class="pane" id="p-cab"><div class="row"><select id="cabSel"></select></div><div class="card" id="cabOut"></div></section>
 <section class="pane" id="p-fix"><div id="fixOut"></div></section>
 </main><div id="sheet"><button class="x" onclick="closeSheet()">✕</button><div id="sheetBody"></div></div>
 <script>
@@ -79,7 +80,8 @@ function openSheet(h){$('#sheetBody').innerHTML=h;$('#sheet').classList.add('on'
 function showSeg(id){const s=segById[id];openSheet(`<h3 style="margin:0 0 6px">${s.id}: ${s.a} → ${s.z} ${pill(s)}</h3><div class="mut">Ring ${s.ring} · ${s.kind}${s.roadside?' · lề '+s.roadside:''}${s.rerouted?' · <span class="warn">đã đổi tuyến</span>':''}</div>
  <table><tr><th>km HĐ</th><th>km OTDR</th><th>km KML</th><th>km tính</th></tr><tr><td>${fmt(s.km_hd,3)}</td><td>${fmt(s.km_otdr,3)}</td><td>${fmt(s.km_kml,3)}</td><td class="b">${fmt(s.km_ref,3)}</td></tr></table>
  <table><tr><th>dB core 1</th><th>dB core 2</th><th>Ngưỡng</th><th>Dư</th><th>Chênh core</th></tr><tr><td>${fmt(s.db1)}</td><td>${fmt(s.db2)}</td><td>${s.allow}</td><td class="b">${fmt(s.margin)}</td><td>${fmt(s.delta)}</td></tr></table>
- <div class="mut">Mã BBNT ${s.bbnt??'—'} · ngưỡng theo chiều dài đoạn (${s.km_ref<10?'<10 km':s.km_ref<=40?'10–40 km':'>40 km'}).</div>${issuesFor(s.id)}`)}
+ ${D.links[s.id]?'<div class="b" style="margin-top:8px">Cáp trên đường đi ('+D.links[s.id].total+' m)</div><table>'+D.links[s.id].steps.map(x=>`<tr onclick="goCab('${x[0]}')" style="cursor:pointer"><td>${x[0]}</td><td>${x[2]||x[1]}</td><td>core ${x[3].join('+')}</td><td>${x[4]} m</td></tr>`).join('')+'</table>':''}<div class="mut">Mã BBNT ${s.bbnt??'—'} · ngưỡng theo chiều dài đoạn (${s.km_ref<10?'<10 km':s.km_ref<=40?'10–40 km':'>40 km'}).</div>${issuesFor(s.id)}`)}
+function goCab(id){document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-cab'));[...$('#tabs').children].forEach((x,i)=>x.classList.toggle('on',tabs[i][0]=='cab'));$('#cabSel').value=id;$('#cabOut').innerHTML=cabCard(id);closeSheet()}
 function issuesFor(id){const L=D.issues.filter(i=>i[0]==id);return L.length?'<div class="card warn">'+L.map(i=>`<div>⚠ ${i[1]}: ${i[2]}</div>`).join('')+'</div>':''}
 function odfGrid(node){const ps=D.odf.filter(o=>o.node==node);if(!ps.length)return '<div class="mut">Chưa có dữ liệu ODF cho trạm này.</div>';
  const cols=Object.keys(RC);let h='<div class="ports">';ps.forEach(p=>{h+=`<div class="port" style="${p.dest?'background:color-mix(in srgb,'+destCol(p.dest)+' 25%,transparent)':''}"><b>${p.port}</b>${(p.dest||'').replace('AGG-','')}</div>`});
@@ -95,7 +97,7 @@ function showMx(c){const rows=D.mxpairs[c.name]||[],cab=D.mxcab[c.name]||[];
  h+=rows.length?'<div class="b" style="margin-top:8px">Phối core (cùng nhãn hàn với nhau)</div><table><tr><th>Nhãn</th><th>Cáp A / core</th><th>Cáp B / core</th><th>Trạm</th></tr>'+rows.map(r=>`<tr><td class="b">${r[0]}</td><td>${r[1]}<br><b>core ${r[2]}</b></td><td>${r[3]}<br><b>core ${r[4]}</b></td><td>${r[5]}</td></tr>`).join('')+'</table>':'<div class="mut">Chưa có nhãn phối core cho măng xông này trong sơ đồ gốc.</div>';
  openSheet(h)}
 // ---- tabs
-const tabs=[['map','Bản đồ'],['ring','Ring'],['seg','Đoạn'],['odf','ODF'],['otdr','OTDR → vị trí'],['fix','Khắc phục']];
+const tabs=[['map','Bản đồ'],['ring','Ring'],['seg','Đoạn'],['odf','ODF'],['cab','Cáp'],['otdr','OTDR → vị trí'],['fix','Khắc phục']];
 tabs.forEach(([id,t],i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-'+id));[...$('#tabs').children].forEach(x=>x.classList.toggle('on',x==b));closeSheet()};if(!i)b.classList.add('on');$('#tabs').appendChild(b)});
 $('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme=='dark'?'':'dark';try{localStorage.setItem('th',r.dataset.theme)}catch(e){}};try{if(localStorage.getItem('th')=='dark')document.documentElement.dataset.theme='dark'}catch(e){}
 $('#leg').innerHTML=Object.entries(RC).map(([r,c])=>`<span><i style="background:${c}"></i>${r}</span>`).join('')+'<span>■ AGG</span><span>○ CSG</span><span style="color:#f6a623">▲ MX</span>';
@@ -124,6 +126,11 @@ $('#oGo').onclick=()=>{const s=segById[$('#oSeg').value],m=+$('#oM').value,from=
  const before=[...mxs].filter(o=>o.al<=pos).pop(),after=mxs.find(o=>o.al>pos);
  h+=`<div class="b">Điểm nghi đứt: ${(f*100).toFixed(0)}% chiều dài đoạn ${s.id} tính từ ${from=='a'?s.a:s.z}</div><div>Vị trí ước tính (phân bổ dự trữ đều): <a href="https://maps.google.com/?q=${lat.toFixed(6)},${lon.toFixed(6)}" target="_blank">${lat.toFixed(5)}, ${lon.toFixed(5)}</a></div>`;
  h+=`<div class="mut">Trước điểm: ${before?before.c.name+' (~'+Math.round((pos-before.al)/(L||1)*tot)+' m cáp)':'—'}<br>Sau điểm: ${after?after.c.name+' (~'+Math.round((after.al-pos)/(L||1)*tot)+' m cáp)':'—'}</div><div class="mut">Chỉ ước tính theo hình KML ± dự trữ cáp; cần chỉ số mét hai đầu từng cáp để chính xác. ${s.rerouted?'<span class="warn">Đoạn đã đổi tuyến: KML có thể không còn đúng.</span>':''}</div>`;$('#oOut').innerHTML=h};
+// ---- Hồ sơ cáp
+$('#cabSel').innerHTML=D.cprof.map(c=>`<option value="${c.id}">${c.id} · ${c.ma_cap} · ${c.frm} → ${c.to}</option>`).join('');
+function cabCard(id){const c=D.cprof.find(x=>x.id==id);return `<h3 style="margin:0">${c.id} · ${c.ma_cap} · ${c.fo}FO</h3><div class="mut">${c.frm} → ${c.to} · ${c.len_m} m · cs ${c.cs_dau||'—'} → ${c.cs_cuoi||'—'}</div>
+ <table><tr><td class="b">Core đang chạy</td><td>${c.run}</td></tr><tr><td class="b bad">Core hư</td><td>${c.hu}</td></tr><tr><td class="b">Có nhãn, chưa gán</td><td>${c.lab}<br><span class="mut">${c.lab_stations}</span></td></tr><tr><td class="b ok">Core trống</td><td>${c.free}</td></tr><tr><td class="b">Khi đứt cáp</td><td class="${c.effect.startsWith('MẤT')?'bad':''}">${c.effect}</td></tr></table>`}
+const upC=()=>$('#cabOut').innerHTML=cabCard($('#cabSel').value);$('#cabSel').onchange=upC;upC();
 // ---- Khắc phục
 $('#fixOut').innerHTML='<div class="card"><table><tr><th>Triệu chứng</th><th>Xử lý</th></tr>'+D.fix.map(f=>`<tr><td>${f[0]}</td><td>${f[2]}</td></tr>`).join('')+'</table></div><div class="card"><div class="b">Cần xác nhận dữ liệu</div>'+D.issues.map(i=>`<div class="mut">• ${i[0]} — ${i[1]}: ${i[2]}</div>`).join('')+'</div>';
 draw();

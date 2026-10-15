@@ -131,6 +131,7 @@ def build():
         elif name in seen and name.startswith('MX_HTP-03'):continue
         elif name in seen:name=name+' (2)'
         seen[name]=1
+        if name.startswith('Thẳng HTP'):name='MX thẳng HTP'
         closures.append(dict(name=name,straight=r['sheet']!='MX',lat=_f(r['lat']),lon=_f(r['lon']),desc=r['mo_ta']))
     cables=_csv('cap_tong_hop.csv')
     mxc=_csv('mx_cap.csv');mxo=_csv('mx_core.csv')
@@ -152,6 +153,7 @@ def build():
     d['issues']=detect_issues(d)
     d['paths']=load_paths(d)
     d['ledger'],d['ledger_conflicts']=core_ledger(d)
+    d['cable_profiles']=cable_profiles(d)
     return d
 
 def simulate_cut(d,seg_ids):
@@ -238,6 +240,12 @@ def check_splice(pairs,a,ca,b,cb,subst=None,nominal_b=None):
 
 def load_paths(d):
     cables={c['id']:c for c in json.load(open(os.path.join(DATA,'cables.json'),encoding='utf-8'))}
+    so=_csv('cap_tong_hop.csv')
+    for c in cables.values():
+        r=so[c['so_row']-2] if c.get('so_row') else None
+        c['ma_cap']=(r['ma_cap'].strip() if r else '') or ''
+        c['cs_dau']=r['cs_dau'] if r else '';c['cs_cuoi']=r['cs_cuoi'] if r else '';c['so_ghi_chu']=r['ghi_chu'] if r else ''
+        c['so_dau_cuoi']=f"{r['dau']} → {r['cuoi']}" if r else ''
     d['phys_cables']=cables
     out=[]
     for f in sorted(os.listdir(os.path.join(DATA,'paths'))):
@@ -280,3 +288,41 @@ def core_ledger(d):
             rows.append(dict(cable=cid,name=c['name'],route=f"{c['frm']} → {c['to']}",core=core,status=status,labels='; '.join(lab),stations=', '.join(dict.fromkeys(tr)),links=use))
     return rows,conf
 
+
+def _rng(xs):
+    xs=sorted(set(xs))
+    if not xs:return ''
+    out=[];st=pv=xs[0]
+    for x in xs[1:]+[None]:
+        if x is not None and x==pv+1:pv=x;continue
+        out.append(f'{st}' if st==pv else f'{st}-{pv}')
+        if x is not None:st=pv=x
+    return ','.join(out)
+
+def cable_profiles(d):
+    """Hồ sơ từng cáp phục vụ xử lý sự cố: mã cáp, core đang chạy (link nào), hư, có nhãn chưa gán, trống, hệ quả khi đứt."""
+    led={}
+    for r in d['ledger']:led.setdefault(r['cable'],[]).append(r)
+    seg_ids={s['id'] for s in d['segments']}
+    out=[]
+    for cid,c in d['phys_cables'].items():
+        rows=led[cid];run={};hu=[];lab=[];free=[];stn={}
+        for r in rows:
+            if r['status']=='HƯ':hu.append(r['core'])
+            elif r['status'].startswith('dùng'):
+                for l in r['links']:run.setdefault(l,[]).append(r['core'])
+            elif r['status'].startswith('có nhãn'):
+                lab.append(r['core'])
+                if r['stations']:stn.setdefault(r['stations'],[]).append(r['core'])
+            else:free.append(r['core'])
+        links=sorted(run);cut=[l for l in links if l in seg_ids]
+        res=simulate_cut(d,cut) if cut else {}
+        lost=sorted(k for k,v in res.items() if v==(None,None))
+        out.append(dict(id=cid,name=c['name'],ma_cap=c['ma_cap'] or '(chưa ghi mã cáp trong sổ)',fo=c['fo'],frm=c['frm'],to=c['to'],len_m=c['len_m'],
+            cs_dau=c['cs_dau'],cs_cuoi=c['cs_cuoi'],so_row=c.get('so_row'),so_dau_cuoi=c.get('so_dau_cuoi',''),
+            run='; '.join(f"{_rng(run[l])} ({l})" for l in links) or '—',run_cores=sorted(sum(run.values(),[])),
+            hu=_rng(hu) or '—',lab=_rng(lab) or '—',lab_stations='; '.join(f"{k}: {_rng(v)}" for k,v in stn.items()) or '—',free=_rng(free) or '—',
+            n_free=len(free),links=links,lost=', '.join(lost) or '—',
+            effect=('MẤT KẾT NỐI: '+', '.join(lost)) if lost else ('các link '+', '.join(links)+' mất một hướng, ring vẫn bảo vệ' if links else 'chưa có link mô tả'),
+            link_status=run))
+    return out
