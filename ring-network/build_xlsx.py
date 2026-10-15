@@ -343,9 +343,13 @@ for i,lk in enumerate(d['paths']):
     r=r0+i
     ref=lk['ref_m'];PA.cell(r,1,lk['id']);PA.cell(r,2,lk['frm']);PA.cell(r,3,lk['to'])
     PA.cell(r,4,f'=SUMIFS($G${r0+nl_+4}:$G$2000,$A${r0+nl_+4}:$A$2000,A{r},$C${r0+nl_+4}:$C$2000,"cáp")');PA.cell(r,5,ref)
-    PA.cell(r,6,f'=D{r}-E{r}');PA.cell(r,7,f'=F{r}/E{r}');PA.cell(r,7).number_format='0.0%'
-    PA.cell(r,8,('Chưa hoàn chỉnh (còn tiếp)' if not lk['complete'] else f'=IF(ABS(G{r})<=0.02,"Khớp (≤2%)","Lệch >2%: kiểm tra")'))
-    PA.cell(r,9,'OTDR tham chiếu: '+(('ODF AGG ghi '+'/'.join(map(str,lk['odf_otdr_m']))+' m') if lk['odf_otdr_m'] else 'BBNT (số thống nhất)'))
+    if ref:
+        PA.cell(r,6,f'=D{r}-E{r}');PA.cell(r,7,f'=F{r}/E{r}');PA.cell(r,7).number_format='0.0%'
+        PA.cell(r,8,f'=IF(ABS(G{r})<=0.02,"Khớp (≤2%)",IF(ABS(G{r})<=0.06,"Lệch nhẹ (≤6%)","Lệch lớn (>6%)"))')
+    else:PA.cell(r,8,'Chưa có số tham chiếu')
+    if not lk['complete']:PA.cell(r,8,'Chưa hoàn chỉnh (còn tiếp)')
+    ref_txt=('ODF AGG ghi '+'/'.join(map(str,lk['odf_otdr_m']))+' m') if lk['odf_otdr_m'] else ('BBNT (số thống nhất)' if ref else '—')
+    PA.cell(r,9,'OTDR tham chiếu: '+ref_txt+(' | ĐỔI TUYẾN so với thiết kế' if lk.get('rerouted') else '')+((' | '+lk['note']) if lk.get('note') else ''))
 box(PA,r0,r0+nl_-1,1,9)
 hr=r0+nl_+2;PA.cell(hr,1,'Chi tiết từng bước').font=Font(bold=True,size=12)
 header(PA,hr+1,['Link','Bước','Loại','Vị trí / cáp','Từ → Đến','Core','Dài (m)','Cộng dồn (m)','Đối chiếu sơ đồ MX','Ghi chú'],None)

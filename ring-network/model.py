@@ -142,7 +142,9 @@ def build():
     for mx in dict.fromkeys(c['mx'] for c in mxc):
         ids=[c['cap_id'] for c in mxc if c['mx']==mx];ends={};info={}
         for i in ids:
-            rows=[r for r in mxo if r['cap_id']==i];ends[i]=[r['nhan'] for r in rows];info[i]={int(r['core']):r for r in rows}
+            rows=[r for r in mxo if r['cap_id']==i];n=max(int(r['core']) for r in rows);ends[i]=['']*n
+            for r in rows:ends[i][int(r['core'])-1]=r['nhan']
+            info[i]={int(r['core']):r for r in rows}
         pr,wr=splice_pairs(ends)
         for lab,a,x,b,y in pr:
             ra,rb=info[a][x],info[b][y]
@@ -263,8 +265,12 @@ def load_paths(d):
                     ea=cables[st['a_cable']]['ends'].get(st['at']);eb=cables[st['b_cable']]['ends'].get(st['at'])
                     r['check'],r['check_detail']=check_splice(d['mx_pairs'],ea,st['cores_a'],eb,st['cores_b'],st.get('subst'),st.get('nominal_b'))
                 rows.append(r)
-            ref=(lk.get('odf_otdr_m') or [None])[0] or lk.get('bbnt_otdr_m')
-            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=lk.get('bbnt_otdr_m'),odf_otdr_m=lk.get('odf_otdr_m'),ref_m=ref,complete=lk.get('complete',True),steps=rows))
+            bb=lk.get('bbnt_otdr_m')
+            if bb is None:
+                sg=next((s for s in d['segments'] if s['id']==lk['id']),None)
+                bb=round(sg['km_otdr']*1000) if sg and sg.get('km_otdr') else None
+            ref=(lk.get('odf_otdr_m') or [None])[0] or bb
+            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=bb,rerouted=lk.get('rerouted',False),note=lk.get('note',''),odf_otdr_m=lk.get('odf_otdr_m'),ref_m=ref,complete=lk.get('complete',True),steps=rows))
     return out
 
 def core_ledger(d):

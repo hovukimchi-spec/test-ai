@@ -1,0 +1,689 @@
+{
+ "ring": "R5",
+ "sfp": "1310 nm, 2 core/link",
+ "source": "Suy ra từ nhãn/trạm trong sơ đồ MX, ODF AGG và sổ cáp; chưa được người dùng xác nhận từng bước",
+ "links": [
+  {
+   "id": "R5-01",
+   "frm": "NBE12",
+   "to": "HNB012",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "NBE12",
+     "name": "ODF-01 24FO hướng NB (POSTEF 11/2016)",
+     "cores": [
+      7,
+      8
+     ],
+     "note": "ODF AGG ghi cổng 7-8 (core cáp 1,2): HNB012 ring 5"
+    },
+    {
+     "t": "cable",
+     "cable": "C22",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-01",
+     "a_cable": "C22",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C11",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C11",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-05",
+     "a_cable": "C11",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C39",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A"
+    },
+    {
+     "t": "cable",
+     "cable": "C39",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng LVL-05/DST",
+     "a_cable": "C39",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C40",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C40",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_DST",
+     "a_cable": "C40",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C42",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "rẽ qua sông; chưa có nhãn"
+    },
+    {
+     "t": "cable",
+     "cable": "C42",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX băng sông 2",
+     "a_cable": "C42",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C43",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "giả định core 1,2 trên cáp 48FO"
+    },
+    {
+     "t": "cable",
+     "cable": "C43",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX băng sông 1",
+     "a_cable": "C43",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C44",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C44",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB012",
+     "name": "ODF-HNB012 (hướng NBE12, cs 2692)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R5-02",
+   "frm": "HNB012",
+   "to": "HNB014",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB012",
+     "name": "ODF-HNB012 (hướng HNB014)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C71",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_PHẠM HÙNG",
+     "a_cable": "C71",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C72",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C72",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng Phạm Hùng",
+     "a_cable": "C72",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C73",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C73",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX cầu NVL 2",
+     "a_cable": "C73",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C74",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C74",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX cầu NVL 1",
+     "a_cable": "C74",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C75",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C75",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB014",
+     "name": "ODF-HNB014 (hướng HNB012)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R5-03",
+   "frm": "HNB014",
+   "to": "HNB075",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB014",
+     "name": "ODF-HNB014 (hướng HNB075)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C70",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB075",
+     "name": "ODF-HNB075 (hướng HNB014)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R5-04",
+   "frm": "HNB075",
+   "to": "NBE22",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB075",
+     "name": "ODF-HNB075 (hướng NBE22)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C56",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng LVL-01/075",
+     "a_cable": "C56",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C55",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "MX thẳng"
+    },
+    {
+     "t": "cable",
+     "cable": "C55",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-01",
+     "a_cable": "C55",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C38",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn C (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C38",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-02",
+     "a_cable": "C38",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C37",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A"
+    },
+    {
+     "t": "cable",
+     "cable": "C37",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng đi LVL",
+     "a_cable": "C37",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C36",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "MX thẳng"
+    },
+    {
+     "t": "cable",
+     "cable": "C36",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-03",
+     "a_cable": "C36",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C32",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn B"
+    },
+    {
+     "t": "cable",
+     "cable": "C32",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-01",
+     "a_cable": "C32",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C33",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A"
+    },
+    {
+     "t": "cable",
+     "cable": "C33",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-02",
+     "a_cable": "C33",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C34",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A"
+    },
+    {
+     "t": "cable",
+     "cable": "C34",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-03A",
+     "a_cable": "C34",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C35",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn A"
+    },
+    {
+     "t": "cable",
+     "cable": "C35",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "NBE22",
+     "name": "ODF-01 24FO NBE22 (cs 1816)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": "ODF AGG ghi cổng 1-2: HNB075 ring 5"
+    }
+   ]
+  },
+  {
+   "id": "R5-S1",
+   "frm": "HNB113",
+   "to": "HNB014",
+   "note": "Mâu thuẫn: ODF-HNB113 ghi \"To HNB012\", nhưng sơ đồ MX_PHẠM HÙNG ghép nhãn B giữa cáp HNB113 và cáp về HNB014",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB113",
+     "name": "ODF-HNB113",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C76",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_PHẠM HÙNG",
+     "a_cable": "C76",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C72",
+     "cores_b": [
+      5,
+      6
+     ],
+     "note": "nhãn B (sơ đồ MX): HNB113 ghép với cáp hướng HNB014"
+    },
+    {
+     "t": "cable",
+     "cable": "C72",
+     "cores": [
+      5,
+      6
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng Phạm Hùng",
+     "a_cable": "C72",
+     "cores_a": [
+      5,
+      6
+     ],
+     "b_cable": "C73",
+     "cores_b": [
+      5,
+      6
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C73",
+     "cores": [
+      5,
+      6
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX cầu NVL 2",
+     "a_cable": "C73",
+     "cores_a": [
+      5,
+      6
+     ],
+     "b_cable": "C74",
+     "cores_b": [
+      5,
+      6
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C74",
+     "cores": [
+      5,
+      6
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX cầu NVL 1",
+     "a_cable": "C74",
+     "cores_a": [
+      5,
+      6
+     ],
+     "b_cable": "C75",
+     "cores_b": [
+      5,
+      6
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C75",
+     "cores": [
+      5,
+      6
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB014",
+     "name": "ODF-HNB014 (hướng HNB113)",
+     "cores": [
+      5,
+      6
+     ],
+     "note": ""
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,405 @@
+{
+ "ring": "R8",
+ "sfp": "1310 nm, 2 core/link",
+ "source": "Suy ra từ nhãn/trạm trong sơ đồ MX, ODF AGG và sổ cáp; chưa được người dùng xác nhận từng bước",
+ "links": [
+  {
+   "id": "R8-01",
+   "frm": "NBE12",
+   "to": "HNB066",
+   "odf_otdr_m": [
+    15404
+   ],
+   "rerouted": true,
+   "note": "nhóm kênh HNB066 đã đổi tuyến so với thiết kế (dài hơn)",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "NBE12",
+     "name": "ODF-02 24FO hướng NVT",
+     "cores": [
+      9,
+      10
+     ],
+     "note": "ODF AGG ghi cổng 9-10: HNB066 ring 8"
+    },
+    {
+     "t": "cable",
+     "cable": "C01",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX nhập đài Long Thới–NVT",
+     "a_cable": "C01",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C02",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C02",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NVT_01",
+     "a_cable": "C02",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C04",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": "MX chân cầu vượt, chưa có nhãn"
+    },
+    {
+     "t": "cable",
+     "cable": "C04",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NVT_02A",
+     "a_cable": "C04",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C77",
+     "cores_b": [
+      3,
+      4
+     ],
+     "note": "nhãn C (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C77",
+     "cores": [
+      3,
+      4
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NVT_02B",
+     "a_cable": "C77",
+     "cores_a": [
+      3,
+      4
+     ],
+     "b_cable": "C10",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": "qua đường sang lề phải"
+    },
+    {
+     "t": "cable",
+     "cable": "C10",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-05",
+     "a_cable": "C10",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C30",
+     "cores_b": [
+      3,
+      4
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C30",
+     "cores": [
+      3,
+      4
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-04",
+     "a_cable": "C30",
+     "cores_a": [
+      3,
+      4
+     ],
+     "b_cable": "C31",
+     "cores_b": [
+      3,
+      4
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C31",
+     "cores": [
+      3,
+      4
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-03",
+     "a_cable": "C31",
+     "cores_a": [
+      3,
+      4
+     ],
+     "b_cable": "C32",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C32",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-01",
+     "a_cable": "C32",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C45",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "nhãn B (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C45",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB066",
+     "name": "ODF-HNB066 (hướng NBE12)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R8-02",
+   "frm": "HNB066",
+   "to": "HNB016",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB066",
+     "name": "ODF-HNB066 (hướng HNB016)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C67",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng 66-16",
+     "a_cable": "C67",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C68",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "MX thẳng, \"đầu cầu Phú Xuân để cáp sai\""
+    },
+    {
+     "t": "cable",
+     "cable": "C68",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB016",
+     "name": "ODF-HNB016 (hướng HNB066)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R8-03",
+   "frm": "HNB016",
+   "to": "HNB038",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB016",
+     "name": "ODF-HNB016 (hướng HNB038)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C69",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB038",
+     "name": "ODF-HNB038 (hướng HNB016)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R8-04",
+   "frm": "HNB038",
+   "to": "NBE22",
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB038",
+     "name": "ODF-HNB038 (hướng NBE22)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C46",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-02",
+     "a_cable": "C46",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C34",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": "nhãn C (sơ đồ MX)"
+    },
+    {
+     "t": "cable",
+     "cable": "C34",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-03A",
+     "a_cable": "C34",
+     "cores_a": [
+      9,
+      10
+     ],
+     "b_cable": "C35",
+     "cores_b": [
+      9,
+      10
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C35",
+     "cores": [
+      9,
+      10
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "NBE22",
+     "name": "ODF-01 24FO NBE22 (cs 1816)",
+     "cores": [
+      9,
+      10
+     ],
+     "note": "ODF AGG ghi cổng 9-10: HNB038 ring 8"
+    }
+   ]
+  }
+ ]
+}

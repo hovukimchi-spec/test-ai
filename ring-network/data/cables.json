@@ -342,5 +342,597 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 716 m",
   "so_row": 23,
   "ends": {}
+ },
+ {
+  "id": "C30",
+  "name": "12FO LVL-05 → LVL-04",
+  "fo": 12,
+  "frm": "MX_LVL-05",
+  "to": "MX_LVL-04",
+  "len_m": 667,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 667 m",
+  "so_row": 33,
+  "ends": {
+   "MX_LVL-05": "MX_LVL-05|AD86",
+   "MX_LVL-04": "MX_LVL-04|AD80"
+  }
+ },
+ {
+  "id": "C31",
+  "name": "SAMTEL 3/2015 LVL-04 → LVL-03",
+  "fo": 12,
+  "frm": "MX_LVL-04",
+  "to": "MX_LVL-03",
+  "len_m": 1161,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1161 m",
+  "so_row": 34,
+  "ends": {
+   "MX_LVL-04": "MX_LVL-04|AD67",
+   "MX_LVL-03": "MX_LVL-03|AD61"
+  }
+ },
+ {
+  "id": "C32",
+  "name": "POSTEF 9/2019 LVL-03 → HTP-01 (cầu Phú Xuân 2)",
+  "fo": 12,
+  "frm": "MX_LVL-03",
+  "to": "MX_HTP-01",
+  "len_m": 4644,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 4644 m",
+  "so_row": 37,
+  "ends": {
+   "MX_LVL-03": "MX_LVL-03|AQ61",
+   "MX_HTP-01": "MX_HTP-01|CE48"
+  }
+ },
+ {
+  "id": "C33",
+  "name": "12FO HTP-01 → HTP-02",
+  "fo": 12,
+  "frm": "MX_HTP-01",
+  "to": "MX_HTP-02",
+  "len_m": 533,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 533 m",
+  "so_row": 3,
+  "ends": {
+   "MX_HTP-01": "MX_HTP-01|CE61",
+   "MX_HTP-02": "MX_HTP-02|CE68"
+  }
+ },
+ {
+  "id": "C34",
+  "name": "FOCAL 12FO HTP-02 → HTP-03A",
+  "fo": 12,
+  "frm": "MX_HTP-02",
+  "to": "MX_HTP-03A",
+  "len_m": 1704,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1704 m",
+  "so_row": 4,
+  "ends": {
+   "MX_HTP-02": "MX_HTP-02|CE81",
+   "MX_HTP-03A": "MX_HTP-03A|CE88"
+  }
+ },
+ {
+  "id": "C35",
+  "name": "POSTEF 24FO nhập đài (cs 1570→1816) → ODF-01 NBE22",
+  "fo": 24,
+  "frm": "MX_HTP-03A",
+  "to": "ODF-01 NBE22",
+  "len_m": 256,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 256 m",
+  "so_row": 16,
+  "ends": {
+   "MX_HTP-03A": "MX_HTP-03A|CE101"
+  }
+ },
+ {
+  "id": "C36",
+  "name": "VINA-OFC 2016 LVL-03 → MX thẳng (đi LVL)",
+  "fo": 12,
+  "frm": "MX_LVL-03",
+  "to": "MX thẳng đi LVL",
+  "len_m": 858,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 858 m",
+  "so_row": 36,
+  "ends": {
+   "MX_LVL-03": "MX_LVL-03|AD48"
+  }
+ },
+ {
+  "id": "C37",
+  "name": "SACOM 1/2015 MX thẳng (đi LVL) → LVL-02",
+  "fo": 12,
+  "frm": "MX thẳng đi LVL",
+  "to": "MX_LVL-02",
+  "len_m": 891,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 891 m",
+  "so_row": 39,
+  "ends": {
+   "MX_LVL-02": "MX_LVL-02|AD41"
+  }
+ },
+ {
+  "id": "C38",
+  "name": "FOCAL 2013 LVL-02 → LVL-01",
+  "fo": 12,
+  "frm": "MX_LVL-02",
+  "to": "MX_LVL-01",
+  "len_m": 534,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 534 m",
+  "so_row": 40,
+  "ends": {
+   "MX_LVL-02": "MX_LVL-02|AD28",
+   "MX_LVL-01": "MX_LVL-01|AD22"
+  }
+ },
+ {
+  "id": "C39",
+  "name": "TPKL 9/2019 LVL-05 → MX thẳng (giữa MX_DST và LVL-05)",
+  "fo": 12,
+  "frm": "MX_LVL-05",
+  "to": "MX thẳng LVL-05/DST",
+  "len_m": 1380,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1380 m",
+  "so_row": 52,
+  "ends": {
+   "MX_LVL-05": "MX_LVL-05|AA89"
+  }
+ },
+ {
+  "id": "C40",
+  "name": "ADSS 9/2009 MX thẳng LVL-05/DST → MX_DST",
+  "fo": 12,
+  "frm": "MX thẳng LVL-05/DST",
+  "to": "MX_DST",
+  "len_m": 1834,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1834 m",
+  "so_row": 51,
+  "ends": {
+   "MX_DST": "MX_DST|L36"
+  }
+ },
+ {
+  "id": "C41",
+  "name": "FOCAL 8/2020 MX_DST → LVL-01",
+  "fo": 12,
+  "frm": "MX_DST",
+  "to": "MX_LVL-01",
+  "len_m": 2450,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 2450 m",
+  "so_row": 50,
+  "ends": {
+   "MX_DST": "MX_DST|L23",
+   "MX_LVL-01": "MX_LVL-01|AA8"
+  }
+ },
+ {
+  "id": "C42",
+  "name": "4FO MX_DST → MX băng sông 2",
+  "fo": 4,
+  "frm": "MX_DST",
+  "to": "MX băng sông 2",
+  "len_m": 243,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 243 m",
+  "so_row": 77,
+  "ends": {
+   "MX_DST": "MX_DST|C23"
+  }
+ },
+ {
+  "id": "C43",
+  "name": "48FO băng sông 2 → băng sông 1",
+  "fo": 48,
+  "frm": "MX băng sông 2",
+  "to": "MX băng sông 1",
+  "len_m": 235,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 235 m",
+  "so_row": 76,
+  "ends": {}
+ },
+ {
+  "id": "C44",
+  "name": "FOCAL 2020 băng sông 1 → HNB012 (6FO)",
+  "fo": 6,
+  "frm": "MX băng sông 1",
+  "to": "HNB012",
+  "len_m": 1191,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1191 m",
+  "so_row": 75,
+  "ends": {}
+ },
+ {
+  "id": "C45",
+  "name": "POSTEF 2016 HTP-01 → HNB066 (8FO)",
+  "fo": 8,
+  "frm": "MX_HTP-01",
+  "to": "HNB066",
+  "len_m": 150,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
+  "so_row": 2,
+  "ends": {
+   "MX_HTP-01": "MX_HTP-01|CR48"
+  }
+ },
+ {
+  "id": "C46",
+  "name": "POSTEF 1/2019 HTP-02 → HNB038 (8FO)",
+  "fo": 8,
+  "frm": "MX_HTP-02",
+  "to": "HNB038",
+  "len_m": 714,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 714 m",
+  "so_row": 8,
+  "ends": {
+   "MX_HTP-02": "MX_HTP-02|CB71"
+  }
+ },
+ {
+  "id": "C47",
+  "name": "VINA-OFC 2016 HTP-02 → HNB005 (8FO)",
+  "fo": 8,
+  "frm": "MX_HTP-02",
+  "to": "HNB005",
+  "len_m": 449,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 449 m",
+  "so_row": 9,
+  "ends": {
+   "MX_HTP-02": "MX_HTP-02|CR81"
+  }
+ },
+ {
+  "id": "C48",
+  "name": "POSTEF 2017 HTP-03A → HNB013 (8FO)",
+  "fo": 8,
+  "frm": "MX_HTP-03A",
+  "to": "HNB013",
+  "len_m": 430,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 430 m",
+  "so_row": 15,
+  "ends": {
+   "MX_HTP-03A": "MX_HTP-03A|CU88"
+  }
+ },
+ {
+  "id": "C49",
+  "name": "SACOM 2014 LVL-03 → HNB094 (12FO)",
+  "fo": 12,
+  "frm": "MX_LVL-03",
+  "to": "HNB094",
+  "len_m": 150,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
+  "so_row": 38,
+  "ends": {
+   "MX_LVL-03": "MX_LVL-03|AQ48"
+  }
+ },
+ {
+  "id": "C50",
+  "name": "POSTEF 8/2019 LVL-04 → HNB018 (6FO)",
+  "fo": 6,
+  "frm": "MX_LVL-04",
+  "to": "HNB018",
+  "len_m": 150,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
+  "so_row": 35,
+  "ends": {
+   "MX_LVL-04": "MX_LVL-04|AA70"
+  }
+ },
+ {
+  "id": "C51",
+  "name": "SACOM 3/2016 LVL-02 → HNB065 (8FO)",
+  "fo": 8,
+  "frm": "MX_LVL-02",
+  "to": "HNB065",
+  "len_m": 269,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 269 m",
+  "so_row": 42,
+  "ends": {
+   "MX_LVL-02": "MX_LVL-02|AQ41"
+  }
+ },
+ {
+  "id": "C52",
+  "name": "POSTEF 6/2019 LVL-02 → HNB055 (8FO)",
+  "fo": 8,
+  "frm": "MX_LVL-02",
+  "to": "HNB055",
+  "len_m": 598,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 598 m",
+  "so_row": 41,
+  "ends": {
+   "MX_LVL-02": "MX_LVL-02|AQ28"
+  }
+ },
+ {
+  "id": "C53",
+  "name": "VINA 2017 LVL-02 → HNB073 (8FO)",
+  "fo": 8,
+  "frm": "MX_LVL-02",
+  "to": "HNB073",
+  "len_m": 262,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 262 m",
+  "so_row": 44,
+  "ends": {
+   "MX_LVL-02": "MX_LVL-02|AA31"
+  }
+ },
+ {
+  "id": "C54",
+  "name": "VINA 2018 LVL-01 → HNB011 (8FO)",
+  "fo": 8,
+  "frm": "MX_LVL-01",
+  "to": "HNB011",
+  "len_m": 382,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 382 m",
+  "so_row": 49,
+  "ends": {
+   "MX_LVL-01": "MX_LVL-01|AM5"
+  }
+ },
+ {
+  "id": "C55",
+  "name": "FOCAL 8FO LVL-01 → MX thẳng → HNB075 (945 m)",
+  "fo": 8,
+  "frm": "MX_LVL-01",
+  "to": "MX thẳng LVL-01/075",
+  "len_m": 945,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 945 m",
+  "so_row": 66,
+  "ends": {
+   "MX_LVL-01": "MX_LVL-01|AD5"
+  }
+ },
+ {
+  "id": "C56",
+  "name": "focal 8fo 10/2014 MX thẳng LVL-01/075 → HNB075",
+  "fo": 8,
+  "frm": "MX thẳng LVL-01/075",
+  "to": "HNB075",
+  "len_m": 920,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 920 m",
+  "so_row": 67,
+  "ends": {}
+ },
+ {
+  "id": "C57",
+  "name": "POSTEF 6/2019 HNB055 ↔ HNB065 (8FO)",
+  "fo": 8,
+  "frm": "HNB055",
+  "to": "HNB065",
+  "len_m": 988,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 988 m",
+  "so_row": 43,
+  "ends": {}
+ },
+ {
+  "id": "C58",
+  "name": "PRYSMIAN 2009 HNB011 → MX thẳng 11-56 (8FO)",
+  "fo": 8,
+  "frm": "HNB011",
+  "to": "MX thẳng 11-56",
+  "len_m": 455,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 455 m",
+  "so_row": 48,
+  "ends": {}
+ },
+ {
+  "id": "C59",
+  "name": "VINA OFC MX thẳng 11-56 → HNB056 (8FO)",
+  "fo": 8,
+  "frm": "MX thẳng 11-56",
+  "to": "HNB056",
+  "len_m": 420,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 420 m",
+  "so_row": 47,
+  "ends": {}
+ },
+ {
+  "id": "C60",
+  "name": "POSTEF 6/2019 HNB056 ↔ HNB071 (8FO)",
+  "fo": 8,
+  "frm": "HNB056",
+  "to": "HNB071",
+  "len_m": 1300,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1300 m",
+  "so_row": 46,
+  "ends": {}
+ },
+ {
+  "id": "C61",
+  "name": "POSTEF 2017 HNB071 ↔ HNB073 (8FO)",
+  "fo": 8,
+  "frm": "HNB071",
+  "to": "HNB073",
+  "len_m": 755,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 755 m",
+  "so_row": 45,
+  "ends": {}
+ },
+ {
+  "id": "C62",
+  "name": "POSTEF 1/2019 HNB005 ↔ HNB062 (8FO)",
+  "fo": 8,
+  "frm": "HNB005",
+  "to": "HNB062",
+  "len_m": 1268,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1268 m",
+  "so_row": 10,
+  "ends": {}
+ },
+ {
+  "id": "C63",
+  "name": "ETCC-2009 HNB062 → MX thẳng 62-21 (8FO)",
+  "fo": 8,
+  "frm": "HNB062",
+  "to": "MX thẳng 62-21",
+  "len_m": 236,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 236 m",
+  "so_row": 11,
+  "ends": {}
+ },
+ {
+  "id": "C64",
+  "name": "FIBERHOME AERIAL MX thẳng 62-21 → HNB021 (8FO)",
+  "fo": 8,
+  "frm": "MX thẳng 62-21",
+  "to": "HNB021",
+  "len_m": 777,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 777 m",
+  "so_row": 12,
+  "ends": {}
+ },
+ {
+  "id": "C65",
+  "name": "VINACAP HNB021 → MX thẳng 13-21 (8FO)",
+  "fo": 8,
+  "frm": "HNB021",
+  "to": "MX thẳng 13-21",
+  "len_m": 660,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 660 m",
+  "so_row": 13,
+  "ends": {}
+ },
+ {
+  "id": "C66",
+  "name": "ETCC-2009 MX thẳng 13-21 → HNB013 (8FO)",
+  "fo": 8,
+  "frm": "MX thẳng 13-21",
+  "to": "HNB013",
+  "len_m": 320,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 320 m",
+  "so_row": 14,
+  "ends": {}
+ },
+ {
+  "id": "C67",
+  "name": "VDF HNB066 → MX thẳng 66-16 (8FO)",
+  "fo": 8,
+  "frm": "HNB066",
+  "to": "MX thẳng 66-16",
+  "len_m": 200,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 200 m",
+  "so_row": 5,
+  "ends": {}
+ },
+ {
+  "id": "C68",
+  "name": "POSTEF 2017 MX thẳng 66-16 → HNB016 (8FO)",
+  "fo": 8,
+  "frm": "MX thẳng 66-16",
+  "to": "HNB016",
+  "len_m": 300,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 300 m",
+  "so_row": 6,
+  "ends": {}
+ },
+ {
+  "id": "C69",
+  "name": "RECOIN 12/2016 HNB016 ↔ HNB038 (4FO)",
+  "fo": 4,
+  "frm": "HNB016",
+  "to": "HNB038",
+  "len_m": 600,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 600 m",
+  "so_row": 7,
+  "ends": {}
+ },
+ {
+  "id": "C70",
+  "name": "FOCAL 2020 HNB014 ↔ HNB075 (6FO)",
+  "fo": 6,
+  "frm": "HNB014",
+  "to": "HNB075",
+  "len_m": 861,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 861 m",
+  "so_row": 68,
+  "ends": {}
+ },
+ {
+  "id": "C71",
+  "name": "Fiber 6/2007 HNB012 → MX_PHẠM HÙNG (8FO)",
+  "fo": 8,
+  "frm": "HNB012",
+  "to": "MX_PHẠM HÙNG",
+  "len_m": 300,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 300 m",
+  "so_row": 73,
+  "ends": {
+   "MX_PHẠM HÙNG": "MX_PHẠM HÙNG|K17"
+  }
+ },
+ {
+  "id": "C72",
+  "name": "FOCAL MX_PHẠM HÙNG → MX thẳng Phạm Hùng (8FO)",
+  "fo": 8,
+  "frm": "MX_PHẠM HÙNG",
+  "to": "MX thẳng Phạm Hùng",
+  "len_m": 2093,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 2093 m",
+  "so_row": 72,
+  "ends": {
+   "MX_PHẠM HÙNG": "MX_PHẠM HÙNG|K4"
+  }
+ },
+ {
+  "id": "C73",
+  "name": "FOCAL MX thẳng Phạm Hùng → MX cầu NVL 2 (8FO)",
+  "fo": 8,
+  "frm": "MX thẳng Phạm Hùng",
+  "to": "MX cầu NVL 2",
+  "len_m": 1497,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1497 m",
+  "so_row": 71,
+  "ends": {}
+ },
+ {
+  "id": "C74",
+  "name": "FOCAL MX cầu NVL 2 → MX cầu NVL 1 (8FO)",
+  "fo": 8,
+  "frm": "MX cầu NVL 2",
+  "to": "MX cầu NVL 1",
+  "len_m": 606,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 606 m",
+  "so_row": 70,
+  "ends": {}
+ },
+ {
+  "id": "C75",
+  "name": "FOCAL MX cầu NVL 1 → HNB014 (8FO)",
+  "fo": 8,
+  "frm": "MX cầu NVL 1",
+  "to": "HNB014",
+  "len_m": 1409,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1409 m",
+  "so_row": 69,
+  "ends": {}
+ },
+ {
+  "id": "C76",
+  "name": "FOCAL 2020 MX_PHẠM HÙNG → HNB113 (6FO)",
+  "fo": 6,
+  "frm": "MX_PHẠM HÙNG",
+  "to": "HNB113",
+  "len_m": 760,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 760 m",
+  "so_row": 74,
+  "ends": {
+   "MX_PHẠM HÙNG": "MX_PHẠM HÙNG|C17"
+  }
+ },
+ {
+  "id": "C77",
+  "name": "8FO chéo đường NVT_02A ↔ NVT_02B",
+  "fo": 8,
+  "frm": "MX_NVT_02A",
+  "to": "MX_NVT_02B",
+  "len_m": 30,
+  "src": "Chưa có trong sổ cáp: ước tính 30 m từ toạ độ hai măng xông (cần xác nhận)",
+  "so_row": null,
+  "ends": {
+   "MX_NVT_02A": "MX_NVT_02A|AQ174",
+   "MX_NVT_02B": "MX_NVT_02B|U174"
+  }
  }
 ]

@@ -50,6 +50,11 @@ def parse(path):
             if len(seg)>=12 and sorted(vals)==list(range(1,len(seg)+1)) and vals[0]!=1:
                 runs.append(dict(kind='h',r=r,c=seg[0],n=len(seg),nums=vals))
             if c is not None:seg=[c]
+    # bỏ các run con nằm gọn trong một hàng số hoán vị
+    perm=[x for x in runs if x.get('nums')]
+    def inside(x):
+        return any(y is not x and y['kind']==x['kind'] and y['r']==x['r'] and y['c']<=x['c'] and y['c']+y['n']>=x['c']+x['n'] and not x.get('nums') for y in perm)
+    runs=[x for x in runs if not inside(x)]
     lab=re.compile(r'^([A-Za-z]\d?|HƯ|Hư|hư|HU)$')
     good=[]
     for run in runs:

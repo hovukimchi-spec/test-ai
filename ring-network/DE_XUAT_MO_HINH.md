@@ -157,3 +157,12 @@ Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model
 - Độ dài cộng theo sổ cáp khớp OTDR/BBNT: 3063/3075, 2013/2013, 860/862, 2900/2896, 1178/1178, 2393/2401 m.
 - Đoạn trục NB-01→HTP-03B (C12, C14–C17) hiện mang 3 ring (R1, R2, R6); đứt một cáp làm mất đồng thời 3 link (mỗi ring một link, các CSG vẫn còn hướng kia).
 - Sơ đồ MX: nhãn có chữ số (A2, A3, C1…) được coi là nhóm riêng; hàng số core bị hoán vị (24FO ODF-01 tại NB-01: 7..12, 1..6, 13..24) được đọc theo số in trên sơ đồ.
+
+## 17. Lần đường đi các ring còn lại (R3, R4, R5, R7, R8 và nhánh cụt)
+Suy luận chủ yếu từ **tên trạm ghi sát nhãn trong sơ đồ MX** (cho biết cặp core nào là của CSG nào trên từng cáp), ODF AGG (cổng ↔ ring/trạm), sổ độ dài cáp (thứ tự MX, mã cáp), rồi kiểm tra tổng độ dài so với BBNT/ODF. Chưa được người dùng xác nhận từng bước.
+- 38 link đã lần (R1–R8 + nhánh HNB018, HNB113). Không có xung đột core giữa các link. Không có mối hàn nào mâu thuẫn với nhãn sơ đồ MX (56 trên 107 mối hàn đối chiếu được; phần còn lại nằm ở măng xông chưa có nhãn).
+- Độ dài khớp trong 2%: 27 link; lệch nhẹ (≤6%): 9 link (HNB094/HNB073→NBE22 thấp hơn BBNT 4–5%, nghi cáp trục LVL-03→HTP-01 dài hơn sổ ~360–410 m); lệch lớn: R5-02 (HNB012→HNB014, +6,3%) và R7-01 (HNB005, +40,7%).
+- R7-01 (HNB005) và R8-01 (HNB066) đi qua hành lang LVL ↔ NVT (đúng với việc đã đổi tuyến, dài hơn thiết kế): 15 624 m và 14 792 m (BBNT 11 101 / 15 404 m).
+- Nhánh HNB113: ODF-HNB113 ghi "To HNB012" nhưng sơ đồ MX_PHẠM HÙNG ghép nhãn B giữa cáp HNB113 và cáp hướng HNB014; hiện mô hình theo sơ đồ (cần xác nhận).
+- Cáp 8FO chéo đường NVT_02A↔02B: sổ không có, chiều dài ước tính 30 m theo toạ độ.
+- Tải cáp: C32 (POSTEF 9/2019 12FO, LVL-03→HTP-01, 4644 m) mang 5 link của 5 ring, dùng 10/12 core (còn 1 cặp). C11 (24FO TPKL) mang 5 link; C01, C02, C04, C10, C22, C33, C34 mang 4 link. Không cáp nào làm cô lập CSG ring ngoài các cáp vào trạm (C03, C05, C49) mà quy tắc chấp nhận; HNB018/HNB113 là nhánh cụt.
