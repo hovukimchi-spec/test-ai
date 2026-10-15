@@ -73,3 +73,27 @@
 - Ví dụ "khác lề": `MX_NVT_03A` và `MX_NVT_03B` là hai măng xông ở hai bên lề đường (file ghi nhầm trùng tên); đấu hai hướng cần tách như vậy.
 - Một số CSG là trạm cấp 3 (last-mile), **chỉ có một hướng đến**, triển khai cùng đợt, không bảo vệ 1+1.
 - Ghi chú DWDM, VNN, TTC trong ODF/MX là **quỹ core trống cho đối tác** dùng trên một đoạn nào đó; mô hình gắn "đối tác" vào sợi và đoạn.
+
+## 8. Đối chiếu với KML `Nha_Be.kml` (vị trí & khoảng cách)
+Tệp: `data/segments_geo.csv` (chiều dài từng đoạn theo KML), `data/ban_do_8_ring.svg|png` (bản đồ 8 ring).
+
+**KML chứa**: thư mục `Lastmile Nha Be` (32 điểm: 2 AGG + 30 CSG; 17 điểm MX; 8 thư mục tuyến = 8 ring, 38 đoạn gồm cả nhánh HNB018 và HNB113) và một nhóm khác `34 LINK MBF` (AGG-HCMNBE11/NBE21, 33 trạm CSG khác, 34 link) cùng các điểm lẻ (HNB072, HNB134, NB Kim Long, Riverside).
+Đánh số Folder 1–8 trùng đúng R1–R8 đã suy ra, khớp nhãn "ring n" trong ODF AGG.
+
+**Chiều dài**: nhìn chung OTDR ≈ 1,07–1,10 × chiều dài vẽ trên KML (slack hợp lý). Các đoạn lệch:
+| Đoạn | HĐ | OTDR | KML | Nhận xét |
+|---|---|---|---|---|
+| 1 NBE12→066 | 10,24 | 15,40 | 14,35 | số HĐ sai (KML & OTDR cùng ~14–15 km) |
+| 5 NBE12→005 | 10,86 | 11,10 | 15,05 | KML dài hơn OTDR 4 km: nghi vẽ sai tuyến |
+| 3 016→038 | 0,52 | 0,62 | 0,27 | OTDR gấp 2,3× KML: dư cáp lớn hoặc vẽ sai |
+| 18 014→075, 32 006→091 | 0,52 / 0,96 | 0,86 / 1,61 | 0,41 / 0,78 | OTDR ≈ 2× KML |
+| 22 056→071 | 0,83 | 1,33 | 1,28 | số HĐ sai |
+| 2 066→016 | 0,46 | 0,50 | 0,69 | OTDR ngắn hơn KML: vẽ chưa chuẩn |
+Giá trị HĐ **0,827 km lặp 5 lần** (đoạn 7, 8, 12, 22, 26) và 1,086 lặp 2 lần: nhiều khả năng là số điền mẫu, không phải số đo.
+Toạ độ AGG-NBE22 trong BBNT (10,69881) lệch KML (10,685521): BBNT chép nhầm vĩ độ của HNB038.
+
+**Kiểm tra "không cùng đường" (so sánh hình học KML, dung sai 20 m)**: tuyến vẽ tay nên chỉ là cảnh báo cần xác nhận thực địa.
+- Cáp NBE12→HNB059 (R1) trùng ~0,65–0,95 km với đoạn HNB060→048 và HNB048→NBE22 của cùng ring.
+- R1 (048→NBE22) và R2 (091→NBE22) **chạy chung ~14 km** về NBE22; cả hai đều chung hành lang với tuyến NBE12→054/059 phía nam.
+- Các ring phía bắc (R3, R4, R5, R7, R8): các đoạn từ NBE12 và về NBE22 chung hành lang 5–13 km (đường Long Thới ↔ Lê Văn Lương).
+Nên khi mô hình hoá cần khai báo từng đoạn thuộc "hành lang" nào (cùng đường/cùng cột/khác lề) và cảnh báo mọi ring mà hai hướng của một CSG cùng hành lang. Đây là điểm yếu bảo vệ 1+1 thật sự nếu đứt cáp trên hành lang chung (một sự cố làm mất cả hai hướng).
