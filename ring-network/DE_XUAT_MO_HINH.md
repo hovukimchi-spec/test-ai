@@ -69,7 +69,7 @@
 - Ngưỡng theo chiều dài tuyến, ứng với SFP 10/40/80 km của MobiFone: **< 10 km: 12,1 dB; 10–40 km: 17 dB; > 40 km: 27 dB.**
 - Lệch suy hao giữa hai core chấp nhận **≤ 2 dB**.
 - Kết quả kiểm tra BBNT theo quy ước: cả 37 đoạn khớp ngưỡng; chỉ **đoạn 31 (HNB054→HNB006)** có lệch core 2,02 dB (vượt nhẹ 2 dB).
-- Ring đi hết một vòng (kịch bản đứt một đoạn, tín hiệu đi hướng còn lại): dài nhất R1 ≈ 29,9 km, suy hao đo lớn nhất ≈ 13,7 dB, thuộc nhóm 10–40 km (ngưỡng 17 dB) nên còn dư khoảng 3,3 dB. Các ring khác dư nhiều hơn.
+- (Đã thay thế bằng phân tích đứt-một-đoạn ở mục 9; con số "29,9 km/13,7 dB" trước đây là cả vòng, không phải đường thực tế khi đứt.)
 - Ví dụ "khác lề": `MX_NVT_03A` và `MX_NVT_03B` là hai măng xông ở hai bên lề đường (file ghi nhầm trùng tên); đấu hai hướng cần tách như vậy.
 - Một số CSG là trạm cấp 3 (last-mile), **chỉ có một hướng đến**, triển khai cùng đợt, không bảo vệ 1+1.
 - Ghi chú DWDM, VNN, TTC trong ODF/MX là **quỹ core trống cho đối tác** dùng trên một đoạn nào đó; mô hình gắn "đối tác" vào sợi và đoạn.
@@ -96,4 +96,29 @@ Toạ độ AGG-NBE22 trong BBNT (10,69881) lệch KML (10,685521): BBNT chép n
 - Cáp NBE12→HNB059 (R1) trùng ~0,65–0,95 km với đoạn HNB060→048 và HNB048→NBE22 của cùng ring.
 - R1 (048→NBE22) và R2 (091→NBE22) **chạy chung ~14 km** về NBE22; cả hai đều chung hành lang với tuyến NBE12→054/059 phía nam.
 - Các ring phía bắc (R3, R4, R5, R7, R8): các đoạn từ NBE12 và về NBE22 chung hành lang 5–13 km (đường Long Thới ↔ Lê Văn Lương).
-Nên khi mô hình hoá cần khai báo từng đoạn thuộc "hành lang" nào (cùng đường/cùng cột/khác lề) và cảnh báo mọi ring mà hai hướng của một CSG cùng hành lang. Đây là điểm yếu bảo vệ 1+1 thật sự nếu đứt cáp trên hành lang chung (một sự cố làm mất cả hai hướng).
+(Đã điều chỉnh nhận định sau khi bạn giải thích: các ring dùng chung cáp là được phép; xem mục 9.)
+
+## 9. Quy tắc bảo vệ đã chốt & phân tích đứt một đoạn
+**Quy ước**
+- Bảo vệ tính **trong phạm vi từng ring, từ AGG đến AGG**. Các ring **được phép đi chung cáp/hành lang** với nhau: một sự cố trên cáp chung chỉ làm mỗi ring mất một đoạn, các CSG vẫn còn tín hiệu từ một AGG.
+- **Điều cần tránh**: một CSG không còn link nào về bất kỳ AGG. Chỉ xảy ra khi cùng một ring mất ≥ 2 đoạn trong một sự cố (hai hướng của ring chung cáp/hành lang với nhau), hoặc với trạm nhánh cụt (HNB018, HNB113: chỉ có một hướng).
+- Nhóm kênh của **HNB066 và HNB005 đã chuyển sang đường khác thiết kế** nên chiều dài thực tăng. Đoạn 1 (NBE12→066) và đoạn 5 (NBE12→005) dùng chiều dài KML cộng slack (~8%) khi tính quỹ suy hao.
+- **BBNT chỉ mang tính chất con số thống nhất**, không phải kết quả đo đáng tin tuyệt đối. Nguồn tham chiếu vật lý: KML + slack; BBNT dùng đối soát hợp đồng.
+
+**Đứt một đoạn bất kỳ: CSG đi đường dài nhất về AGG còn lại**
+| Ring | Tổng km | Đứt đoạn | CSG nặng nhất | Đường mới (km) | Suy hao (dB) | Ngưỡng | Dư |
+|---|---|---|---|---|---|---|---|
+| R1 | 29,9 | 34 | HNB059 | 25,2 | 10,6 | 17 | 6,4 |
+| R2 | 20,4 | 30 | HNB054 | 19,4 | 10,7 | 17 | 6,3 |
+| R3 | 21,3 | 28 | HNB094 | 13,6 | 4,9 | 17 | 12,1 |
+| R4 | 22,1 | 24 | HNB073 | 12,6 | 4,5 | 17 | 12,5 |
+| R5 | 26,3 | 16 | HNB012 | 17,8 | 6,7 | 17 | 10,3 |
+| R6 | 12,2 | 15 | HNB020 | 10,0 | 3,1 | 17 | 13,9 (sát mốc 10 km) |
+| R7 | 20,2 | 9 | HNB013 | 19,5 | 7,4 | 17 | 9,6 |
+| R8 | 19,3 | 4 | HNB038 | 16,6 | 6,6 | 17 | 10,4 |
+Suy hao lấy core cao hơn trong BBNT (đoạn 1, 5 quy đổi theo chiều dài KML). Chưa tính mối hàn/đầu nối bổ sung.
+
+## 10. Đoạn "hai lề" (người dùng bổ sung)
+- **HNB020 → HNB031** (đoạn 14, R6) đi **hai lề đường**, mỗi lề một sợi. Tức hai core của cặp 2FO nằm trên hai tuyến cáp vật lý khác nhau (một bên mỗi lề).
+- **Khoảng HNB006 → HNB060** (trục phía nam, thuộc R1/R2) cũng đi hai lề, mỗi lề một sợi. Phạm vi chính xác từng đoạn cần xác nhận (nghi gồm 006→091, 091→NBE22 một phần, 059→060 và các đoạn R1 cùng hành lang).
+- Hệ quả cho mô hình: một đoạn dịch vụ có thể gồm **hai cáp vật lý song song** (lề A, lề B), mỗi cáp mang một core. Khi đó chiều dài và suy hao của core #1 và core #2 có thể khác nhau (đoạn băng đường thêm cáp); đứt một lề chỉ mất một core nhưng link hai chiều vẫn mất; ghi nhận trạng thái theo từng core.
