@@ -133,7 +133,21 @@ def build():
         seen[name]=1
         closures.append(dict(name=name,straight=r['sheet']!='MX',lat=_f(r['lat']),lon=_f(r['lon']),desc=r['mo_ta']))
     cables=_csv('cap_tong_hop.csv')
-    d=dict(config=CONFIG,nodes=nodes,rings=RINGS,segments=segments,odf=odf,odf_agg=odf_agg,closures=closures,cables=cables,partners=PARTNERS,
+    mxc=_csv('mx_cap.csv');mxo=_csv('mx_core.csv')
+    cab={c['cap_id']:c for c in mxc}
+    pairs=[];mxwarn=[]
+    for mx in dict.fromkeys(c['mx'] for c in mxc):
+        ids=[c['cap_id'] for c in mxc if c['mx']==mx];ends={};info={}
+        for i in ids:
+            rows=[r for r in mxo if r['cap_id']==i];ends[i]=[r['nhan'] for r in rows];info[i]={int(r['core']):r for r in rows}
+        pr,wr=splice_pairs(ends)
+        for lab,a,x,b,y in pr:
+            ra,rb=info[a][x],info[b][y]
+            pairs.append(dict(mx=mx,label=lab,a=a,core_a=x,color_a=ra['mau_soi'],tube_a=ra['ong'],b=b,core_b=y,color_b=rb['mau_soi'],tube_b=rb['ong'],station=ra['tram'] or rb['tram']))
+        mxwarn+=[(mx,w) for w in wr]
+        for i in ids:
+            if not any(ends[i]):mxwarn.append((mx,f"{cab[i]['o_goc']}: chưa ghi nhãn core (chưa có dữ liệu phối)"))
+    d=dict(config=CONFIG,mx_cables=mxc,mx_cores=mxo,mx_pairs=pairs,mx_warn=mxwarn,mx_notes=_csv('mx_ghi_chu.csv'),nodes=nodes,rings=RINGS,segments=segments,odf=odf,odf_agg=odf_agg,closures=closures,cables=cables,partners=PARTNERS,
            vat_tu=_csv('vat_tu_odf_mx.csv'))
     d['issues']=detect_issues(d)
     return d

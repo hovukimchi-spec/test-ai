@@ -13,7 +13,28 @@ for s in d['segments']:
 nodes={k:{kk:v[kk] for kk in('id','type','lat','lon','ring','role') if kk in v} for k,v in d['nodes'].items()}
 rings={k:dict(csg=v['csg'],segs=v['segs']) for k,v in d['rings'].items()}
 odf=[{k:o[k] for k in('node','port','dest','cable')} for o in d['odf']]
-data=dict(segments=segs,nodes=nodes,rings=rings,odf=odf,closures=[{k:c[k] for k in('name','straight','lat','lon','desc')} for c in d['closures']],
+cab={c['cap_id']:c for c in d['mx_cables']}
+def cn(i):
+    c=cab[i];return f"{c['o_goc']} {(c['ma_cap']+' ') if c['ma_cap'] else ''}{c['so_FO']}FO→{c['huong'] or '?'}"
+def rng_(xs):
+    xs=sorted(xs);out=[];st=pv=xs[0]
+    for x in xs[1:]+[None]:
+        if x is not None and x==pv+1:pv=x;continue
+        out.append(f'{st}' if st==pv else f'{st}–{pv}')
+        if x is not None:st=pv=x
+    return ','.join(out)
+mxd={}
+for p in d['mx_pairs']:
+    mxd.setdefault(p['mx'],{}).setdefault((p['label'],p['a'],p['b']),[]).append(p)
+mxs={}
+for m,g in mxd.items():
+    rows=[]
+    for (lab,a,b),ps in g.items():
+        rows.append([lab,cn(a),rng_([p['core_a'] for p in ps]),cn(b),rng_([p['core_b'] for p in ps]),', '.join(sorted({p['station'] for p in ps if p['station']}))])
+    mxs[m]=rows
+mxcab={}
+for c in d['mx_cables']:mxcab.setdefault(c['mx'],[]).append([c['o_goc'],cn(c['cap_id']),c['so_core_co_nhan']+'/'+c['so_core_ve']])
+data=dict(mxpairs=mxs,mxcab=mxcab,segments=segs,nodes=nodes,rings=rings,odf=odf,closures=[{k:c[k] for k in('name','straight','lat','lon','desc')} for c in d['closures']],
           issues=[list(i) for i in d['issues']],fix=[
  ['CSG mất một hướng','Đứt/hỏng một đoạn kề','OTDR từ đầu trạm, đổi sang vị trí (tab OTDR → vị trí); báo thi công; theo dõi hướng còn lại'],
  ['CSG mất cả hai hướng','Hai đoạn cùng ring đứt cùng lúc hoặc trạm nhánh cụt','Dùng nút Giả lập sự cố để xác định; ưu tiên khôi phục đoạn có CSG cô lập'],

@@ -100,4 +100,29 @@ for r in range(1,ws.max_row+1):
         name=ws.cell(r-1,5).value or ''
         out.append((str(name),t,mm.group(1) if mm else '',mm.group(2) if mm else '','MX thang'))
 w('mx_dang_ky.csv',['ten','mo_ta','lat','lon','sheet'],out)
+
+# ---------- Phối core tại măng xông (sheet MX): cáp, core, nhãn, trạm ----------
+sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
+import parse_mx
+res=parse_mx.parse(find('*MX__NHA_BE.xlsx'))
+TUBE=['xanh dương','cam','xanh lá','nâu','xám','trắng']
+cab=[];cor=[]
+for mx in dict.fromkeys(c['mx'] for c in res['cables']):
+    n=0
+    for c in [x for x in res['cables'] if x['mx']==mx]:
+        n+=1;cid=f"{mx}|{c['cell']}";h=c['header']
+        fo=re.search(r'(\d+)\s*FO',h,re.I);cs=re.search(r'(?:cs|chỉ số)\s*:?\s*(\d+)',h,re.I)
+        loai='treo' if re.search(r'TREO',h,re.I) else 'tròn' if re.search(r'TRÒN',h,re.I) else ''
+        hv=re.search(r'(?:To:\s*|[Hh]ướng\s+(?:về|vào trạm|qua)?\s*)(.*)$',h.split(' / ')[-1])
+        ma=re.sub(r'\(.*?\)|\d+\s*FO|CÁP|TREO|TRÒN','',h.split(' / ')[0],flags=re.I);ma=re.sub(r'\s+',' ',ma).strip(' -/')
+        off=0;ncore=0;lab=0
+        for t in c['tubes']:
+            for i,(l,st) in enumerate(zip(t['labels'],t['stations']),1):
+                g=off+i;cor.append((mx,cid,g,(g-1)//6+1,TUBE[(g-1)%6],l,st));ncore+=1;lab+=1 if l else 0
+            off+=len(t['labels'])
+        cab.append((mx,cid,c['cell'],h.replace(' / ',' | '),ma,loai,fo.group(1) if fo else '',cs.group(1) if cs else '',(hv.group(1).strip() if hv else ''),ncore,lab))
+w('mx_cap.csv',['mx','cap_id','o_goc','tieu_de','ma_cap','loai','so_FO','chi_so_m','huong','so_core_ve','so_core_co_nhan'],cab)
+w('mx_core.csv',['mx','cap_id','core','ong','mau_soi','nhan','tram'],cor)
+w('mx_ghi_chu.csv',['o','noi_dung'],res['notes'])
+print('MX cáp',len(cab),'core',len(cor))
 print('OK',len(out),'MX')

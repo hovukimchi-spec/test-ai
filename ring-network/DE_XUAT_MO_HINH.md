@@ -117,3 +117,11 @@ Cách hiểu đúng: "1 sợi cáp" = **một cáp vật lý gồm nhiều core*
 - Hệ quả: đây chính là điều kiện vật lý "hai hướng không chung lề". Trong mô hình mỗi cáp có thuộc tính `lề` (trái/phải) và hai hướng của một CSG phải khác lề; đoạn đứt trên một lề chỉ ảnh hưởng hướng đi theo lề đó.
 - Đã xác nhận: "nb51" là gõ nhầm của HNB054; MX1 = MX_NVT_01, MX2 = MX_NVT_02A/02B.
 - **Cáp trục lề trái từ AGG (NBE12) đi qua MX_NVT_01 → MX_NVT_02A → MX_NVT_03A là một cáp dùng chung**: R2 dùng một số core của cáp này cho HNB054 và HNB006, R1 dùng core khác của cùng cáp để đi tới MX_NVT_03A rồi tiếp tục sang HNB059. Đây là trường hợp "các ring chạy chung cáp" được phép (mục 9): mỗi link dùng 2 core riêng, bảng hàn tại từng MX quyết định core nào rẽ vào CSG, core nào đi thẳng.
+
+## 11. Bảng phối core tại măng xông (trọng tâm)
+Nguồn: sheet `MX` của file MX__NHA_BE.xlsx, đọc bằng `parse_mx.py` (kết quả trong `data/mx_cap.csv`, `mx_core.csv`, `mx_ghi_chu.csv`).
+- Cách đọc sơ đồ: mỗi cáp là hàng/cột số core; chữ ngay sát = nhãn nhóm hàn; **cùng nhãn hàn với nhau, core nhỏ hàn core nhỏ**; tên trạm (HNBxxx) ghi sát nhãn = trạm có link đi qua nhóm core đó; ô màu = màu sợi.
+- Kết quả: 21 măng xông trong sơ đồ, 70 đầu cáp, 794 core, **176 cặp hàn** suy ra; số core mỗi nhãn ở các đầu cáp khớp nhau ở hầu hết măng xông (kiểm tra tự động, các chỗ lệch nằm ở `Cảnh báo phối core`).
+- Chưa có nhãn (người dùng chưa ghi): MX_NVT_01, MX_NB-02/03/04, MX_HTP-03B, MX_DST (một phần), NVT_03A/03B (tiêu đề copy mẫu "Hướng vào trạm HNB006").
+- Màu sợi/ống: giả định 6 sợi mỗi ống (xanh dương, cam, xanh lá, nâu, xám, trắng), khớp ô màu trong sơ đồ; chưa kiểm tra với cáp 24FO.
+- Chưa làm: lần theo từng link ring từ CSG này qua các măng xông đến CSG kia (cần nối đầu cáp giữa các măng xông).

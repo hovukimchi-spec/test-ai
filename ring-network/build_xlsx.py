@@ -173,8 +173,8 @@ for i,x in enumerate(d['closures'],5):
 ML=4+len(d['closures']);box(M,5,ML,1,6);M.freeze_panes='A5'
 
 # ---------------- Hàn nối ----------------
-H=sheet('Hàn nối')
-title(H,'Bảng hàn nối tại măng xông','Quy ước nhãn: cùng nhãn = cùng nhóm hàn; trong một nhãn sợi nhỏ hàn sợi nhỏ (A1–A1, A2–A2…). Điền vào ô vàng; ví dụ dưới là DỮ LIỆU GIẢ ĐỊNH để minh hoạ.')
+H=sheet('Hàn nối bổ sung')
+title(H,'Nhập thêm hàn nối cho măng xông chưa có nhãn (NVT_01, NB-02/03/04, HTP-03B…)','Quy ước nhãn: cùng nhãn = cùng nhóm hàn; trong một nhãn sợi nhỏ hàn sợi nhỏ (A1–A1, A2–A2…). Điền vào ô vàng; ví dụ dưới là DỮ LIỆU GIẢ ĐỊNH để minh hoạ.')
 header(H,4,['Măng xông','Cáp A','Sợi A','Nhãn','Cáp B','Sợi B','Khay','Ghi chú'],[22,26,8,8,26,8,8,50])
 dv=DataValidation(type='list',formula1=f"='Măng xông'!$A$5:$A${ML}",allow_blank=True);H.add_data_validation(dv);dv.add('A5:A300')
 for r in range(5,301):
@@ -288,6 +288,52 @@ for i,x in enumerate(tips,4):
     for j,v in enumerate(x,1):X.cell(i,j,v).alignment=Alignment(wrap_text=True,vertical='top')
 box(X,4,3+len(tips),1,4)
 
+
+# ---------------- Phối core (trọng tâm) ----------------
+cabinfo={c['cap_id']:c for c in d['mx_cables']}
+def cname(i):
+    c=cabinfo[i];h=c['huong'] or c['tieu_de']
+    return f"{c['o_goc']} · {(c['ma_cap']+' ') if c['ma_cap'] else ''}{c['so_FO']}FO → {h}"
+PC=sheet('Phối core MX')
+title(PC,'Bảng phối core tại măng xông: core nào hàn với core nào','Suy từ nhãn trong sơ đồ MX (cùng nhãn = cùng nhóm hàn; core nhỏ hàn core nhỏ). Màu sợi/ống theo thứ tự 6 sợi/ống (giả định). Cột "Trạm" lấy từ tên trạm ghi sát nhãn.')
+header(PC,4,['Măng xông','Nhãn','Cáp A','Core A','Ống A','Màu A','Cáp B','Core B','Ống B','Màu B','Trạm (ghi trong sơ đồ)','Ghi chú'],[16,7,46,7,6,11,46,7,6,11,16,30])
+for i,p in enumerate(d['mx_pairs'],5):
+    for j,v in enumerate([p['mx'],p['label'],cname(p['a']),p['core_a'],int(p['tube_a']),p['color_a'],cname(p['b']),p['core_b'],int(p['tube_b']),p['color_b'],p['station'],''],1):PC.cell(i,j,v)
+    PC.cell(i,12).fill=INP
+pl=4+len(d['mx_pairs']);box(PC,5,pl,1,12);PC.freeze_panes='C5';PC.auto_filter.ref=f'A4:L{pl}'
+PCA="'Phối core MX'!"
+CM=sheet('Cáp tại MX')
+title(CM,'Cáp (đầu cáp) tại từng măng xông','Ô gốc = vị trí ô trong sơ đồ MX. Số core vẽ / có nhãn tính từ sheet "Core MX".')
+header(CM,4,['Măng xông','Ô gốc','Mã cáp','Loại','Số FO','Chỉ số mét','Hướng','Số core vẽ','Số core có nhãn','Tiêu đề gốc'],[16,8,18,8,7,10,34,9,10,60])
+for i,c in enumerate(d['mx_cables'],5):
+    for j,v in enumerate([c['mx'],c['o_goc'],c['ma_cap'],c['loai'],model._f(c['so_FO']),model._f(c['chi_so_m']),c['huong']],1):CM.cell(i,j,v)
+    CM.cell(i,8,f"=COUNTIFS('Core MX'!B:B,\"{c['cap_id']}\")");CM.cell(i,9,f"=COUNTIFS('Core MX'!B:B,\"{c['cap_id']}\",'Core MX'!F:F,\"?*\")");CM.cell(i,10,c['tieu_de'])
+cl2=4+len(d['mx_cables']);box(CM,5,cl2,1,10);CM.freeze_panes='C5';CM.auto_filter.ref=f'A4:J{cl2}'
+CO=sheet('Core MX')
+title(CO,'Từng core của từng đầu cáp tại măng xông','Nhãn trống = chưa ghi (dự phòng/chưa phối).')
+header(CO,4,['Măng xông','Mã đầu cáp','Core','Ống','Màu sợi','Nhãn','Trạm'],[16,26,6,6,11,7,12])
+for i,r in enumerate(d['mx_cores'],5):
+    for j,v in enumerate([r['mx'],r['cap_id'],int(r['core']),int(r['ong']),r['mau_soi'],r['nhan'],r['tram']],1):CO.cell(i,j,v)
+box(CO,5,4+len(d['mx_cores']),1,7);CO.freeze_panes='A5';CO.auto_filter.ref=f'A4:G{4+len(d["mx_cores"])}'
+CT=sheet('Core theo trạm')
+title(CT,'Core đi vào từng trạm theo sơ đồ MX','Gom theo tên trạm ghi trong sơ đồ: măng xông, cáp, nhóm core và nhãn.')
+header(CT,4,['Trạm','Măng xông','Nhãn','Cáp','Các core','Số core'],[14,16,7,56,24,8])
+grp={}
+for r in d['mx_cores']:
+    if r['tram']:grp.setdefault((r['tram'],r['mx'],r['nhan'],r['cap_id']),[]).append(int(r['core']))
+for i,((tr,mx,lab,cid),cs_) in enumerate(sorted(grp.items()),5):
+    for j,v in enumerate([tr,mx,lab,cname(cid),', '.join(map(str,cs_)),len(cs_)],1):CT.cell(i,j,v)
+box(CT,5,4+len(grp),1,6);CT.freeze_panes='A5';CT.auto_filter.ref=f'A4:F{4+len(grp)}'
+CW_=sheet('Cảnh báo phối core')
+title(CW_,'Cảnh báo khi suy bảng phối core từ sơ đồ MX')
+header(CW_,3,['Măng xông','Nội dung','Xác nhận'],[18,100,30])
+rr=4
+for mx,wmsg in d['mx_warn']:
+    CW_.cell(rr,1,mx);CW_.cell(rr,2,wmsg);CW_.cell(rr,3).fill=INP;rr+=1
+for o,t in d['mx_notes']:
+    CW_.cell(rr,1,'ghi chú tay '+o);CW_.cell(rr,2,t);CW_.cell(rr,3).fill=INP;rr+=1
+box(CW_,4,rr-1,1,3)
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -295,7 +341,7 @@ kp=[('Số ring',f'=COUNTA(Ring!A5:A12)'),('Số CSG ring',f'=SUM(Ring!C5:C12)')
     ('Số đoạn cáp (gồm nhánh cụt)',f'=COUNTA({rng("A")})'),('Tổng km tính (đoạn ring)',f'=SUMIF({rng("E")},"ring",{rng("K")})'),
     ('Đoạn dài nhất (km)',f'=MAX({rng("K")})'),('Dư suy hao thấp nhất (dB)',f'=MIN({rng("P")})'),
     ('Số đoạn Đạt',f'=COUNTIF({rng("R")},"Đạt")'),('Số đoạn Cảnh báo',f'=COUNTIF({rng("R")},"Cảnh báo")'),('Số đoạn chưa đo',f'=COUNTIF({rng("R")},"Chưa đo")'),
-    ('Số măng xông trong danh bạ',f"=COUNTA('Măng xông'!A5:A{ML})"),('Số cổng ODF CSG ghi hướng',"=COUNTIFS('ODF chi tiết'!D:D,\"<>\")-1"),('Mục cần xác nhận',f"=COUNTA('Dữ liệu cần xác nhận'!A4:A{3+len(d['issues'])})")]
+    ('Số măng xông trong danh bạ',f"=COUNTA('Măng xông'!A5:A{ML})"),('Số cổng ODF CSG ghi hướng',"=COUNTIFS('ODF chi tiết'!D:D,\"<>\")-1"),('Cặp core hàn (suy từ nhãn MX)',f"=COUNTA('Phối core MX'!A5:A{pl})"),('Măng xông đã có nhãn core',f"=SUMPRODUCT(1/COUNTIF('Phối core MX'!A5:A{pl},'Phối core MX'!A5:A{pl}))"),('Mục cần xác nhận',f"=COUNTA('Dữ liệu cần xác nhận'!A4:A{3+len(d['issues'])})")]
 header(T,4,['Chỉ số','Giá trị'],[44,16])
 for i,(k,f) in enumerate(kp,5):
     T.cell(i,1,k);x=T.cell(i,2,f);x.font=Font(bold=True,size=12);x.number_format='0.0' if 'km' in k or 'dB' in k else '0'
@@ -310,7 +356,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True

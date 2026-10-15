@@ -89,7 +89,11 @@ const dc={};function destCol(d){if(!dc[d])dc[d]=['#3d85c6','#e06666','#6aa84f','
 function showNode(id){const n=D.nodes[id];const into=D.segments.filter(s=>s.z==id),out=D.segments.filter(s=>s.a==id);
  const row=s=>`<tr onclick="showSeg('${s.id}')" style="cursor:pointer"><td>${s.id}</td><td>${s.a}→${s.z}</td><td>${fmt(s.km_ref)} km</td><td>${pill(s)}</td></tr>`;
  openSheet(`<h3 style="margin:0">${id} <small>${n.type}${n.ring?' · ring '+n.ring:''}${n.role&&n.role!='ring'?' · '+n.role:''}</small></h3><div class="mut">${n.lat.toFixed(5)}, ${n.lon.toFixed(5)} · <a href="https://maps.google.com/?q=${n.lat},${n.lon}" target="_blank">bản đồ</a></div><table>${into.concat(out).map(row).join('')}</table><h4>ODF ${id}</h4>${odfGrid(id.replace('NBE','NBE'))}`)}
-function showMx(c){openSheet(`<h3 style="margin:0">${c.name}</h3><div class="mut">${c.straight?'MX thẳng':'MX phối/rẽ'} · ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}</div><p>${c.desc}</p><div class="mut">Bảng hàn từng khay: chưa nhập (xem sheet "Hàn nối" trong Excel).</div>`)}
+function showMx(c){const rows=D.mxpairs[c.name]||[],cab=D.mxcab[c.name]||[];
+ let h=`<h3 style="margin:0">${c.name}</h3><div class="mut">${c.straight?'MX thẳng':'MX phối/rẽ'} · ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}</div><p class="mut">${c.desc}</p>`;
+ h+=cab.length?'<div class="b">Đầu cáp</div><table>'+cab.map(x=>`<tr><td>${x[1]}</td><td class="mut">${x[2]} core có nhãn</td></tr>`).join('')+'</table>':'';
+ h+=rows.length?'<div class="b" style="margin-top:8px">Phối core (cùng nhãn hàn với nhau)</div><table><tr><th>Nhãn</th><th>Cáp A / core</th><th>Cáp B / core</th><th>Trạm</th></tr>'+rows.map(r=>`<tr><td class="b">${r[0]}</td><td>${r[1]}<br><b>core ${r[2]}</b></td><td>${r[3]}<br><b>core ${r[4]}</b></td><td>${r[5]}</td></tr>`).join('')+'</table>':'<div class="mut">Chưa có nhãn phối core cho măng xông này trong sơ đồ gốc.</div>';
+ openSheet(h)}
 // ---- tabs
 const tabs=[['map','Bản đồ'],['ring','Ring'],['seg','Đoạn'],['odf','ODF'],['otdr','OTDR → vị trí'],['fix','Khắc phục']];
 tabs.forEach(([id,t],i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-'+id));[...$('#tabs').children].forEach(x=>x.classList.toggle('on',x==b));closeSheet()};if(!i)b.classList.add('on');$('#tabs').appendChild(b)});
