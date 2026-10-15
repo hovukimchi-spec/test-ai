@@ -58,7 +58,7 @@ def splice_pairs(ends):
     """Quy ước nhãn hàn (người dùng): cùng nhãn = cùng nhóm hàn; trong một nhãn, sợi nhỏ hàn sợi nhỏ.
     ends: {tên_đầu_cáp: ['A','A','B',...]} (nhãn của sợi 1..n; '' = không hàn).
     Trả (cặp, cảnh_báo): cặp = [(nhãn, đầu1, sợi1, đầu2, sợi2)]."""
-    pairs=[];warn=[];labels=sorted({l for v in ends.values() for l in v if l})
+    pairs=[];warn=[];labels=sorted({l for v in ends.values() for l in v if l and l!='HƯ'})
     for lab in labels:
         pos={e:[i+1 for i,l in enumerate(v) if l==lab] for e,v in ends.items() if lab in v}
         names=list(pos)
@@ -151,6 +151,7 @@ def build():
            vat_tu=_csv('vat_tu_odf_mx.csv'))
     d['issues']=detect_issues(d)
     d['paths']=load_paths(d)
+    d['ledger'],d['ledger_conflicts']=core_ledger(d)
     return d
 
 def simulate_cut(d,seg_ids):
@@ -213,9 +214,9 @@ def corridor_overlap(p1,p2,tol=20,step=10):
         if any(math.dist(a,q)<=tol for di in(-1,0,1) for dj in(-1,0,1) for q in cell.get((ci+di,cj+dj),())):c+=1
     return c*step/1000
 
-def check_splice(pairs,a,ca,b,cb):
+def check_splice(pairs,a,ca,b,cb,subst=None,nominal_b=None):
     """Đối chiếu một mối hàn (cáp a core ca ↔ cáp b core cb) với bảng phối core suy ra từ sơ đồ MX.
-    Trả (trạng thái, chi tiết)."""
+    subst/nominal_b: core hư được thay (quy tắc vẫn theo thiết kế ban đầu, thực tế thay core)."""
     if not a or not b:return 'chưa có sơ đồ','không xác định cáp trong sơ đồ MX'
     m={}
     for p in pairs:
@@ -225,12 +226,19 @@ def check_splice(pairs,a,ca,b,cb):
     bad=[];ok=True
     for x,y in zip(ca,cb):
         if x in m and m[x][0]==y:continue
-        ok=False;bad.append(f"core {x}→{m[x][0] if x in m else '?'} (quy tắc nhỏ-nhỏ) ≠ {y} (mô tả)")
+        ok=False;bad.append(f"core {x}→{m[x][0] if x in m else '?'} (sơ đồ) ≠ {y} (mô tả)")
     if ok:return 'khớp sơ đồ','nhãn '+','.join(sorted({m[x][1] for x in ca if x in m}))
-    if all(x in m for x in ca) and {m[x][0] for x in ca}==set(cb):return 'khớp nhóm, THỨ TỰ KHÁC','cùng nhóm core nhưng hàn chéo so với quy tắc nhỏ-nhỏ: '+'; '.join(bad)
+    if subst and nominal_b:
+        # thiết kế: ca[i] ↔ nominal_b[i]; thực tế core hư nominal thay bằng subst
+        act=[subst.get(str(n),n) for n in nominal_b]
+        if act==list(cb) and {c for c in cb}=={m[x][0] for x in ca if x in m}:
+            return 'khớp sơ đồ (thay core hư)','thiết kế '+'+'.join(f'{x}↔{n}' for x,n in zip(ca,nominal_b))+'; thực tế '+'+'.join(f'{x}↔{y}' for x,y in zip(ca,cb))
+    if all(x in m for x in ca) and {m[x][0] for x in ca}==set(cb):return 'khớp nhóm, THỨ TỰ KHÁC','cùng nhóm core: '+'; '.join(bad)
     return 'KHÁC sơ đồ','; '.join(bad)
 
 def load_paths(d):
+    cables={c['id']:c for c in json.load(open(os.path.join(DATA,'cables.json'),encoding='utf-8'))}
+    d['phys_cables']=cables
     out=[]
     for f in sorted(os.listdir(os.path.join(DATA,'paths'))):
         if not f.endswith('.json'):continue
@@ -238,9 +246,37 @@ def load_paths(d):
         for lk in P['links']:
             tot=0;rows=[]
             for st in lk['steps']:
-                r=dict(st);
-                if st['t']=='cable':tot+=st['len_m'];r['cum']=tot
-                if st['t']=='mx':r['check'],r['check_detail']=check_splice(d['mx_pairs'],st.get('a'),st.get('cores_a'),st.get('b'),st.get('cores_b'))
+                r=dict(st)
+                if st['t']=='cable':
+                    c=cables[st['cable']];tot+=c['len_m'];r.update(name=c['name'],fo=c['fo'],frm=c['frm'],to=c['to'],len_m=c['len_m'],src=c['src'],cum=tot)
+                if st['t']=='mx':
+                    ea=cables[st['a_cable']]['ends'].get(st['at']);eb=cables[st['b_cable']]['ends'].get(st['at'])
+                    r['check'],r['check_detail']=check_splice(d['mx_pairs'],ea,st['cores_a'],eb,st['cores_b'],st.get('subst'),st.get('nominal_b'))
                 rows.append(r)
-            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=lk.get('bbnt_otdr_m'),odf_otdr_m=lk.get('odf_otdr_m'),complete=lk.get('complete',True),steps=rows))
+            ref=(lk.get('odf_otdr_m') or [None])[0] or lk.get('bbnt_otdr_m')
+            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=lk.get('bbnt_otdr_m'),odf_otdr_m=lk.get('odf_otdr_m'),ref_m=ref,complete=lk.get('complete',True),steps=rows))
     return out
+
+def core_ledger(d):
+    """Quỹ core từng cáp: dùng bởi link nào, hư, nhãn sơ đồ, xung đột. Loại trừ dần: core đã dùng/hư không còn là ứng viên."""
+    cables=d['phys_cables'];usage={}
+    for lk in d['paths']:
+        for st in lk['steps']:
+            if st['t']=='cable':
+                for c in st['cores']:usage.setdefault((st['cable'],c),[]).append(lk['id'])
+    labels={}
+    for r in d['mx_cores']:labels[(r['cap_id'],int(r['core']))]=(r['nhan'],r['tram'])
+    rows=[];conf=[]
+    for cid,c in cables.items():
+        for core in range(1,c['fo']+1):
+            use=sorted(set(usage.get((cid,core),[])))
+            lab=[];tr=[]
+            for node,cap in c['ends'].items():
+                l=labels.get((cap,core))
+                if l and (l[0] or l[1]):lab.append(f"{node}: {l[0] or '·'}");tr+= [l[1]] if l[1] else []
+            hu=any('HƯ' in x for x in lab)
+            if len(use)>1:conf.append((cid,core,use))
+            status='HƯ' if hu else ('dùng '+'+'.join(use) if use else ('có nhãn, chưa gán link' if lab else 'trống/chưa rõ'))
+            rows.append(dict(cable=cid,name=c['name'],route=f"{c['frm']} → {c['to']}",core=core,status=status,labels='; '.join(lab),stations=', '.join(dict.fromkeys(tr)),links=use))
+    return rows,conf
+

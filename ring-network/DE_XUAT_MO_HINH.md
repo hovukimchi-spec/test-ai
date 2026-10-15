@@ -133,3 +133,9 @@ Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model
 - Mối hàn khớp sơ đồ MX: NVT_02A 1,2↔1,2 (nhãn A); NVT_02B 1,2↔1,2 (nhãn A). Mối hàn NVT_02A 3,4↔5,2 cùng nhóm core (nhãn D) nhưng thứ tự khác quy tắc nhỏ-nhỏ (cần xác nhận thứ tự chéo).
 - Chưa có nhãn trong sơ đồ: NVT_01, NVT_03A, NVT_03B, MX nhập đài Long Thới–NVT.
 - Link R2-04 (HNB091 → NBE22) mới mô tả đến NVT_02B; chờ phần còn lại.
+
+## 13. Hoàn chỉnh link HNB091 → NBE22 và quỹ core
+- Core hư thay thế: tại NVT_02A thiết kế ban đầu 3↔1, 4↔2 (nhãn D); core 1 hư (sơ đồ ghi "HƯ") nên thực tế 3↔5, 4↔2. Quy tắc nhỏ-nhỏ vẫn đúng; mô hình ghi riêng "thiết kế" và "phát sinh" (`subst` trong `data/paths/R2.json`).
+- Link R2-04 (HNB091 → NBE22) đã đi đến ODF-02 NBE22: tổng cáp 16 023 m so với OTDR ghi trên ODF AGG 16 028 m (lệch 5 m). Nhãn khớp sơ đồ MX tại NVT_02B (A), LVL-05 (1,2↔19,20, nhãn D), NB-01 (19,20↔1,2, nhãn B). Các MX còn lại (NVT_03B, NB-02/03/04, HTP-03B) chưa có nhãn nên mối hàn được dựng từ mô tả.
+- `data/cables.json`: 17 cáp vật lý (đã dùng trong R2) kèm chiều dài và đầu cáp tương ứng trong sơ đồ MX. MX thẳng giữa NB-04 và HTP-03B là giả định theo sổ cáp (777 + 640 m).
+- Quỹ core (`model.core_ledger`): mỗi core ở trạng thái dùng cho link nào / hư / có nhãn chưa gán link / trống. Gợi ý loại trừ: HNB048 dùng cùng tuyến với HNB091 ở core kế tiếp (trục NVT_02B→LVL-05 core 3,4; cáp 24FO TPKL core 21,22).

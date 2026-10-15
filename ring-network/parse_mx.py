@@ -38,7 +38,7 @@ def parse(path):
             n=1
             while cells.get((r,c+n) if kind=='h' else (r+n,c))==str(n+1):n+=1
             if n>=2:runs.append(dict(kind=kind,r=r,c=c,n=n))
-    lab=re.compile(r'^[A-Za-z]{1,2}$')
+    lab=re.compile(r'^([A-Za-z]|HƯ|Hư|hư|HU)$')
     good=[]
     for run in runs:
         r,c,n,k=run['r'],run['c'],run['n'],run['kind'];best=None

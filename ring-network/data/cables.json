@@ -1,0 +1,195 @@
+[
+ {
+  "id": "C01",
+  "name": "ADSS 9/2009",
+  "fo": 24,
+  "frm": "VNPT Long Thới (ODF-02 NBE12)",
+  "to": "MX nhập đài Long Thới–NVT",
+  "len_m": 150,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
+  "ends": {}
+ },
+ {
+  "id": "C02",
+  "name": "SACOM 8/2014",
+  "fo": 12,
+  "frm": "MX nhập đài Long Thới–NVT",
+  "to": "MX_NVT_01",
+  "len_m": 680,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 680 m",
+  "ends": {
+   "MX_NVT_01": "MX_NVT_01|AD154"
+  }
+ },
+ {
+  "id": "C03",
+  "name": "FOCAL 9/2020 (vào HNB054)",
+  "fo": 12,
+  "frm": "MX_NVT_01",
+  "to": "HNB054",
+  "len_m": 150,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 150 m",
+  "ends": {
+   "MX_NVT_01": "MX_NVT_01|AQ154"
+  }
+ },
+ {
+  "id": "C04",
+  "name": "FOCAL 9/2020 trục (gồm 175 m ngầm)",
+  "fo": 12,
+  "frm": "MX_NVT_01",
+  "to": "MX_NVT_02A",
+  "len_m": 1060,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1060 m",
+  "ends": {
+   "MX_NVT_01": "MX_NVT_01|AD167",
+   "MX_NVT_02A": "MX_NVT_02A|AD174"
+  }
+ },
+ {
+  "id": "C05",
+  "name": "12FO vào HNB006",
+  "fo": 12,
+  "frm": "MX_NVT_02A",
+  "to": "HNB006",
+  "len_m": 220,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 220 m",
+  "ends": {
+   "MX_NVT_02A": "MX_NVT_02A|AQ187"
+  }
+ },
+ {
+  "id": "C06",
+  "name": "12FO NVT_02A → NVT_03A",
+  "fo": 12,
+  "frm": "MX_NVT_02A",
+  "to": "MX_NVT_03A",
+  "len_m": 845,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 845 m",
+  "ends": {
+   "MX_NVT_02A": "MX_NVT_02A|AD187",
+   "MX_NVT_03A": "MX_NVT_03A|AD193"
+  }
+ },
+ {
+  "id": "C07",
+  "name": "FOCAL 2020 vào HNB091 (6FO #1)",
+  "fo": 6,
+  "frm": "MX_NVT_03A",
+  "to": "HNB091",
+  "len_m": 545,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 545 m",
+  "ends": {}
+ },
+ {
+  "id": "C08",
+  "name": "FOCAL 2020 ra HNB091 (6FO #2)",
+  "fo": 6,
+  "frm": "HNB091",
+  "to": "MX_NVT_03B",
+  "len_m": 550,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 550 m",
+  "ends": {}
+ },
+ {
+  "id": "C09",
+  "name": "12FO NVT_03B → NVT_02B",
+  "fo": 12,
+  "frm": "MX_NVT_03B",
+  "to": "MX_NVT_02B",
+  "len_m": 770,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 770 m",
+  "ends": {
+   "MX_NVT_02B": "MX_NVT_02B|H187",
+   "MX_NVT_03B": "MX_NVT_03B|H193"
+  }
+ },
+ {
+  "id": "C10",
+  "name": "TPKL 12FO trục NVT_02B → LVL-05 (qua MX thẳng nối dài)",
+  "fo": 12,
+  "frm": "MX_NVT_02B",
+  "to": "MX_LVL-05",
+  "len_m": 6250,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 6250 m (ghi chú sổ: 7020 = 785+1745+3715+770)",
+  "ends": {
+   "MX_NVT_02B": "MX_NVT_02B|H174",
+   "MX_LVL-05": "MX_LVL-05|AP86"
+  }
+ },
+ {
+  "id": "C11",
+  "name": "TPKL POSTEF 11/2016",
+  "fo": 24,
+  "frm": "MX_LVL-05",
+  "to": "MX_NB-01",
+  "len_m": 3236,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 3236 m",
+  "ends": {
+   "MX_LVL-05": "MX_LVL-05|AD103",
+   "MX_NB-01": "MX_NB-01|AD109"
+  }
+ },
+ {
+  "id": "C12",
+  "name": "12FO NB-01 → NB-02",
+  "fo": 12,
+  "frm": "MX_NB-01",
+  "to": "MX_NB-02",
+  "len_m": 1040,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1040 m (NB Phạm Thị Kỳ → nhập đài Long Thới-NB)",
+  "ends": {
+   "MX_NB-01": "MX_NB-01|BD112"
+  }
+ },
+ {
+  "id": "C13",
+  "name": "12FO NB-02 → NB-03",
+  "fo": 12,
+  "frm": "MX_NB-02",
+  "to": "MX_NB-03",
+  "len_m": 1408,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1408 m",
+  "ends": {}
+ },
+ {
+  "id": "C14",
+  "name": "12FO NB-03 → NB-04",
+  "fo": 12,
+  "frm": "MX_NB-03",
+  "to": "MX_NB-04",
+  "len_m": 1092,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1092 m",
+  "ends": {}
+ },
+ {
+  "id": "C15",
+  "name": "12FO NB-04 → MX thẳng HTP",
+  "fo": 12,
+  "frm": "MX_NB-04",
+  "to": "MX thẳng HTP (giữa NB-04 và HTP-03B)",
+  "len_m": 777,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 777 m (giả định MX thẳng ở giữa, theo sổ cáp)",
+  "ends": {}
+ },
+ {
+  "id": "C16",
+  "name": "12FO MX thẳng HTP → HTP-03B",
+  "fo": 12,
+  "frm": "MX thẳng HTP (giữa NB-04 và HTP-03B)",
+  "to": "MX_HTP-03B",
+  "len_m": 640,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 640 m",
+  "ends": {}
+ },
+ {
+  "id": "C17",
+  "name": "POSTEF 24FO nhập đài (cs 1550→1288)",
+  "fo": 24,
+  "frm": "MX_HTP-03B",
+  "to": "ODF-02 NBE22",
+  "len_m": 260,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 260 m",
+  "ends": {}
+ }
+]

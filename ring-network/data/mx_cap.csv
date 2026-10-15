@@ -61,7 +61,7 @@ MX_NVT_02B,MX_NVT_02B|U174,U174,CÁP 8FO  (cs ) | Hướng qua MX_NVT_02A đối
 MX_NVT_02B,MX_NVT_02B|H187,H187,CÁP TREO 12FO  (chỉ số ) | Cáp Trục hướng về Nguyễn Văn Tạo,,treo,12,,Nguyễn Văn Tạo,12,4
 MX_NVT_02A,MX_NVT_02A|AD174,AD174,CÁP TREO  12FO   (chỉ số  ) | Cáp Trục hướng về VNPT Long Thới,,treo,12,,VNPT Long Thới,12,10
 MX_NVT_02A,MX_NVT_02A|AQ174,AQ174,CÁP 8FO  (cs ) | Hướng qua MX_NVT_02B đối diện,,,8,,MX_NVT_02B đối diện,8,6
-MX_NVT_02A,MX_NVT_02A|AD187,AD187,CÁP TREO 12FO  (chỉ số ) | Cáp Trục hướng về trạm Cần Giờ,,treo,12,,trạm Cần Giờ,12,4
+MX_NVT_02A,MX_NVT_02A|AD187,AD187,CÁP TREO 12FO  (chỉ số ) | Cáp Trục hướng về trạm Cần Giờ,,treo,12,,trạm Cần Giờ,12,5
 MX_NVT_02A,MX_NVT_02A|AQ187,AQ187,CÁP 12FO  (cs ) | Hướng vào trạm HNB006,,,12,,HNB006,8,4
 MX_NVT_03B,MX_NVT_03B|H193,H193,CÁP TREO  12FO   (chỉ số  ) | Cáp Trục hướng về Ngô Quang Thắm,,treo,12,,Ngô Quang Thắm,12,0
 MX_NVT_03B,MX_NVT_03B|H206,H206,CÁP 12FO  (cs ) | Hướng vào trạm HNB006,,,12,,HNB006,8,4

@@ -1,13 +1,12 @@
 {
  "ring": "R2",
- "source": "Người dùng mô tả bằng lời; cáp/độ dài lấy từ sổ độ dài; nhãn đối chiếu sơ đồ MX",
  "sfp": "1310 nm, 2 core/link",
+ "source": "Người dùng mô tả bằng lời; cáp/độ dài lấy từ sổ độ dài; nhãn đối chiếu sơ đồ MX",
  "links": [
   {
    "id": "R2-01",
    "frm": "NBE12",
    "to": "HNB054",
-   "bbnt_otdr_m": null,
    "odf_otdr_m": [
     982,
     988
@@ -16,7 +15,7 @@
     {
      "t": "odf",
      "at": "NBE12",
-     "name": "ODF-02 24FO hướng NVT (ADSS 9/2009)",
+     "name": "ODF-02 24FO hướng NVT",
      "cores": [
       1,
       2
@@ -25,25 +24,21 @@
     },
     {
      "t": "cable",
-     "name": "ADSS 9/2009 24FO",
-     "frm": "VNPT Long Thới",
-     "to": "MX nhập đài Long Thới–NVT",
+     "cable": "C01",
      "cores": [
       1,
       2
-     ],
-     "len_m": 150,
-     "src": "Tổng Hợp (sổ độ dài cáp): 150 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX nhập đài Long Thới–NVT",
-     "a": null,
+     "a_cable": "C01",
      "cores_a": [
       1,
       2
      ],
-     "b": null,
+     "b_cable": "C02",
      "cores_b": [
       1,
       2
@@ -52,42 +47,34 @@
     },
     {
      "t": "cable",
-     "name": "SACOM 8/2014 12FO",
-     "frm": "MX nhập đài Long Thới–NVT",
-     "to": "MX_NVT_01",
+     "cable": "C02",
      "cores": [
       1,
       2
-     ],
-     "len_m": 680,
-     "src": "Tổng Hợp (sổ độ dài cáp): 680 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_01",
-     "a": "MX_NVT_01|AD154",
+     "a_cable": "C02",
      "cores_a": [
       1,
       2
      ],
-     "b": "MX_NVT_01|AQ154",
+     "b_cable": "C03",
      "cores_b": [
       1,
       2
      ],
-     "note": "MX chân cầu vượt vào trạm 54"
+     "note": ""
     },
     {
      "t": "cable",
-     "name": "FOCAL 9/2020 12FO",
-     "frm": "MX_NVT_01",
-     "to": "HNB054",
+     "cable": "C03",
      "cores": [
       1,
       2
-     ],
-     "len_m": 150,
-     "src": "Tổng Hợp (sổ độ dài cáp): 150 m"
+     ]
     },
     {
      "t": "odf",
@@ -119,25 +106,21 @@
     },
     {
      "t": "cable",
-     "name": "FOCAL 9/2020 12FO",
-     "frm": "HNB054",
-     "to": "MX_NVT_01",
+     "cable": "C03",
      "cores": [
       3,
       4
-     ],
-     "len_m": 150,
-     "src": "Tổng Hợp (sổ độ dài cáp): 150 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_01",
-     "a": "MX_NVT_01|AQ154",
+     "a_cable": "C03",
      "cores_a": [
       3,
       4
      ],
-     "b": "MX_NVT_01|AD167",
+     "b_cable": "C04",
      "cores_b": [
       1,
       2
@@ -146,25 +129,21 @@
     },
     {
      "t": "cable",
-     "name": "FOCAL 9/2020 12FO (trục, gồm 175 m ngầm)",
-     "frm": "MX_NVT_01",
-     "to": "MX_NVT_02A",
+     "cable": "C04",
      "cores": [
       1,
       2
-     ],
-     "len_m": 1060,
-     "src": "Tổng Hợp (sổ độ dài cáp): 1060 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_02A",
-     "a": "MX_NVT_02A|AD174",
+     "a_cable": "C04",
      "cores_a": [
       1,
       2
      ],
-     "b": "MX_NVT_02A|AQ187",
+     "b_cable": "C05",
      "cores_b": [
       1,
       2
@@ -173,15 +152,11 @@
     },
     {
      "t": "cable",
-     "name": "12FO vào HNB006",
-     "frm": "MX_NVT_02A",
-     "to": "HNB006",
+     "cable": "C05",
      "cores": [
       1,
       2
-     ],
-     "len_m": 220,
-     "src": "Tổng Hợp (sổ độ dài cáp): 220 m"
+     ]
     },
     {
      "t": "odf",
@@ -213,52 +188,51 @@
     },
     {
      "t": "cable",
-     "name": "12FO vào HNB006",
-     "frm": "HNB006",
-     "to": "MX_NVT_02A",
+     "cable": "C05",
      "cores": [
       3,
       4
-     ],
-     "len_m": 220,
-     "src": "Tổng Hợp (sổ độ dài cáp): 220 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_02A",
-     "a": "MX_NVT_02A|AQ187",
+     "a_cable": "C05",
      "cores_a": [
       3,
       4
      ],
-     "b": "MX_NVT_02A|AD187",
+     "b_cable": "C06",
      "cores_b": [
       5,
       2
      ],
-     "note": "dùng core 5,2 do core 1 đoạn này hư"
+     "note": "thiết kế ban đầu 3↔1, 4↔2; core 1 hư nên 3 phối với 5 (phát sinh thực tế)",
+     "subst": {
+      "1": 5
+     },
+     "nominal_b": [
+      1,
+      2
+     ]
     },
     {
      "t": "cable",
-     "name": "12FO NVT_02A → NVT_03A",
-     "frm": "MX_NVT_02A",
-     "to": "MX_NVT_03A",
+     "cable": "C06",
      "cores": [
       5,
       2
-     ],
-     "len_m": 845,
-     "src": "Tổng Hợp (sổ độ dài cáp): 845 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_03A",
-     "a": null,
+     "a_cable": "C06",
      "cores_a": [
       5,
       2
      ],
-     "b": null,
+     "b_cable": "C07",
      "cores_b": [
       1,
       2
@@ -267,15 +241,11 @@
     },
     {
      "t": "cable",
-     "name": "6FO FOCAL 2020 vào HNB091",
-     "frm": "MX_NVT_03A",
-     "to": "HNB091",
+     "cable": "C07",
      "cores": [
       1,
       2
-     ],
-     "len_m": 545,
-     "src": "Tổng Hợp (sổ độ dài cáp): 545 m"
+     ]
     },
     {
      "t": "odf",
@@ -293,8 +263,9 @@
    "id": "R2-04",
    "frm": "HNB091",
    "to": "NBE22",
-   "bbnt_otdr_m": 16341,
-   "complete": false,
+   "odf_otdr_m": [
+    16028
+   ],
    "steps": [
     {
      "t": "odf",
@@ -308,25 +279,21 @@
     },
     {
      "t": "cable",
-     "name": "6FO FOCAL 2020 thứ 2",
-     "frm": "HNB091",
-     "to": "MX_NVT_03B",
+     "cable": "C08",
      "cores": [
       1,
       2
-     ],
-     "len_m": 550,
-     "src": "Tổng Hợp (sổ độ dài cáp): 550 m"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_03B",
-     "a": null,
+     "a_cable": "C08",
      "cores_a": [
       1,
       2
      ],
-     "b": null,
+     "b_cable": "C09",
      "cores_b": [
       1,
       2
@@ -335,34 +302,205 @@
     },
     {
      "t": "cable",
-     "name": "12FO NVT_03B → NVT_02B",
-     "frm": "MX_NVT_03B",
-     "to": "MX_NVT_02B",
+     "cable": "C09",
      "cores": [
       1,
       2
-     ],
-     "len_m": 770,
-     "src": "Tổng Hợp (sổ độ dài cáp): 770 m (7020 = 785+1745+3715+770: ghi chú sổ cáp)"
+     ]
     },
     {
      "t": "mx",
      "at": "MX_NVT_02B",
-     "a": "MX_NVT_02B|H187",
+     "a_cable": "C09",
      "cores_a": [
       1,
       2
      ],
-     "b": "MX_NVT_02B|H174",
+     "b_cable": "C10",
      "cores_b": [
       1,
       2
      ],
-     "note": "tiếp tục 1,2 sợi trục 12FO đi Ngô Quang Thắm"
+     "note": ""
     },
     {
-     "t": "todo",
-     "note": "… chờ người dùng mô tả tiếp: trục 12FO đi Ngô Quang Thắm … về NBE22"
+     "t": "cable",
+     "cable": "C10",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_LVL-05",
+     "a_cable": "C10",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C11",
+     "cores_b": [
+      19,
+      20
+     ],
+     "note": "hàn 1,2 vào 19,20 sợi 24FO TPKL POSTEF 11/2016"
+    },
+    {
+     "t": "cable",
+     "cable": "C11",
+     "cores": [
+      19,
+      20
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-01",
+     "a_cable": "C11",
+     "cores_a": [
+      19,
+      20
+     ],
+     "b_cable": "C12",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C12",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-02",
+     "a_cable": "C12",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C13",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C13",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-03",
+     "a_cable": "C13",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C14",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C14",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-04",
+     "a_cable": "C14",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C15",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C15",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng HTP (giả định)",
+     "a_cable": "C15",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C16",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "MX thẳng nối dài; theo sổ cáp"
+    },
+    {
+     "t": "cable",
+     "cable": "C16",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-03B",
+     "a_cable": "C16",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C17",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "hàn 1,2 vào sợi nhập đài POSTEF 24FO (chỉ số 1550→1288)"
+    },
+    {
+     "t": "cable",
+     "cable": "C17",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "NBE22",
+     "name": "ODF-02 24FO NBE22 (cs 1288)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": "ODF AGG ghi cổng 1-2: HNB091 ring 2"
     }
    ]
   }
