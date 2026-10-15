@@ -146,3 +146,8 @@ Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model
 - Mỗi cáp vật lý có mã nội bộ (C01…C21), mã cáp theo sổ (`ma_cap`), chỉ số mét hai đầu, dòng sổ cáp; `model.cable_profiles` liệt kê core đang chạy / hư / có nhãn chưa gán / trống và hệ quả khi đứt (sheet `Hồ sơ cáp`, `Tra cứu cáp`; tab "Cáp" trong HTML).
 - Cáp chưa có mã trong sổ (cần bổ sung): C05, C06, C09, C12–C16.
 - Quan sát: cáp vào trạm C03 (HNB054) và C05 (HNB006) mang cả hai cặp link của trạm đó (1,2 và 3,4) nên một lần đứt cô lập trạm; các cáp trục chung (C01, C02, C09–C17) mang đồng thời link R1 và R2 (mỗi ring chỉ mất một hướng).
+
+## 15. Quy tắc cáp vào trạm và cân đối cáp
+- Cáp vào trạm từ MX trục gần trạm (< 300 m) được chấp nhận với điều kiện ≥ 12FO (cấu hình `drop_max_m`, `drop_min_fo`). Cáp dùng chung mang nhiều link được phép, chấp nhận sự cố nhiều tuyến cùng lúc, nhưng cần cân đối giữa các cáp.
+- Sheet `Cân đối cáp`: loại cáp (vào trạm / trục / riêng tới trạm / giữa hai trạm), số link và số ring mỗi cáp, tỷ lệ core dùng, kiểm tra quy tắc. Hiện C03, C05, C17 đạt; 8 cáp trục dùng chung (C01, C02, C04, C06, C09–C16) đều mang R1+R2 (2 link mỗi cáp).
+- Mã cáp lấy từ sổ độ dài; cáp chưa có mã trong sổ (C05, C06, C09, C12–C16 ↔ dòng 55, 57, 64, 18–22) được để trống, không điền suy đoán.

@@ -14,6 +14,8 @@ CONFIG=dict(
     link_cores=2,              # mỗi link dùng 2 core
     port_per_dir=6,            # ODF CSG: mỗi hướng dùng tối đa 6 cổng (theo file ODF)
     aggs=('NBE12','NBE22'),
+    drop_max_m=300,            # cáp vào trạm từ MX trục gần trạm: < 300 m được chấp nhận
+    drop_min_fo=12,            # với điều kiện dùng cáp lớn, từ 12FO trở lên
 )
 def threshold(km):
     for lim,db in CONFIG['thresholds']:
@@ -325,4 +327,14 @@ def cable_profiles(d):
             n_free=len(free),links=links,lost=', '.join(lost) or '—',
             effect=('MẤT KẾT NỐI: '+', '.join(lost)) if lost else ('các link '+', '.join(links)+' mất một hướng, ring vẫn bảo vệ' if links else 'chưa có link mô tả'),
             link_status=run))
+    for p in out:
+        c=d['phys_cables'][p['id']];stn=lambda x:x.startswith(('HNB','NBE','ODF'))
+        p['n_links']=len(p['links']);p['rings']=sorted({l.split('-')[0] for l in p['links']});p['used_cores']=len(p['run_cores']);p['util']=len(p['run_cores'])/c['fo']
+        if stn(c['frm']) and stn(c['to']):p['kind']='giữa hai trạm'
+        elif (stn(c['frm']) or stn(c['to'])) and c['len_m']<CONFIG['drop_max_m']:p['kind']='cáp vào trạm'
+        elif stn(c['frm']) or stn(c['to']):p['kind']='cáp riêng tới trạm (>=300 m)'
+        else:p['kind']='cáp trục'
+        if p['kind']=='cáp vào trạm':
+            p['rule']='đạt (<300 m, ≥12FO)' if c['fo']>=CONFIG['drop_min_fo'] else 'KHÔNG đạt: cáp vào trạm phải ≥12FO'
+        else:p['rule']='—'
     return out

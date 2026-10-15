@@ -431,6 +431,20 @@ for k,(t_,col) in enumerate(labels_,6):
     TC.cell(k,1,t_).font=Font(bold=True);c=TC.cell(k,2,f"=INDEX('Hồ sơ cáp'!{col}$5:{col}${hl},MATCH($B$4,'Hồ sơ cáp'!$A$5:$A${hl},0))&\"\"");c.alignment=Alignment(wrap_text=True,vertical='top')
 TC.column_dimensions['A'].width=26;TC.column_dimensions['B'].width=80;box(TC,6,5+len(labels_),1,2)
 
+# ---------------- Cân đối cáp ----------------
+CB2=sheet('Cân đối cáp')
+title(CB2,'Cân đối tải giữa các cáp và kiểm tra quy tắc cáp vào trạm','Quy tắc: cáp vào trạm từ MX trục gần trạm (<300 m) chấp nhận nếu ≥12FO; cáp dùng chung nhiều link được phép nhưng cần cân đối. "Số link" = số link đang mô tả chạy trên cáp = số link mất cùng lúc khi đứt cáp.')
+header(CB2,4,['Mã','Mã cáp (sổ)','FO','Dài (m)','Loại','Số link','Ring','Core dùng','Tỷ lệ core dùng','Kiểm tra quy tắc','Hệ quả khi đứt'],[7,24,5,9,26,8,10,10,12,26,60])
+ps=sorted(d['cable_profiles'],key=lambda p:(-p['n_links'],p['id']))
+for i,p in enumerate(ps,5):
+    for j,v in enumerate([p['id'],p['ma_cap'],p['fo'],p['len_m'],p['kind'],p['n_links'],'+'.join(p['rings']),p['used_cores'],None,p['rule'],p['effect']],1):CB2.cell(i,j,v)
+    CB2.cell(i,9,f'=H{i}/C{i}').number_format='0%'
+    if p['rule'].startswith('KHÔNG'):CB2.cell(i,10).fill=BAD
+    elif p['rule'].startswith('đạt'):CB2.cell(i,10).fill=GOOD
+    if p['n_links']>=3 :CB2.cell(i,6).fill=WARN
+cb_l=4+len(ps);box(CB2,5,cb_l,1,11);CB2.freeze_panes='B5';CB2.auto_filter.ref=f'A4:K{cb_l}'
+CB2.conditional_formatting.add(f'I5:I{cb_l}',CellIsRule(operator='greaterThan',formula=['0.5'],fill=WARN))
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -453,7 +467,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Hồ sơ cáp','Tra cứu cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True
