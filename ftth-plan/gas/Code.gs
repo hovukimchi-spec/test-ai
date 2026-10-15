@@ -8,7 +8,17 @@ var LOG_NAME = 'NhatKy';
 var STATUSES = ['Chưa lắp', 'Đã đấu nối', 'Hoạt động', 'Sự cố'];
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  // Tìm tệp giao diện: tên chuẩn là "Index"; chấp nhận vài biến thể thường gặp khi tạo tệp.
+  var names = ['Index', 'index', 'INDEX', 'Index.html', 'index.html'];
+  var out = null;
+  for (var k = 0; k < names.length && !out; k++) {
+    try { out = HtmlService.createHtmlOutputFromFile(names[k]); } catch (e) { out = null; }
+  }
+  if (!out) {
+    return HtmlService.createHtmlOutput(
+      '<p style="font-family:sans-serif;padding:16px"><b>Chưa có tệp giao diện.</b><br>Trong Apps Script, bấm dấu + cạnh "Tệp" &gt; HTML, đặt tên đúng là <b>Index</b> (không gõ đuôi .html), dán nội dung file Index.html vào, lưu, rồi triển khai lại (Triển khai &gt; Quản lý bản triển khai &gt; bút &gt; Phiên bản mới).</p>');
+  }
+  return out
     .setTitle('FTTH Phố Đông')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);

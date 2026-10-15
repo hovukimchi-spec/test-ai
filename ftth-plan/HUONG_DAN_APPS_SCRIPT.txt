@@ -11,7 +11,8 @@ A. CHUẨN BỊ FILE SHEETS (làm một lần)
 B. DÁN MÃ VÀO APPS SCRIPT
 3. Trong file Sheets: Tiện ích mở rộng > Apps Script.
 4. Ở tệp Code.gs: xóa nội dung mẫu, dán toàn bộ nội dung file Code.gs (gửi kèm).
-5. Bấm dấu + cạnh "Tệp" > HTML > đặt tên đúng là Index (không thêm đuôi). Xóa nội dung mẫu, dán toàn bộ nội dung file Index.html (gửi kèm; khoảng 180 KB, dán hơi chậm là bình thường).
+5. Bấm dấu + cạnh "Tệp" > HTML > đặt tên đúng là Index (chỉ gõ chữ Index, KHÔNG gõ đuôi .html; hệ thống tự thêm). Xóa nội dung mẫu, dán toàn bộ nội dung file Index.html (gửi kèm; khoảng 180 KB, dán hơi chậm là bình thường).
+   Lưu ý: giao diện tiếng Việt đổi tên Code.gs thành "Mã", điều này bình thường. Danh sách tệp phải có: Mã (Code.gs), Index (HTML) và appsscript.json.
 6. Bấm biểu tượng bánh răng (Cài đặt dự án) > bật "Hiện tệp kê khai appsscript.json trong trình chỉnh sửa". Quay lại Trình chỉnh sửa, mở appsscript.json, dán nội dung file appsscript.json (gửi kèm). Bấm biểu tượng lưu.
 
 C. CẤP QUYỀN VÀ TRIỂN KHAI
@@ -35,6 +36,7 @@ F. CẬP NHẬT APP SAU NÀY
 12. Sửa Index.html (hoặc Code.gs) trong Apps Script > Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: Phiên bản mới > Triển khai. URL giữ nguyên.
 
 G. XỬ LÝ SỰ CỐ THƯỜNG GẶP
+- Báo "Không tìm thấy tệp HTML có tên Index": tệp HTML chưa tạo hoặc đặt sai tên. Tạo lại đúng tên Index (không đuôi .html, đúng chữ hoa I), dán nội dung, lưu, rồi Triển khai > Quản lý bản triển khai > bút > Phiên bản mới > Triển khai. Mở link bản triển khai (.../exec), đừng mở link /dev.
 - "Không thấy tab Thuê bao" / "thiếu cột": đổi tên tab / tiêu đề cột đúng chính tả.
 - "Bạn chỉ có quyền xem": chủ file chia sẻ lại cho người đó quyền Người chỉnh sửa.
 - Trang trắng hoặc báo lỗi khi đang đăng nhập nhiều tài khoản Google: mở URL bằng cửa sổ riêng tư, hoặc đăng xuất bớt tài khoản.
