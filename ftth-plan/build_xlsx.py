@@ -391,7 +391,7 @@ wsT.column_dimensions['L'].width = 12
 wsT['J16'] = 'Cách dùng nhanh'; wsT['J16'].font = Font(name=F, bold=True, color=NAVY)
 for i, t in enumerate(['1. Tra đường quang 1 căn hộ → sheet "Tra cứu".', '2. Khách mới: tìm căn hộ ở "Thuê bao", đổi Trạng thái,',
                        '    ghi serial ONU. Dashboard tự cập nhật.', '3. Mất tín hiệu hàng loạt → xem "Vận hành" (cây xử lý sự cố).',
-                       '4. Đấu nối ODF → sheet "ODF 48FO"; xem hình tổng thể → ftth_viewer.html.']):
+                       '4. Đấu nối ODF → "ODF 48FO"; sự cố → "Sự cố & khắc phục".']):
     wsT.cell(row=17 + i, column=10, value=t).font = Font(name=F, size=10)
 
 # =============== TRA CỨU ===============
@@ -522,6 +522,77 @@ for t_, lvl in text:
         c.font = Font(name=F, bold=True, color='FFFFFF'); c.fill = fill(NAVY); r += 1
     else:
         c.font = Font(name=F, size=10); c.alignment = Alignment(wrap_text=True, vertical='top'); wsG.row_dimensions[r].height = 30; r += 1
+
+# =============== SỰ CỐ & KHẮC PHỤC ===============
+import math, incidents as INC
+wsI = wb.create_sheet('Sự cố & khắc phục')
+wb.move_sheet(wsI, offset=-(len(wb.sheetnames) - 1 - wb.sheetnames.index(S_TC) - 1))
+title(wsI, 'Sự cố tuyến quang và phương án khắc phục (từ dây nhảy PON ở OLT đến fast connector cắm modem)',
+      'Phạm vi: OLT (cổng PON, SFP) → dây nhảy → ODF-96 → splitter 1:4 → ODF-96 → dây nhảy → ODF-48 → cáp trục 24FO → cáp nhánh 8FO → tủ (splitter 1:16) → cáp 1FO → hộp BOX → fast connector. Số hộ ảnh hưởng tính từ dữ liệu thiết kế.')
+WID = [6, 30, 32, 17, 17, 42, 44, 44, 38, 34, 8, 14]
+widths(wsI, WID)
+def hfit(vals):
+    n = 1
+    for v, w in zip(vals, WID):
+        if v: n = max(n, math.ceil(len(str(v)) / (w * 1.05)))
+    return min(409, 13.5 * n + 6)
+ST = INC.stats(D)
+r = 4
+header(wsI, r, ['Mã', 'Đoạn tuyến', 'Sự cố', 'Phạm vi', 'Số hộ ảnh hưởng (nhỏ nhất / TB / lớn nhất)', 'Triệu chứng', 'Chẩn đoán và đo kiểm', 'Khắc phục tạm thời', 'Khắc phục dứt điểm', 'Phòng ngừa', 'Ưu tiên', 'Thời gian mục tiêu (ước tính)'], h=44)
+PRIO_BG = {'P1': 'F8B4B4', 'P2': 'FAD6A5', 'P3': 'FFF0A8', 'P4': 'DDEBDD'}
+order = {'pon': 0, 'spl': 1, 'cab': 2, 'tr': 3, 'apt': 4}
+for it in sorted(INC.INCIDENTS, key=lambda x: (order[x['scope']], x['id'])):
+    r += 1
+    a, b, c = ST[it['scope']]
+    vals = [it['id'], it['seg'], it['title'], INC.SCOPE_LABEL[it['scope']], f'{a} / {b} / {c}' if c != 1 else '1',
+            it['symptoms'], it['check'], it['temp'], it['fix'], it['prevent'], it['prio'], it['eta']]
+    for k, v in enumerate(vals, 1):
+        body(wsI, r, k, v, bold=(k in (1, 3)), center=k in (1, 4, 5, 11, 12), wrap=True, bg=PRIO_BG[it['prio']] if k == 11 else None)
+        wsI.cell(row=r, column=k).alignment = Alignment(wrap_text=True, vertical='top', horizontal='center' if k in (1, 4, 5, 11, 12) else 'left')
+    wsI.row_dimensions[r].height = hfit(vals)
+wsI.freeze_panes = 'D5'
+wsI.cell(row=r + 1, column=1, value='Ưu tiên: P1 = mất nhiều hộ, xử lý ngay; P2 = mất một nhóm, xử lý trong ngày; P3 = một căn hộ; P4 = suy giảm chưa mất. Thời gian là ước tính để lập kế hoạch, không phải cam kết.').font = Font(name=F, size=9, italic=True)
+
+def section(row, text):
+    wsI.merge_cells(start_row=row, start_column=1, end_row=row, end_column=12)
+    x = wsI.cell(row=row, column=1, value=text); x.font = Font(name=F, bold=True, color='FFFFFF', size=11); x.fill = fill(NAVY)
+    return row + 1
+def textrow(row, text, bold=False, h=None):
+    wsI.merge_cells(start_row=row, start_column=1, end_row=row, end_column=12)
+    x = wsI.cell(row=row, column=1, value=text); x.font = Font(name=F, size=10, bold=bold); x.alignment = Alignment(wrap_text=True, vertical='top')
+    wsI.row_dimensions[row].height = h or max(18, 13.5 * math.ceil(len(text) / 250) + 6)
+    return row + 1
+
+r += 3
+r = section(r, 'BẢNG TRA NHANH THEO TRIỆU CHỨNG (nhìn danh sách ONU mất trên OLT, gom theo mã splitter)')
+header(wsI, r, ['', 'Triệu chứng trên OLT', '', 'Nghi ngờ đoạn', '', 'Mã sự cố', '', 'Việc đầu tiên cần đo', '', '', '', ''], h=24)
+for k in (2, 4, 6, 8): wsI.merge_cells(start_row=r, start_column=k, end_row=r, end_column=k + 1)
+for sym, seg, codes, first in INC.DECISION:
+    r += 1
+    for k, v in ((2, sym), (4, seg), (6, codes), (8, first)):
+        wsI.merge_cells(start_row=r, start_column=k, end_row=r, end_column=k + 1)
+        x = wsI.cell(row=r, column=k, value=v); x.font = Font(name=F, size=10); x.alignment = Alignment(wrap_text=True, vertical='top'); x.border = BORDER
+    wsI.row_dimensions[r].height = max(30, 13.5 * math.ceil(max(len(sym) / 45, len(seg) / 30, len(first) / 90)) + 6)
+
+r += 2
+r = section(r, 'TÀI NGUYÊN DỰ PHÒNG CÓ SẴN TRONG THIẾT KẾ (dùng để khắc phục tạm thời)')
+for k, v in INC.spare(D).items():
+    wsI.merge_cells(start_row=r, start_column=1, end_row=r, end_column=3); wsI.merge_cells(start_row=r, start_column=4, end_row=r, end_column=5)
+    body(wsI, r, 1, k); body(wsI, r, 4, v, True, True); wsI.row_dimensions[r].height = 18; r += 1
+
+r += 1
+r = section(r, 'DỤNG CỤ VÀ VẬT TƯ DỰ TRỮ')
+for t_ in INC.TOOLS: r = textrow(r, '• ' + t_)
+r += 1
+r = section(r, 'GIÁ TRỊ THAM CHIẾU')
+for k, v in INC.REFERENCE:
+    wsI.merge_cells(start_row=r, start_column=1, end_row=r, end_column=3); wsI.merge_cells(start_row=r, start_column=4, end_row=r, end_column=12)
+    body(wsI, r, 1, k, True); body(wsI, r, 4, v); wsI.row_dimensions[r].height = 18; r += 1
+r += 1
+r = section(r, 'QUY HOẠCH CỔNG TẠI TỦ: CỐ ĐỊNH CHO TỪNG CĂN HỘ HAY CẮM THEO THỨ TỰ KÍCH HOẠT?')
+for t_ in INC.PLANNING: r = textrow(r, ('' if t_.startswith('KHUYẾN') else '• ') + t_, bold=t_.startswith('KHUYẾN'))
+wsI.sheet_properties.tabColor = 'C00000'
+wsI.page_setup.orientation = 'landscape'; wsI.page_setup.fitToWidth = 1; wsI.page_setup.fitToHeight = 0; wsI.sheet_properties.pageSetUpPr.fitToPage = True
 
 for ws, col in [(wsT, NAVY), (wsD, '2F6FDE'), (wsC, '2F6FDE'), (wsX, 'C00000'), (wsK, '2F6FDE'), (wsO, '2F6FDE'), (wsO48, '2F6FDE'), (wsO96, '2F6FDE'), (wsPC, '8C959F'), (wsH, '1E9E5A'), (wsS, 'E8710A'), (wsQ, '8E44AD'), (wsV, '8E44AD'), (wsG, '8C959F')]:
     ws.sheet_properties.tabColor = col

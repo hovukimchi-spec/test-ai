@@ -37,6 +37,7 @@ h2{font-size:13px;margin:0 0 8px;color:var(--head);text-transform:uppercase;lett
 .banner{background:var(--banner);border:1px solid var(--bannerbd);color:var(--bannerink);border-radius:8px;padding:6px 10px;margin-top:6px}
 table.kv{border-collapse:collapse;font-size:12px}table.kv td{padding:2px 10px 2px 0;vertical-align:top}table.kv td:first-child{color:var(--mute)}
 .muted{color:var(--mute)}
+.incbox{font-size:12px;line-height:1.5;display:flex;flex-direction:column;gap:3px;margin-top:2px}
 .legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;margin-bottom:8px;color:var(--mute)}.legend span{display:flex;align-items:center;gap:4px}
 .chip{display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #0004;flex:none}
 .tabs{display:none;gap:6px;margin-bottom:8px}.tabs button{flex:1;border:1px solid var(--line);background:var(--btn);color:var(--ink);border-radius:8px;padding:8px;font:inherit;font-weight:600;min-height:40px}.tabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -288,6 +289,17 @@ function kpis(){
   if(srcUrl)k.push(['⟳',syncAt?'đồng bộ '+syncAt.toTimeString().slice(0,5):(syncMsg?'chưa đồng bộ':'đang đồng bộ…')]);
   $('#kpis').innerHTML=k.map(([a,b])=>`<div class="kpi"><b>${a}</b><span>${b}</span></div>`).join('');
 }
+let incId=null;
+const INC=DATA.incidents||[];
+function scenarioHtml(){
+  const list=INC.filter(x=>x.scope===sel.t);if(!list.length)return '';
+  if(!list.find(x=>x.id===incId))incId=list[0].id;
+  const it=list.find(x=>x.id===incId);
+  return `<div style="margin-top:6px"><label>Tình huống: <select id="incSel" style="font-size:14px;padding:4px;max-width:100%;background:var(--btn);color:var(--ink);border:1px solid var(--line);border-radius:6px">${list.map(x=>`<option value="${x.id}" ${x.id===incId?'selected':''}>${x.id} · ${x.title}</option>`).join('')}</select></label>
+  <span class="tag" style="background:${{P1:'#f8b4b4',P2:'#fad6a5',P3:'#fff0a8',P4:'#ddebdd'}[it.prio]};margin-left:6px">${it.prio} · ${it.eta}</span>
+  <div class="incbox"><div class="muted" style="margin:4px 0">Đoạn tuyến: ${it.seg}</div>
+  <div><b>Triệu chứng:</b> ${it.symptoms}</div><div><b>Chẩn đoán, đo kiểm:</b> ${it.check}</div>
+  <div><b>Khắc phục tạm thời:</b> ${it.temp}</div><div><b>Khắc phục dứt điểm:</b> ${it.fix}</div><div><b>Phòng ngừa:</b> ${it.prevent}</div></div></div>`}
 const step=(t,s)=>`<div class="step"><b>${t}</b><small>${s}</small></div>`;
 function info(){
   const el=$('#info');document.body.classList.toggle('has-sel',!!sel);
@@ -323,15 +335,16 @@ function info(){
   }
   h+=`<div style="margin-top:6px"><button class="btn2 red" id="simBtn">${fault?'Tắt giả lập':'Giả lập sự cố tại đây'}</button></div>`;
   if(fault){const cabs=new Set(),pons=new Set();fault.forEach(c=>{cabs.add(homeBy[c].cab);pons.add(homeBy[c].pon)});
-    h=h.replace('<div style="margin-top:6px">',`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON. Kiểm tra: ${sel.t==='apt'?'ONU / cáp 1FO / cổng splitter':sel.t==='spl'?'sợi trục, coupler ODF, dây nhảy ODF-96→ODF-48':sel.t==='cab'?'cáp nhánh 8FO, mối hàn tại hub':sel.t==='tr'?'cáp trục 24FO, ODF 48FO':'SFP/cổng OLT, dây nhảy OLT→ODF-96, splitter 1:4'}</div><div style="margin-top:6px">`);}
+    h=h.replace('<div style="margin-top:6px">',`<div class="banner"><b>Mất tín hiệu:</b> ${fault.size} căn hộ · ${cabs.size} tủ · ${pons.size} PON.${scenarioHtml()}</div><div style="margin-top:6px">`);}
   h=h.replace('<div class="row1">','<div class="row1"><button class="xbtn" id="xbtn" aria-label="Đóng">✕</button>');
   el.innerHTML=h;
   const xb=$('#xbtn');if(xb)xb.onclick=()=>{sel=null;fault=null;refresh()};
+  const isel=$('#incSel');if(isel)isel.onchange=()=>{incId=isel.value;info()};
   const b=$('#simBtn');if(b)b.onclick=()=>{fault=fault?null:scopeOf(sel);refresh()};
   el.querySelectorAll('[data-st]').forEach(x=>x.onclick=()=>{if(GAS){gasSet(sel.id,x.dataset.st)}else{status[sel.id]=x.dataset.st;saveSt();refresh()}});
 }
 
-function select(s){sel=s;fault=null;if(s&&s.t==='apt')setTab(s.id[0]);refresh()}
+function select(s){sel=s;fault=null;incId=null;if(s&&s.t==='apt')setTab(s.id[0]);refresh()}
 document.addEventListener('click',e=>{
   if(e.target.closest('#info')||e.target.closest('header'))return;
   const a=e.target.closest('.apt'),c=e.target.closest('.cab:not(.sub)'),t=e.target.closest('.strip'),o=e.target.closest('.out[data-spl],.cp[data-spl],.c96[data-spl]'),p=e.target.closest('.pon,.c96[data-pon]');
