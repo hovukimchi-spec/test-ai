@@ -25,8 +25,8 @@
 1. **Đoạn 1 (NBE12→HNB066)**: HĐ 10,236 km, đo 15,404 km (+50%) — kéo cả ring R8 lên +42%. Nghi sai km hợp đồng hoặc tuyến đi vòng.
 2. Nhiều đoạn CSG–CSG đo dài hơn HĐ 23–67% (đoạn 18, 21, 22, 26, 27, 32). Dài hơn có thể do slack ở măng xông, không phải sai.
 3. **Đoạn 31 (HNB054→HNB006)** core #1 = 2,359 dB trên 1,433 km (~1,65 dB/km) trong khi core #2 = 0,336 dB. Nghi mối hàn/uốn cong; BBNT vẫn ghi "Đạt".
-4. **Đoạn 34 (NBE12→HNB059)**: core #1 1,664 dB vs core #2 3,069 dB (lệch gần gấp đôi). **Đoạn 9**: 0,227 vs 0,604 dB.
-5. Ngưỡng "cho phép" 17 dB / 12,1 dB không nhất quán: đoạn 20 (9,63 km) và 16 (8,45 km) dùng 12,1; các đoạn >10 km dùng 17. Nên tính từ quỹ suy hao thay vì gõ tay.
+4. Lệch hai core: đoạn 34 (1,664 vs 3,069 dB; chênh 1,4 dB) và đoạn 9 (0,227 vs 0,604 dB) vẫn trong ngưỡng 2 dB. Chỉ đoạn 31 vượt (chênh 2,02 dB).
+5. ~~Ngưỡng cho phép không nhất quán~~ — **đã rút lại**: sau khi bạn chốt quy ước (mục 7), cả 37 đoạn trong BBNT đều khớp ngưỡng theo chiều dài đo.
 6. Đoạn 35 (HNB048→NBE22) dài 17,69 km, đoạn 33 dài 16,34 km: đây là các đoạn đóng vòng dài nhất, quyết định suy hao ring khi đứt/đảo hướng.
 7. Số liệu độ dài cáp theo mét (file chiều dài) khác BBNT (vd HNB066–HNB016: Sheet1 ghi 500 m, BBNT 0,456 km HĐ / 0,501 km đo; HNB038–HNB016 ghi 600 m vs 0,517/0,618 km). Chưa rõ nguồn nào là chuẩn.
 8. ODF AGG ghi nhiều giá trị OTDR theo ngày (10–11/2020) lệch nhau, một số ô ghi "hư"/"Hư" ở ODF-01 bên Nguyễn Bình: cần xác nhận cổng hỏng còn dùng được không (chưa đối chiếu từng cổng).
@@ -64,3 +64,12 @@
   - Nhãn A xuất hiện 8 sợi ở mỗi đầu cáp: hàn theo thứ tự, A1↔A1, A2↔A2...
   - Cùng nhãn ở hai đầu cáp khác số sợi (vd 12FO có 2 sợi B, 6FO có 2 sợi B): sợi B nhỏ hàn sợi B nhỏ theo thứ tự tăng dần.
   - Số sợi cùng nhãn hai đầu khác nhau → cảnh báo.
+
+## 7. Quy ước suy hao đã chốt (từ người dùng)
+- Ngưỡng theo chiều dài tuyến, ứng với SFP 10/40/80 km của MobiFone: **< 10 km: 12,1 dB; 10–40 km: 17 dB; > 40 km: 27 dB.**
+- Lệch suy hao giữa hai core chấp nhận **≤ 2 dB**.
+- Kết quả kiểm tra BBNT theo quy ước: cả 37 đoạn khớp ngưỡng; chỉ **đoạn 31 (HNB054→HNB006)** có lệch core 2,02 dB (vượt nhẹ 2 dB).
+- Ring đi hết một vòng (kịch bản đứt một đoạn, tín hiệu đi hướng còn lại): dài nhất R1 ≈ 29,9 km, suy hao đo lớn nhất ≈ 13,7 dB, thuộc nhóm 10–40 km (ngưỡng 17 dB) nên còn dư khoảng 3,3 dB. Các ring khác dư nhiều hơn.
+- Ví dụ "khác lề": `MX_NVT_03A` và `MX_NVT_03B` là hai măng xông ở hai bên lề đường (file ghi nhầm trùng tên); đấu hai hướng cần tách như vậy.
+- Một số CSG là trạm cấp 3 (last-mile), **chỉ có một hướng đến**, triển khai cùng đợt, không bảo vệ 1+1.
+- Ghi chú DWDM, VNN, TTC trong ODF/MX là **quỹ core trống cho đối tác** dùng trên một đoạn nào đó; mô hình gắn "đối tác" vào sợi và đoạn.
