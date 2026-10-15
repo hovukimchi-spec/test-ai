@@ -38,7 +38,19 @@ def parse(path):
             n=1
             while cells.get((r,c+n) if kind=='h' else (r+n,c))==str(n+1):n+=1
             if n>=2:runs.append(dict(kind=kind,r=r,c=c,n=n))
-    lab=re.compile(r'^([A-Za-z]|HƯ|Hư|hư|HU)$')
+    # hàng số core bị hoán vị: các ô số liền nhau tạo thành hoán vị của 1..n (n>=12) nhưng không bắt đầu bằng 1
+    rowsn={}
+    for (r,c),v in cells.items():
+        if v.isdigit():rowsn.setdefault(r,[]).append(c)
+    for r,cs in rowsn.items():
+        cs.sort();seg=[cs[0]]
+        for c in cs[1:]+[None]:
+            if c is not None and c==seg[-1]+1:seg.append(c);continue
+            vals=[int(cells[(r,x)]) for x in seg]
+            if len(seg)>=12 and sorted(vals)==list(range(1,len(seg)+1)) and vals[0]!=1:
+                runs.append(dict(kind='h',r=r,c=seg[0],n=len(seg),nums=vals))
+            if c is not None:seg=[c]
+    lab=re.compile(r'^([A-Za-z]\d?|HƯ|Hư|hư|HU)$')
     good=[]
     for run in runs:
         r,c,n,k=run['r'],run['c'],run['n'],run['kind'];best=None
@@ -69,6 +81,16 @@ def parse(path):
             if 1<=g<=2 and (best is None or g<best[0]):best=(g,h)
         return best[1] if best else None
     for run in good:run['head']=hdr_for(run)
+    # nếu một tiêu đề có run có nhãn thì bỏ các run không nhãn cùng tiêu đề (vd hàng số ODF phụ)
+    byh={}
+    for x in good:
+        if x['head']:byh.setdefault(x['head']['box'],[]).append(x)
+    drop=set()
+    for k,v in byh.items():
+        if any(any(l for l in x['labels']) for x in v):
+            for x in v:
+                if not any(l for l in x['labels']):drop.add(id(x))
+    good=[x for x in good if id(x) not in drop]
     good=[x for x in good if x['sgn'] or x['head']]
     def gap(a,b):
         dr=max(a[0]-b[2],b[0]-a[2],0);dc=max(a[1]-b[3],b[1]-a[3],0);return dr+dc
@@ -78,7 +100,7 @@ def parse(path):
         t=min(titles,key=lambda t:gap(run['rb'],t['box']))
         if key not in bykey:
             bykey[key]=dict(mx=t['name'],header=h['text'] if h else '',kind=run['kind'],cell=f"{L(run['c'])}{run['r']}",tubes=[]);cables.append(bykey[key])
-        bykey[key]['tubes'].append(dict(cell=f"{L(run['c'])}{run['r']}",labels=run['labels'],stations=run['stations']))
+        bykey[key]['tubes'].append(dict(cell=f"{L(run['c'])}{run['r']}",labels=run['labels'],stations=run['stations'],nums=run.get('nums')))
     notes=[(f'{L(c)}{r}',v.replace('\n',' ')) for (r,c),v in cells.items() if re.search(r'Chéo|swap|Core \d|hàn vào|MTC|TTC',v) and 'CÁP' not in v.upper() and len(v)<80]
     return dict(titles=[dict(name=t['name'],text=t['text']) for t in titles],cables=cables,notes=notes,
                 headers_unused=[h['text'][:60] for h in heads if not any(c['header']==h['text'] for c in cables)])

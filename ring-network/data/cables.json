@@ -252,5 +252,95 @@
   "src": "Sổ độ dài cáp (Tổng Hợp): 1680 m",
   "so_row": 63,
   "ends": {}
+ },
+ {
+  "id": "C22",
+  "name": "POSTEF 11/2016 (ODF-01 hướng NB)",
+  "fo": 24,
+  "frm": "VNPT Long Thới (ODF-01 NBE12)",
+  "to": "MX_NB-01",
+  "len_m": 345,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 345 m (cs 3027)",
+  "so_row": 30,
+  "ends": {
+   "MX_NB-01": "MX_NB-01|AD126"
+  }
+ },
+ {
+  "id": "C23",
+  "name": "FOCAL 2020 NB-02 → HNB086 (6FO số 1)",
+  "fo": 6,
+  "frm": "MX_NB-02",
+  "to": "HNB086",
+  "len_m": 1678,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1678 m",
+  "so_row": 29,
+  "ends": {}
+ },
+ {
+  "id": "C24",
+  "name": "FOCAL 2020 HNB086 → HNB024 (6FO số 2)",
+  "fo": 6,
+  "frm": "HNB086",
+  "to": "HNB024",
+  "len_m": 2013,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 2013 m",
+  "so_row": 28,
+  "ends": {}
+ },
+ {
+  "id": "C25",
+  "name": "FOCAL 2020 HNB024 → HNB027 (6FO số 3)",
+  "fo": 6,
+  "frm": "HNB024",
+  "to": "HNB027",
+  "len_m": 860,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 860 m",
+  "so_row": 27,
+  "ends": {}
+ },
+ {
+  "id": "C26",
+  "name": "FOCAL 2020 HNB027 → NB-03 (6FO số 4)",
+  "fo": 6,
+  "frm": "HNB027",
+  "to": "MX_NB-03",
+  "len_m": 190,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 190 m",
+  "so_row": 26,
+  "ends": {}
+ },
+ {
+  "id": "C27",
+  "name": "FOCAL 2020 NB-04 → HNB031 (6FO)",
+  "fo": 6,
+  "frm": "MX_NB-04",
+  "to": "HNB031",
+  "len_m": 1618,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1618 m",
+  "so_row": 25,
+  "ends": {}
+ },
+ {
+  "id": "C28",
+  "name": "FOCAL 2020 HNB031 → HNB020 (6FO thứ 2)",
+  "fo": 6,
+  "frm": "HNB031",
+  "to": "HNB020",
+  "len_m": 1178,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 1178 m",
+  "so_row": 24,
+  "ends": {}
+ },
+ {
+  "id": "C29",
+  "name": "FOCAL 2020 HNB020 → NB-04 (6FO)",
+  "fo": 6,
+  "frm": "HNB020",
+  "to": "MX_NB-04",
+  "len_m": 716,
+  "src": "Sổ độ dài cáp (Tổng Hợp): 716 m",
+  "so_row": 23,
+  "ends": {}
  }
 ]

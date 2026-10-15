@@ -1,0 +1,390 @@
+{
+ "ring": "R6",
+ "sfp": "1310 nm, 2 core/link",
+ "source": "Người dùng mô tả: ODF-01 hướng NB; 6FO chạy riêng dùng 1,2; đoạn dùng chung dùng 7,8",
+ "links": [
+  {
+   "id": "R6-01",
+   "frm": "NBE12",
+   "to": "HNB086",
+   "odf_otdr_m": [
+    3075
+   ],
+   "bbnt_otdr_m": 3084,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "NBE12",
+     "name": "ODF-01 24FO hướng NB",
+     "cores": [
+      19,
+      20
+     ],
+     "note": "ODF AGG ghi cổng 19-20: HNB086 ring 6"
+    },
+    {
+     "t": "cable",
+     "cable": "C22",
+     "cores": [
+      19,
+      20
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-01",
+     "a_cable": "C22",
+     "cores_a": [
+      19,
+      20
+     ],
+     "b_cable": "C12",
+     "cores_b": [
+      7,
+      8
+     ],
+     "note": "sơ đồ MX: nhãn C, trạm HNB086 ở core 19,20"
+    },
+    {
+     "t": "cable",
+     "cable": "C12",
+     "cores": [
+      7,
+      8
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-02",
+     "a_cable": "C12",
+     "cores_a": [
+      7,
+      8
+     ],
+     "b_cable": "C23",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "hàn vào 6FO số 1 đi HNB086"
+    },
+    {
+     "t": "cable",
+     "cable": "C23",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB086",
+     "name": "ODF-HNB086 (hướng NBE12)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R6-02",
+   "frm": "HNB086",
+   "to": "HNB024",
+   "bbnt_otdr_m": 2013,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB086",
+     "name": "ODF-HNB086 (hướng HNB024)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C24",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB024",
+     "name": "ODF-HNB024 (hướng HNB086)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R6-03",
+   "frm": "HNB024",
+   "to": "HNB027",
+   "bbnt_otdr_m": 862,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB024",
+     "name": "ODF-HNB024 (hướng HNB027)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C25",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB027",
+     "name": "ODF-HNB027 (hướng HNB024)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R6-04",
+   "frm": "HNB027",
+   "to": "HNB031",
+   "bbnt_otdr_m": 2896,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB027",
+     "name": "ODF-HNB027 (hướng HNB031)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C26",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-03",
+     "a_cable": "C26",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C14",
+     "cores_b": [
+      7,
+      8
+     ],
+     "note": "1,2 hàn 7,8 đi NB-04"
+    },
+    {
+     "t": "cable",
+     "cable": "C14",
+     "cores": [
+      7,
+      8
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-04",
+     "a_cable": "C14",
+     "cores_a": [
+      7,
+      8
+     ],
+     "b_cable": "C27",
+     "cores_b": [
+      1,
+      2
+     ],
+     "note": "7,8 hàn 1,2 sợi 6FO đi HNB031"
+    },
+    {
+     "t": "cable",
+     "cable": "C27",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB031",
+     "name": "ODF-HNB031 (hướng HNB027)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R6-05",
+   "frm": "HNB031",
+   "to": "HNB020",
+   "bbnt_otdr_m": 1178,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB031",
+     "name": "ODF-HNB031 (hướng HNB020)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C28",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "HNB020",
+     "name": "ODF-HNB020 (hướng HNB031)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "R6-06",
+   "frm": "HNB020",
+   "to": "NBE22",
+   "odf_otdr_m": [
+    2401
+   ],
+   "bbnt_otdr_m": 2186,
+   "steps": [
+    {
+     "t": "odf",
+     "at": "HNB020",
+     "name": "ODF-HNB020 (hướng ra NBE22)",
+     "cores": [
+      1,
+      2
+     ],
+     "note": ""
+    },
+    {
+     "t": "cable",
+     "cable": "C29",
+     "cores": [
+      1,
+      2
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_NB-04",
+     "a_cable": "C29",
+     "cores_a": [
+      1,
+      2
+     ],
+     "b_cable": "C15",
+     "cores_b": [
+      7,
+      8
+     ],
+     "note": "1,2 từ HNB020 hàn 7,8 sợi 12FO về HTP-03B"
+    },
+    {
+     "t": "cable",
+     "cable": "C15",
+     "cores": [
+      7,
+      8
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX thẳng HTP",
+     "a_cable": "C15",
+     "cores_a": [
+      7,
+      8
+     ],
+     "b_cable": "C16",
+     "cores_b": [
+      7,
+      8
+     ],
+     "note": "MX thẳng nối dài"
+    },
+    {
+     "t": "cable",
+     "cable": "C16",
+     "cores": [
+      7,
+      8
+     ]
+    },
+    {
+     "t": "mx",
+     "at": "MX_HTP-03B",
+     "a_cable": "C16",
+     "cores_a": [
+      7,
+      8
+     ],
+     "b_cable": "C17",
+     "cores_b": [
+      7,
+      8
+     ],
+     "note": "hàn thẳng 7,8 lên ODF-02"
+    },
+    {
+     "t": "cable",
+     "cable": "C17",
+     "cores": [
+      7,
+      8
+     ]
+    },
+    {
+     "t": "odf",
+     "at": "NBE22",
+     "name": "ODF-02 24FO NBE22 (cs 1288)",
+     "cores": [
+      7,
+      8
+     ],
+     "note": "ODF AGG ghi cổng 7-8: HNB020 ring 6"
+    }
+   ]
+  }
+ ]
+}

@@ -151,3 +151,9 @@ Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model
 - Cáp vào trạm từ MX trục gần trạm (< 300 m) được chấp nhận với điều kiện ≥ 12FO (cấu hình `drop_max_m`, `drop_min_fo`). Cáp dùng chung mang nhiều link được phép, chấp nhận sự cố nhiều tuyến cùng lúc, nhưng cần cân đối giữa các cáp.
 - Sheet `Cân đối cáp`: loại cáp (vào trạm / trục / riêng tới trạm / giữa hai trạm), số link và số ring mỗi cáp, tỷ lệ core dùng, kiểm tra quy tắc. Hiện C03, C05, C17 đạt; 8 cáp trục dùng chung (C01, C02, C04, C06, C09–C16) đều mang R1+R2 (2 link mỗi cáp).
 - Mã cáp lấy từ sổ độ dài; cáp chưa có mã trong sổ (C05, C06, C09, C12–C16 ↔ dòng 55, 57, 64, 18–22) được để trống, không điền suy đoán.
+
+## 16. Ring R6 (086–024–027–031–020)
+- 6 link đã lần: ODF-01 NBE12 (24FO, cổng 19-20) → NB-01 (19,20↔7,8 của 12FO, khớp nhãn C trong sơ đồ) → NB-02 (7,8↔1,2 của 6FO số 1) → HNB086; các đoạn trực tiếp giữa trạm dùng 1,2 của 6FO; HNB027 → NB-03 → NB-04 → HNB031 dùng 7,8 trên 12FO đoạn NB-03→NB-04; HNB020 → NB-04 → thẳng HTP → HTP-03B → ODF-02 NBE22 cổng 7-8.
+- Độ dài cộng theo sổ cáp khớp OTDR/BBNT: 3063/3075, 2013/2013, 860/862, 2900/2896, 1178/1178, 2393/2401 m.
+- Đoạn trục NB-01→HTP-03B (C12, C14–C17) hiện mang 3 ring (R1, R2, R6); đứt một cáp làm mất đồng thời 3 link (mỗi ring một link, các CSG vẫn còn hướng kia).
+- Sơ đồ MX: nhãn có chữ số (A2, A3, C1…) được coi là nhóm riêng; hàng số core bị hoán vị (24FO ODF-01 tại NB-01: 7..12, 1..6, 13..24) được đọc theo số in trên sơ đồ.

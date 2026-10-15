@@ -118,7 +118,7 @@ for mx in dict.fromkeys(c['mx'] for c in res['cables']):
         off=0;ncore=0;lab=0
         for t in c['tubes']:
             for i,(l,st) in enumerate(zip(t['labels'],t['stations']),1):
-                g=off+i;cor.append((mx,cid,g,(g-1)//6+1,TUBE[(g-1)%6],l,st));ncore+=1;lab+=1 if l else 0
+                g=(t['nums'][i-1] if t.get('nums') else off+i);cor.append((mx,cid,g,(g-1)//6+1,TUBE[(g-1)%6],l,st));ncore+=1;lab+=1 if l else 0
             off+=len(t['labels'])
         cab.append((mx,cid,c['cell'],h.replace(' / ',' | '),ma,loai,fo.group(1) if fo else '',cs.group(1) if cs else '',(hv.group(1).strip() if hv else ''),ncore,lab))
 w('mx_cap.csv',['mx','cap_id','o_goc','tieu_de','ma_cap','loai','so_FO','chi_so_m','huong','so_core_ve','so_core_co_nhan'],cab)
