@@ -334,6 +334,46 @@ for o,t in d['mx_notes']:
     CW_.cell(rr,1,'ghi chú tay '+o);CW_.cell(rr,2,t);CW_.cell(rr,3).fill=INP;rr+=1
 box(CW_,4,rr-1,1,3)
 
+# ---------------- Đường đi link ----------------
+PA=sheet('Đường đi link')
+title(PA,'Đường đi từng link ring qua ODF – cáp – măng xông (SFP 1310 nm, 2 core/link)','Mô tả do người dùng cung cấp; độ dài cáp từ sổ độ dài; đối chiếu nhãn với sơ đồ MX. Link chưa hoàn chỉnh ghi rõ.')
+header(PA,4,['Link','Từ','Đến','Tổng cáp (m)','OTDR tham chiếu (m)','Lệch (m)','Lệch %','Kết luận','Ghi chú'],[9,9,9,12,14,10,9,26,60])
+nl_=len(d['paths']);r0=5
+for i,lk in enumerate(d['paths']):
+    r=r0+i;ref=(lk['odf_otdr_m'] or [None])[0] or lk['bbnt_otdr_m']
+    PA.cell(r,1,lk['id']);PA.cell(r,2,lk['frm']);PA.cell(r,3,lk['to'])
+    PA.cell(r,4,f'=SUMIFS($G${r0+nl_+4}:$G$2000,$A${r0+nl_+4}:$A$2000,A{r},$C${r0+nl_+4}:$C$2000,"cáp")');PA.cell(r,5,ref)
+    PA.cell(r,6,f'=D{r}-E{r}');PA.cell(r,7,f'=F{r}/E{r}');PA.cell(r,7).number_format='0.0%'
+    PA.cell(r,8,('Chưa hoàn chỉnh (còn tiếp)' if not lk['complete'] else f'=IF(ABS(G{r})<=0.02,"Khớp (≤2%)","Lệch >2%: kiểm tra")'))
+    PA.cell(r,9,'OTDR tham chiếu: '+('ODF AGG ghi 982/988 m' if lk['odf_otdr_m'] else 'BBNT (số thống nhất)'))
+box(PA,r0,r0+nl_-1,1,9)
+hr=r0+nl_+2;PA.cell(hr,1,'Chi tiết từng bước').font=Font(bold=True,size=12)
+header(PA,hr+1,['Link','Bước','Loại','Vị trí / cáp','Từ → Đến','Core','Dài (m)','Cộng dồn (m)','Đối chiếu sơ đồ MX','Ghi chú'],None)
+PA.column_dimensions['J'].width=50
+rr=hr+2
+for lk in d['paths']:
+    first=rr
+    for k,s in enumerate(lk['steps'],1):
+        PA.cell(rr,1,lk['id']);PA.cell(rr,2,k)
+        if s['t']=='odf':
+            vals=['ODF',f"{s['at']}: {s['name']}",'', '+'.join(map(str,s['cores'])),None,None,'',s.get('note','')]
+        elif s['t']=='cable':
+            vals=['cáp',s['name'],f"{s['frm']} → {s['to']}",'+'.join(map(str,s['cores'])),s['len_m'],f'=SUM(G{first}:G{rr})' ,'',s['src']]
+        elif s['t']=='mx':
+            vals=['măng xông',s['at'],'',f"{'+'.join(map(str,s['cores_a']))} ↔ {'+'.join(map(str,s['cores_b']))}",None,None,f"{s['check']} — {s['check_detail']}",s.get('note','')]
+        else:
+            vals=['…','','','',None,None,'',s['note']]
+        for j,v in enumerate(vals,3):PA.cell(rr,j,v)
+        PA.cell(rr,3).font=Font(bold=True)
+        c=PA.cell(rr,9);t=str(vals[6])
+        if t.startswith('khớp sơ đồ'):c.fill=GOOD
+        elif t.startswith('KHÁC') or 'THỨ TỰ' in t:c.fill=BAD
+        elif t.startswith('chưa'):c.fill=WARN
+        if s['t']=='mx':PA.cell(rr,3).fill=GREY
+        if s['t']=='todo':PA.cell(rr,4).fill=INP
+        rr+=1
+box(PA,hr+2,rr-1,1,10);PA.freeze_panes='A5'
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -356,7 +396,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Phối core MX','Đường đi link','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True

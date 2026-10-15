@@ -150,6 +150,7 @@ def build():
     d=dict(config=CONFIG,mx_cables=mxc,mx_cores=mxo,mx_pairs=pairs,mx_warn=mxwarn,mx_notes=_csv('mx_ghi_chu.csv'),nodes=nodes,rings=RINGS,segments=segments,odf=odf,odf_agg=odf_agg,closures=closures,cables=cables,partners=PARTNERS,
            vat_tu=_csv('vat_tu_odf_mx.csv'))
     d['issues']=detect_issues(d)
+    d['paths']=load_paths(d)
     return d
 
 def simulate_cut(d,seg_ids):
@@ -211,3 +212,35 @@ def corridor_overlap(p1,p2,tol=20,step=10):
         ci,cj=int(a[0]//tol),int(a[1]//tol)
         if any(math.dist(a,q)<=tol for di in(-1,0,1) for dj in(-1,0,1) for q in cell.get((ci+di,cj+dj),())):c+=1
     return c*step/1000
+
+def check_splice(pairs,a,ca,b,cb):
+    """Đối chiếu một mối hàn (cáp a core ca ↔ cáp b core cb) với bảng phối core suy ra từ sơ đồ MX.
+    Trả (trạng thái, chi tiết)."""
+    if not a or not b:return 'chưa có sơ đồ','không xác định cáp trong sơ đồ MX'
+    m={}
+    for p in pairs:
+        if p['a']==a and p['b']==b:m[p['core_a']]=(p['core_b'],p['label'])
+        elif p['a']==b and p['b']==a:m[p['core_b']]=(p['core_a'],p['label'])
+    if not any(c in m for c in ca):return 'chưa có nhãn','sơ đồ MX chưa ghi nhãn cho các core này'
+    bad=[];ok=True
+    for x,y in zip(ca,cb):
+        if x in m and m[x][0]==y:continue
+        ok=False;bad.append(f"core {x}→{m[x][0] if x in m else '?'} (quy tắc nhỏ-nhỏ) ≠ {y} (mô tả)")
+    if ok:return 'khớp sơ đồ','nhãn '+','.join(sorted({m[x][1] for x in ca if x in m}))
+    if all(x in m for x in ca) and {m[x][0] for x in ca}==set(cb):return 'khớp nhóm, THỨ TỰ KHÁC','cùng nhóm core nhưng hàn chéo so với quy tắc nhỏ-nhỏ: '+'; '.join(bad)
+    return 'KHÁC sơ đồ','; '.join(bad)
+
+def load_paths(d):
+    out=[]
+    for f in sorted(os.listdir(os.path.join(DATA,'paths'))):
+        if not f.endswith('.json'):continue
+        P=json.load(open(os.path.join(DATA,'paths',f),encoding='utf-8'))
+        for lk in P['links']:
+            tot=0;rows=[]
+            for st in lk['steps']:
+                r=dict(st);
+                if st['t']=='cable':tot+=st['len_m'];r['cum']=tot
+                if st['t']=='mx':r['check'],r['check_detail']=check_splice(d['mx_pairs'],st.get('a'),st.get('cores_a'),st.get('b'),st.get('cores_b'))
+                rows.append(r)
+            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=lk.get('bbnt_otdr_m'),odf_otdr_m=lk.get('odf_otdr_m'),complete=lk.get('complete',True),steps=rows))
+    return out

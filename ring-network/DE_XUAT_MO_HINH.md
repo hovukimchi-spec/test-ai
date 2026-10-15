@@ -125,3 +125,11 @@ Nguồn: sheet `MX` của file MX__NHA_BE.xlsx, đọc bằng `parse_mx.py` (k�
 - Chưa có nhãn (người dùng chưa ghi): MX_NVT_01, MX_NB-02/03/04, MX_HTP-03B, MX_DST (một phần), NVT_03A/03B (tiêu đề copy mẫu "Hướng vào trạm HNB006").
 - Màu sợi/ống: giả định 6 sợi mỗi ống (xanh dương, cam, xanh lá, nâu, xám, trắng), khớp ô màu trong sơ đồ; chưa kiểm tra với cáp 24FO.
 - Chưa làm: lần theo từng link ring từ CSG này qua các măng xông đến CSG kia (cần nối đầu cáp giữa các măng xông).
+
+## 12. Lần đường đi một link (thử với R2 = 054–006–091)
+Mô tả của người dùng được mã hoá ở `data/paths/R2.json`; `model.load_paths` tính tổng độ dài cáp và đối chiếu từng mối hàn với bảng phối core suy ra từ sơ đồ MX (sheet `Đường đi link`).
+- Cặp core của HNB054 trên ODF-02 (hướng NVT) tại NBE12 là 1-2, khớp ghi chú ODF AGG ("HNB054 ring 2", cổng 1-2).
+- Tổng độ dài cáp cộng theo sổ cáp khớp OTDR: R2-01 980 m (ODF AGG ghi 982/988 m), R2-02 1430 m (BBNT 1433 m), R2-03 1610 m (BBNT 1607 m).
+- Mối hàn khớp sơ đồ MX: NVT_02A 1,2↔1,2 (nhãn A); NVT_02B 1,2↔1,2 (nhãn A). Mối hàn NVT_02A 3,4↔5,2 cùng nhóm core (nhãn D) nhưng thứ tự khác quy tắc nhỏ-nhỏ (cần xác nhận thứ tự chéo).
+- Chưa có nhãn trong sơ đồ: NVT_01, NVT_03A, NVT_03B, MX nhập đài Long Thới–NVT.
+- Link R2-04 (HNB091 → NBE22) mới mô tả đến NVT_02B; chờ phần còn lại.
