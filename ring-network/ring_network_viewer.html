@@ -473,9 +473,9 @@ const ti=x=>parseInt(x,10);
 function setDirty(v){dirty=v;renderSrc()}
 function renderSrc(){$('#src').innerHTML=(fname?`Nguồn dữ liệu: <b>${esc_(fname)}</b>`:'Nguồn dữ liệu: bản nhúng sẵn trong HTML (bấm “Mở Excel” để nạp file Excel của bạn)')+(dirty?` · <span class="dirty">● có thay đổi chưa lưu</span>`:'')+(fh?' · lưu thẳng vào file':(fname?' · “Lưu” sẽ tải file mới về':''))}
 function refresh(){derive();fillCab();upC();upO();renderMxList();if(curMx)renderMx(curMx);draw()}
-function touch(){setDirty(true);refresh()}
+function touch(){setDirty(true);saveDraft();refresh()}
 // ---- mở / lưu Excel
-async function loadBytes(b,name,handle){try{const L=await XlsxIO.readLayer(b);RAW.layer=L;xbytes=b;fname=name;fh=handle||null;dirty=false;refresh();renderSrc()}catch(e){alert('Không đọc được file: '+e.message)}}
+async function loadBytes(b,name,handle){try{const L=await XlsxIO.readLayer(b);if(dirty&&!confirm('Đang có thay đổi chưa lưu. Nạp file Excel sẽ thay thế chúng (bản nháp vẫn được giữ để khôi phục). Tiếp tục?'))return;RAW.layer=L;BASE=JSON.parse(JSON.stringify(L));xbytes=b;fname=name;fh=handle||null;dirty=false;refresh();renderSrc()}catch(e){alert('Không đọc được file: '+e.message)}}
 $('#bOpen').onclick=async()=>{
  if(window.showOpenFilePicker){try{const [h]=await showOpenFilePicker({types:[{description:'Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]});const f=await h.getFile();await loadBytes(new Uint8Array(await f.arrayBuffer()),f.name,h)}catch(e){if(e.name!=='AbortError')alert(e.message)}}
  else $('#fIn').click()};
@@ -622,6 +622,38 @@ function showMx(name){popFn=()=>{const cabs=mxCables(name),pairs=mxPairsFor(name
   if(steps.length)h+='<div class="b" style="margin-top:8px">Link đi qua</div><table>'+steps.map(([p,s])=>`<tr><td class="b">${p.id}</td><td>${s.a_cable} ${s.cores_a.join('+')} ↔ ${s.b_cable} ${s.cores_b.join('+')}</td><td class="${/^khớp/.test(s.check)?'ok':/^chưa/.test(s.check)?'warn':'bad'}">${esc_(String(s.check).slice(0,40))}</td></tr>`).join('')+'</table>';
   h+=`<div class="row"><button class="on" onclick="goMx('${q}')">Mở trang MX (sửa nhãn)</button></div>`;openSheet(h)};popFn()}
 const _refresh=refresh;refresh=function(){_refresh();if(popFn&&$('#sheet').classList.contains('on'))popFn()};
+
+// ===== bản nháp tự lưu (không mất thay đổi khi tải bản HTML/Excel mới) =====
+// Lưu vào trình duyệt: lớp dữ liệu hiện tại + lớp gốc lúc bắt đầu sửa. Khôi phục theo kiểu "3 bên": chỉ áp dụng phần bạn đã sửa lên dữ liệu mới.
+let BASE=JSON.parse(JSON.stringify(RAW.layer));const DK='ringDraftV1';
+function saveDraft(){try{localStorage.setItem(DK,JSON.stringify({t:Date.now(),base:BASE,layer:RAW.layer}))}catch(e){}}
+function loadDraft(){try{const s=localStorage.getItem(DK);return s?JSON.parse(s):null}catch(e){return null}}
+function clearDraft(){try{localStorage.removeItem(DK)}catch(e){}}
+const S_=x=>x==null?'':String(x);
+function mergeDraft(dr){const L=RAW.layer,B=dr.base,Dl=dr.layer;let n=0;
+ const byId=(arr,k)=>{const m={};arr.forEach(r=>m[S_(r[k])]=r);return m};
+ [['cables','id'],['links','id']].forEach(([key,k])=>{const nb=byId(B[key],k),nl=byId(L[key],k);Dl[key].forEach(r=>{const id=S_(r[k]),b=nb[id],t=nl[id];
+   if(!b){if(!t){L[key].push(r);n++}return}if(!t)return;Object.keys(r).forEach(f=>{if(S_(r[f])!==S_(b[f])){t[f]=r[f];n++}})})});
+ const grp=arr=>{const m={};arr.forEach(r=>(m[S_(r.link)]=m[S_(r.link)]||[]).push(r));return m};const gb=grp(B.steps),gd=grp(Dl.steps);
+ Object.keys(gd).forEach(l=>{if(JSON.stringify(gd[l])!==JSON.stringify(gb[l]||[])){L.steps=L.steps.filter(r=>S_(r.link)!==l).concat(gd[l]);n++}});
+ const lk=r=>[r.mx,r.cable,S_(r.core)].join('|');const lb=byId2(B.labels),ld=byId2(Dl.labels),ln=byId2(L.labels);
+ function byId2(arr){const m={};arr.forEach(r=>m[lk(r)]=r);return m}
+ Object.keys(ld).forEach(k=>{const r=ld[k],b=lb[k];if(!b||JSON.stringify(r)!==JSON.stringify(b)){if(ln[k])Object.assign(ln[k],r);else L.labels.push(Object.assign({},r));n++}});
+ Object.keys(lb).forEach(k=>{if(!ld[k]&&ln[k]){L.labels.splice(L.labels.indexOf(ln[k]),1);n++}});
+ return n}
+function exportDraft(){const b=new Blob([JSON.stringify({t:Date.now(),base:BASE,layer:RAW.layer})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ring_ban_nhap.json';document.body.appendChild(a);a.click();a.remove()}
+async function importDraft(f){try{const dr=JSON.parse(await f.text());const n=mergeDraft(dr);BASE=JSON.parse(JSON.stringify(RAW.layer));BASE0=null;setDirty(true);saveDraft();refresh();alert('Đã áp dụng '+n+' thay đổi từ bản nháp.')}catch(e){alert('Không đọc được bản nháp: '+e.message)}}
+let BASE0=null;
+function offerDraft(){const dr=loadDraft();if(!dr)return;const same=JSON.stringify(dr.layer)===JSON.stringify(RAW.layer);if(same)return;
+ const d=new Date(dr.t).toLocaleString('vi-VN');const bar=document.createElement('div');bar.id='draftBar';bar.style.cssText='background:color-mix(in srgb,var(--warn) 25%,var(--card));padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px';
+ bar.innerHTML=`Có <b>bản nháp chưa lưu Excel</b> (${esc_(d)}). <button id="dRes" class="on">Khôi phục</button> <button id="dDis">Bỏ bản nháp</button>`;$('#src').after(bar);
+ $('#dRes').onclick=()=>{const n=mergeDraft(dr);BASE=JSON.parse(JSON.stringify(RAW.layer));setDirty(n>0);saveDraft();refresh();bar.remove();alert('Đã khôi phục '+n+' thay đổi. Nhớ bấm “Lưu Excel”.')};
+ $('#dDis').onclick=()=>{if(confirm('Xoá bản nháp?')){clearDraft();bar.remove()}}}
+$('.tools').insertAdjacentHTML('afterbegin','<button id="bBak" title="Sao lưu / nạp bản nháp">⬇⬆</button>');
+$('#bBak').onclick=()=>{if(confirm('OK = tải bản sao lưu (.json) về máy.\nHuỷ = chọn file sao lưu để nạp.'))exportDraft();else{const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>i.files[0]&&importDraft(i.files[0]);i.click()}};
+// sau khi lưu Excel thành công thì bản nháp không còn cần: đặt lại mốc
+const _setDirty=setDirty;setDirty=function(v){_setDirty(v);if(!v){BASE=JSON.parse(JSON.stringify(RAW.layer));clearDraft()}};
+offerDraft();
 
 renderRingSel();draw();
 </script></body></html>
