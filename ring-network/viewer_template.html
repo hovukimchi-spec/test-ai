@@ -111,7 +111,7 @@ $('#simBtn').onclick=()=>{sim=!sim;if(!sim)cut.clear();$('#simBtn').classList.to
 // ---- khung chi tiết
 function openSheet(h){$('#sheetBody').innerHTML=h;$('#sheet').classList.add('on')}function closeSheet(){$('#sheet').classList.remove('on')}
 function showSeg(id){const s=segById[id];openSheet(`<h3 style="margin:0 0 6px">${s.id}: ${s.a} → ${s.z} ${pill(s)}</h3><div class="mut">Ring ${s.ring} · ${s.kind}${s.roadside?' · lề '+s.roadside:''}${s.rerouted?' · <span class="warn">đã đổi tuyến</span>':''}</div>
- <table><tr><th>km HĐ</th><th>km OTDR${s.nghiem_thu?' (nghiệm thu)':''}</th><th>km KML</th><th>km tính</th></tr><tr><td>${fmt(s.km_hd,3)}</td><td>${fmt(s.km_otdr,3)}</td><td>${fmt(s.km_kml,3)}</td><td class="b">${fmt(s.km_ref,3)}</td></tr></table>
+ <table><tr><th>km HĐ</th><th>km OTDR${s.nghiem_thu?' (nghiệm thu)':''}</th><th>km KML</th><th>km tính</th></tr><tr><td>${fmt(s.km_hd,3)}</td><td>${fmt(s.km_otdr,3)}</td><td>${fmt(s.km_kml,3)}</td><td class="b">${fmt(s.km_ref,3)}${s.km_cap?'<br><small class="mut">tổng cáp thật</small>':''}</td></tr></table>
  <table><tr><th>dB core 1</th><th>dB core 2</th><th>Ngưỡng</th><th>Dư</th><th>Chênh core</th></tr><tr><td>${fmt(s.db1)}</td><td>${fmt(s.db2)}</td><td>${s.allow}</td><td class="b">${fmt(s.margin)}</td><td>${fmt(s.delta)}</td></tr></table>
  ${ntRow(s)}${D.links[s.id]?'<div class="b" style="margin-top:8px">Cáp trên đường đi ('+D.links[s.id].total+' m)</div><table>'+D.links[s.id].steps.map(x=>`<tr onclick="goCab('${x[0]}')" style="cursor:pointer"><td>${x[0]}</td><td>${x[2]||x[1]}</td><td><b>${x[7]||'?'}FO</b></td><td>core ${x[3].join('+')}</td><td>${x[4]} m</td></tr>`).join('')+'</table>':''}<div class="mut">Mã BBNT ${s.bbnt??'—'} · ngưỡng theo chiều dài đoạn (${s.km_ref<10?'<10 km':s.km_ref<=40?'10–40 km':'>40 km'}).</div>${issuesFor(s.id)}`)}
 function ntRow(s){const r=(RAW.static.odf_nt||[]).find(x=>x.frm==s.a&&x.to==s.z);if(!r)return '';const bk=s.bbnt_km_otdr??s.km_otdr,b1=s.bbnt_db1??s.db1,b2=s.bbnt_db2??s.db2,dk=r.km-bk,dd=Math.max(Math.abs(r.db1-b1),Math.abs(r.db2-b2));
@@ -165,7 +165,7 @@ const upF=()=>{const s=segById[$('#oSeg').value];$('#oFrom').innerHTML=`<option 
 function polyLen(pm){let L=0;const c=[0];for(let i=1;i<pm.length;i++){L+=Math.hypot(pm[i][0]-pm[i-1][0],pm[i][1]-pm[i-1][1]);c.push(L)}return [L,c]}
 function proj1(pm,cum,p){let best=[1e9,0];for(let i=1;i<pm.length;i++){const [x1,y1]=pm[i-1],[x2,y2]=pm[i],dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;let t=l2?((p[0]-x1)*dx+(p[1]-y1)*dy)/l2:0;t=Math.max(0,Math.min(1,t));const q=[x1+t*dx,y1+t*dy],d=Math.hypot(p[0]-q[0],p[1]-q[1]);if(d<best[0])best=[d,cum[i-1]+t*Math.sqrt(l2)]}return best}
 $('#oGo').onclick=()=>{const s=segById[$('#oSeg').value],m=+$('#oM').value,from=$('#oFrom').value;if(!m){$('#oOut').textContent='Nhập khoảng cách OTDR (m).';return}
- let pm=s.pm.slice();if(from=='z')pm=pm.slice().reverse();const [L,cum]=polyLen(pm);const tot=(s.km_otdr||s.km_ref)*1000;const f=m/tot;
+ let pm=s.pm.slice();if(from=='z')pm=pm.slice().reverse();const [L,cum]=polyLen(pm);const tot=(s.rerouted?s.km_ref:(s.km_otdr||s.km_ref))*1000;const f=m/tot;
  let h='';if(f>1.02)h+=`<div class="bad">Khoảng cách OTDR (${m} m) lớn hơn chiều dài đo của đoạn (${Math.round(tot)} m): kiểm tra đầu đo hoặc đoạn.</div>`;
  const pos=Math.min(f,1)*L;let i=1;while(i<cum.length-1&&cum[i]<pos)i++;const t=(pos-cum[i-1])/((cum[i]-cum[i-1])||1),xy=[pm[i-1][0]+t*(pm[i][0]-pm[i-1][0]),pm[i-1][1]+t*(pm[i][1]-pm[i-1][1])];
  const lon=106.7+xy[0]/(k*111320),lat=10.69-xy[1]/110570;

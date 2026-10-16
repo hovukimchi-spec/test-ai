@@ -161,6 +161,13 @@ def build():
     d['issues']=detect_issues(d)
     d['paths']=load_paths(d)
     d['odf_nt'],d['port_map']=load_nghiem_thu(d)
+    # đoạn đã đổi tuyến: số tham chiếu = tổng chiều dài cáp thật trên đường đi (sổ độ dài cáp), không dùng số ước tính từ KML
+    for s in segments:
+        lk=next((x for x in d['paths'] if x['id']==s['id']),None)
+        if s['rerouted'] and lk and lk['total_m']:
+            tot=lk['total_m']/1000;s['km_ref']=round(tot,3);s['km_cap']=round(tot,3)
+            s['db_ref']=round(max(s['db1'],s['db2'])*(tot/s['km_otdr']),3);s['allow']=threshold(tot);s['margin']=round(s['allow']-s['db_ref'],2);s['ok_loss']=s['db_ref']<=s['allow']
+    d['issues']=[(i,k,f"HĐ {next(s['km_hd'] for s in segments if s['id']==i)} km là chiều dài thiết kế (qua cáp C11); tuyến thực tế sau khi chuyển hướng: tổng cáp theo sổ độ dài {next(s['km_cap'] for s in segments if s['id']==i)} km" ) if k=='đổi tuyến' else (i,k,t) for i,k,t in d['issues']]
     d['ledger'],d['ledger_conflicts']=core_ledger(d)
     d['cable_profiles']=cable_profiles(d)
     d['station_cores']=station_core_table(d)
