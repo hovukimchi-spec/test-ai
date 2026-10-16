@@ -40,6 +40,7 @@ header .tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}#src{font-s
 <nav id="tabs"></nav>
 <main>
 <section class="pane on" id="p-map"><div class="row"><button id="simBtn">⚡ Giả lập sự cố</button><span class="mut" id="simHint">Bấm đoạn/nút để xem chi tiết.</span></div>
+<div class="row" id="ringSel"></div>
 <svg id="map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg><div class="leg" id="leg"></div>
 <div class="card" id="simOut" style="display:none"></div></section>
 <section class="pane" id="p-mx"><div class="row"><input id="mxQ" type="search" placeholder="Tìm măng xông (tên, trạm, cáp)…" style="flex:1;min-width:160px"><label class="mut"><input type="checkbox" id="mxOnlyL"> chỉ MX có nhãn/ghi chú thiếu</label></div><div class="mxl" id="mxList"></div><div id="mxDetail"></div></section>
@@ -361,7 +362,7 @@ const all=[].concat(...D.segments.map(s=>s.pm));all.forEach(p=>{minx=Math.min(mi
 const W=maxx-minx,H=maxy-miny,sc=940/Math.max(W,H);const T=p=>[30+(p[0]-minx)*sc,30+(p[1]-miny)*sc];
 const map=$('#map');map.setAttribute('viewBox',`0 0 ${30*2+W*sc} ${30*2+H*sc}`);
 // ---- trạng thái mô phỏng
-let sim=false,cut=new Set();
+let sim=false,cut=new Set(),selRing=null,hideOthers=false;
 function simulate(cutSet){const res={};
  for(const [rid,r] of Object.entries(D.rings)){const segs=D.segments.filter(x=>x.ring==rid&&x.kind=='ring').sort((a,b)=>a.seq-b.seq).map(x=>x.id);
   r.csg.forEach((c,i)=>{const L=segs.slice(0,i+1).every(s=>!cutSet.has(s)),R=segs.slice(i+1).every(s=>!cutSet.has(s));res[c]=[L?'NBE12':null,R?'NBE22':null]});}
@@ -369,17 +370,21 @@ function simulate(cutSet){const res={};
 function draw(){map.innerHTML='';const g=el('g',{ns:NS});map.appendChild(g);
  const res=simulate(cut);
  D.segments.forEach(s=>{const pts=s.pm.map(p=>T(p).map(v=>v.toFixed(1)).join(',')).join(' ');
-  const pl=el('polyline',{ns:NS,points:pts,class:'seg'+(cut.has(s.id)?' cut':''),stroke:RC[s.ring]});if(s.kind!='ring')pl.style.strokeDasharray='2 3';
+  const off=selRing&&s.ring!=selRing;if(off&&hideOthers)return;const pl=el('polyline',{ns:NS,points:pts,class:'seg'+(cut.has(s.id)?' cut':''),stroke:RC[s.ring]});if(off)pl.style.opacity='.12';if(s.kind!='ring')pl.style.strokeDasharray='2 3';
   const hit=el('polyline',{ns:NS,points:pts,class:'hit'});hit.onclick=()=>sim?toggleCut(s.id):showSeg(s.id);g.appendChild(pl);g.appendChild(hit)});
- D.closures.forEach(c=>{const [x,y]=T(c.pm);const t=el('path',{ns:NS,d:`M${x},${y-4}l3.5,6.5h-7z`,fill:'#f6a623',stroke:'#8a5a00','stroke-width':.5});t.style.cursor='pointer';t.onclick=()=>goMx(c.name);g.appendChild(t)});
+ D.closures.forEach(c=>{const [x,y]=T(c.pm);const t=el('path',{ns:NS,d:`M${x},${y-4}l3.5,6.5h-7z`,fill:'#f6a623',stroke:'#8a5a00','stroke-width':.5});t.style.cursor='pointer';t.onclick=()=>goMx(c.name);if(selRing&&!mxInRing(c,selRing)){if(hideOthers)return;t.setAttribute('opacity','.15')}g.appendChild(t)});
  Object.values(D.nodes).forEach(n=>{const [x,y]=T(n.pm);const agg=n.type=='AGG';let col='var(--card)';const dead=n.role&&n.role.includes('huỷ');
   if(sim&&!agg&&!dead){const r=res[n.id]||[1,1];const c=(r[0]?1:0)+(r[1]?1:0);col=c==0?'var(--bad)':c==1?'var(--warn)':'var(--ok)'}
   const sh=agg?el('rect',{ns:NS,x:x-6,y:y-6,width:12,height:12,fill:'#000'}):el('circle',{ns:NS,cx:x,cy:y,r:5,fill:col,stroke:'#222','stroke-width':1.3});
-  sh.style.cursor='pointer';sh.onclick=()=>showNode(n.id);if(dead)sh.setAttribute('opacity','.3');g.appendChild(sh);
-  const t=el('text',{ns:NS,x:x+7,y:y-5},n.id.replace('HNB',''));t.setAttribute('style',agg?'font-weight:700;font-size:12px':'');if(agg)t.textContent=n.id;g.appendChild(t)});
+  sh.style.cursor='pointer';sh.onclick=()=>showNode(n.id);if(dead)sh.setAttribute('opacity','.3');const offN=selRing&&!agg&&n.ring!=selRing;if(offN&&hideOthers)return;if(offN)sh.setAttribute('opacity','.15');g.appendChild(sh);
+  const t=el('text',{ns:NS,x:x+7,y:y-5},n.id.replace('HNB',''));t.setAttribute('style',agg?'font-weight:700;font-size:12px':'');if(agg)t.textContent=n.id;if(offN)t.setAttribute('opacity','.2');g.appendChild(t)});
  const sh=$('#simOut');if(sim){sh.style.display='';const lost=Object.entries(res).filter(([c,v])=>!v[0]&&!v[1]).map(x=>x[0]),one=Object.entries(res).filter(([c,v])=>(v[0]?1:0)+(v[1]?1:0)==1&&D.nodes[c].role=='ring').map(([c,v])=>c+'→'+(v[0]||v[1]));
   const cs=[...cut].map(i=>{const s=segById[i];return `${i} (${s.a}→${s.z})`}).join(', ')||'—';
   sh.innerHTML=`<div class="b">Đoạn đứt: ${cs}</div><div class="${lost.length?'bad':'ok'} b">${lost.length?'MẤT KẾT NỐI: '+lost.join(', '):'Mọi CSG còn link về AGG'}</div><div class="mut">CSG còn một hướng: ${one.join(', ')||'—'}</div><div class="mut">Suy hao các đoạn còn lại không đổi (tính theo từng đoạn). Bấm đoạn để đứt/nối lại.</div>`}else sh.style.display='none'}
+const _mxc={};
+function mxInRing(c,r){const k=c.name+'|'+r;if(k in _mxc)return _mxc[k];let ok=false;D.segments.filter(s=>s.ring==r).forEach(s=>{const [L,cum]=polyLen(s.pm);if(proj1(s.pm,cum,c.pm)[0]<150)ok=true});return _mxc[k]=ok}
+function renderRingSel(){$('#ringSel').innerHTML='<span class="mut">Ring:</span>'+Object.keys(RC).map(r=>`<button data-r="${r}" class="${selRing==r?'on':''}" style="${selRing==r?'':'border-left:5px solid '+RC[r]}">${r}</button>`).join('')+`<button id="rAll">Hiện hết</button><label class="mut"><input type="checkbox" id="rHide" ${hideOthers?'checked':''}> ẩn hẳn ring khác</label>`;
+ document.querySelectorAll('#ringSel [data-r]').forEach(b=>b.onclick=()=>{selRing=selRing==b.dataset.r?null:b.dataset.r;renderRingSel();draw()});$('#rAll').onclick=()=>{selRing=null;renderRingSel();draw()};$('#rHide').onchange=e=>{hideOthers=e.target.checked;draw()}}
 function toggleCut(id){cut.has(id)?cut.delete(id):cut.add(id);draw()}
 $('#simBtn').onclick=()=>{sim=!sim;if(!sim)cut.clear();$('#simBtn').classList.toggle('on',sim);$('#simHint').textContent=sim?'Bấm vào đoạn cáp để đứt/nối lại; màu nút: xanh 2 hướng, vàng 1 hướng, đỏ mất.':'Bấm đoạn/nút để xem chi tiết.';draw()};
 // ---- khung chi tiết
@@ -570,5 +575,5 @@ function suggestLabels(name){const items=[];E.paths.forEach(p=>p.steps.forEach(s
  add.forEach(a=>{const r=RAW.layer.labels.find(l=>l.mx==a.mx&&l.cable==a.cable&&ti(l.core)==a.core);if(r)Object.assign(r,a);else RAW.layer.labels.push(a)});touch()}
 renderSrc();renderMxList();
 
-draw();
+renderRingSel();draw();
 </script></body></html>
