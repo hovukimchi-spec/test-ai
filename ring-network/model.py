@@ -14,6 +14,7 @@ CONFIG=dict(
     link_cores=2,              # mỗi link dùng 2 core
     port_per_dir=6,            # ODF CSG: mỗi hướng dùng tối đa 6 cổng (theo file ODF)
     aggs=('NBE12','NBE22'),
+    dung_so_nghiem_thu=False,  # True: dùng km/suy hao trong bảng nghiệm thu làm số tham chiếu (người dùng: BBNT/nghiệm thu chỉ mang tính tương đối)
     drop_max_m=300,            # cáp vào trạm từ MX trục gần trạm: < 300 m được chấp nhận
     drop_min_fo=12,            # với điều kiện dùng cáp lớn, từ 12FO trở lên
 )
@@ -113,7 +114,7 @@ def build():
             seg['ok_core']=None if seg['delta'] is None else seg['delta']<=CONFIG['core_delta_max']
             seg['ok_loss']=None if seg['db_ref'] is None else seg['db_ref']<=seg['allow']
             segments.append(seg)
-    apply_nghiem_thu(segments)
+    if CONFIG.get('dung_so_nghiem_thu'):apply_nghiem_thu(segments)
     # nút
     for rid,r in RINGS.items():
         for n in r['csg']:nodes[n]['ring']=rid;nodes[n]['role']='ring'

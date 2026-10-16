@@ -16,3 +16,5 @@ Hoặc sửa trực tiếp các file nguồn gốc (sổ độ dài cáp, sơ đ
 
 ## Bảng nghiệm thu cổng ODF
 `python3 -I import_nghiem_thu.py cap_core_nghiem_thu.xlsx` → `data/odf_nghiem_thu.json`. Cổng ODF của các trạm CSG (hiện trong ô ODF: "ODF 7 · c1") lấy đúng theo bảng này; hai đầu AGG chỉ để đối chiếu. Sheet `Nghiệm thu ODF` và tab Đoạn trong HTML so km/suy hao nghiệm thu với dữ liệu hiện có.
+
+Km/suy hao nghiệm thu chỉ để đối chiếu (BBNT/nghiệm thu chỉ mang tính tương đối). Muốn dùng làm số tham chiếu: đặt `dung_so_nghiem_thu=True` trong `CONFIG` của `model.py`.
