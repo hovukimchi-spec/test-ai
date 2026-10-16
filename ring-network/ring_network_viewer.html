@@ -200,7 +200,7 @@ function compute(RAW){
   mxpairs.forEach(p=>{ if(p.balanced&&cap2[p.a]&&cap2[p.b]){ const [ca,ma]=cap2[p.a],[cb,mb]=cap2[p.b]; if(ma===mb)addE(ca,p.core_a,cb,p.core_b,ma,'sơ đồ MX'); } });
   ovPairs.forEach(p=>addE(p.a.slice(4),p.core_a,p.b.slice(4),p.core_b,p.mx,'nhập tay'));
   function traceCore(cable,core,fromNode){ const hops=[],srcs=[],links=new Set(); let cur=cable,cc=core,frm=fromNode;
-    for(let i=0;i<60;i++){ const c=cables[cur]; const far=c.to===frm?c.frm:c.to; hops.push([cur,cc,far]); const st=stationOf(far);
+    for(let i=0;i<60;i++){ const c=cables[cur]; const far=c.to===frm?c.frm:c.to; hops.push([cur,cc,far]); const st=stationOf(far); ((ledMap[cur+'|'+cc]||{}).links||[]).forEach(l=>links.add(l));
       if(st)return ['station',st,far,hops,srcs,[...links].sort()];
       const nxt=E[cur+'|'+cc+'|'+far]; if(!nxt)return ['dead',far,far,hops,srcs,[...links].sort()];
       const n=nxt[0]; srcs.push(n[2]); if(n[3])links.add(n[3]); cur=n[0];cc=n[1];frm=far; }
@@ -209,6 +209,11 @@ function compute(RAW){
   const ledMap={}; ledger.forEach(r=>ledMap[r.cable+'|'+r.core]=r);
   const op={}; S.odf.forEach(r=>{ const dest=String(r.dest||'').replace('AGG-',''); if(dest){ (op[r.node]=op[r.node]||{}); op[r.node][dest]=(op[r.node][dest]||0)+1; } });
   const useByCable={}; paths.forEach(lk=>lk.steps.forEach(s=>{ if(s.t==='cable'){(useByCable[s.cable]=useByCable[s.cable]||new Set()).add(lk.id);} }));
+  const ringIdx=n=>{ if(n==='NBE12')return -1; if(n==='NBE22')return 999; const nd=nodeMap[n]; const ch=nd&&S.rings[nd.ring]?S.rings[nd.ring].csg:[]; const i=ch.indexOf(n); return i<0?null:i; };
+  const nodeMap={}; S.nodes.forEach(n=>nodeMap[n.id]=n);
+  const pofs={}; new Set(Object.values(cables).flatMap(c=>[stationOf(c.frm),stationOf(c.to)]).filter(x=>x&&x!=='NBE12'&&x!=='NBE22')).forEach(st=>{ const items=[]; let ok=true;
+    for(const c of Object.values(cables)){ if(stationOf(c.frm)===st||stationOf(c.to)===st){ const nb=new Set([...(useByCable[c.id]||[])].map(l=>{const lk=paths.find(x=>x.id===l);return lk.frm===st?lk.to:lk.frm;})); if(nb.size!==1){ok=false;break;} const ix=ringIdx([...nb][0]),ix2=ringIdx(st); if(ix===null||ix2===null){ok=false;break;} items.push([ix,c.id,c.fo]); } }
+    const nport=S.odf.filter(o=>o.node===st).length; if(ok&&items.length&&items.reduce((a,x)=>a+x[2],0)<=nport){ let off=0; items.sort((x,y)=>x[0]-y[0]||(x[1]<y[1]?-1:x[1]>y[1]?1:0)).forEach(([ix,cid,fo])=>{pofs[st+'|'+cid]=off;off+=fo;}); } });
   const stationCores=[];
   Object.values(cables).forEach(c=>{ [['frm','to'],['to','frm']].forEach(([end,oth2])=>{ const node=c[end]; const st=stationOf(node); if(!st)return;
       const neigh=new Set(); (useByCable[c.id]?[...useByCable[c.id]]:[]).forEach(lid=>{ const lk=paths.find(x=>x.id===lid); const o=(lk.frm===st||stationOf(lk.frm)===st)?lk.to:lk.frm; if(o!==st)neigh.add(o); });
@@ -220,7 +225,7 @@ function compute(RAW){
         const srcSet=[...new Set(srcs)].sort(); let text;
         if(kind==='hư')text='HƯ'; else if(kind==='station'){ if(links.length)text='đang chạy link '+links.join(', ')+' → '+dest; else if(srcSet.length&&srcSet.every(x=>x==='MX thẳng (số mối hàn)')&&srcSet.length===1)text='hàn thông (MX thẳng, theo số mối hàn) → '+dest; else if(!srcs.length)text='sợi nối trực tiếp → '+dest+' (chưa rõ đã hàn pigtail ở ODF hai đầu)'; else text='hàn thông theo nhãn sơ đồ → '+dest+' (chưa gán link)'; }
         else text='chưa ghi hàn tại '+via+' (dự phòng / chưa rõ / không hàn)';
-        stationCores.push({text,port_note,odf_ports:ports,station:st,node,cable:c.id,name:c.name,ma_cap:c.ma_cap,fo:c.fo,other_end:c[oth2],core,kind,dest,via,srcs:srcSet,links,status:lr.status}); } }); });
+        stationCores.push({odf_port:(pofs[st+'|'+c.id]!==undefined)?pofs[st+'|'+c.id]+core:null,text,port_note,odf_ports:ports,station:st,node,cable:c.id,name:c.name,ma_cap:c.ma_cap,fo:c.fo,other_end:c[oth2],core,kind,dest,via,srcs:srcSet,links,status:lr.status}); } }); });
   /* --- bảng ODF AGG --- */
   const aggSpec=[['NBE12','ODF-01 (hướng NB)','C22','phai','ODF-01'],['NBE12','ODF-02 (hướng NVT)','C01','phai','ODF-02'],['NBE22','ODF-01 (cs 1816)','C35','trai','ODF-01'],['NBE22','ODF-02 (cs 1288)','C17','trai','ODF-02']];
   const aggOdf=[]; aggSpec.forEach(([st,name,cid,side,pre])=>{ const c=cables[cid]; if(!c)return; const node=stationOf(c.frm)===st?c.frm:c.to;
@@ -343,7 +348,7 @@ const D={};
 function derive(){
  E=RingEngine.compute(RAW);
  D.aggodf=E.aggOdf.map(r=>({station:r.station,odf:r.odf,cable:r.cable,port:r.port,core:r.core,dest:r.dest,note:r.note,kind:r.kind,end:r.end,links:r.links}));
- D.stn={};E.stationCores.forEach(r=>{const c=D.stn[r.station]=D.stn[r.station]||{};const x=c[r.cable]=c[r.cable]||{name:r.name,ma_cap:r.ma_cap,fo:r.fo,other:r.other_end,ports:r.odf_ports,cores:[]};x.cores.push([r.core,r.kind,r.dest,r.links,r.text,r.port_note])});
+ D.stn={};E.stationCores.forEach(r=>{const c=D.stn[r.station]=D.stn[r.station]||{};const x=c[r.cable]=c[r.cable]||{name:r.name,ma_cap:r.ma_cap,fo:r.fo,other:r.other_end,ports:r.odf_ports,cores:[]};x.cores.push([r.core,r.kind,r.dest,r.links,r.text,r.port_note,r.odf_port])});
  D.links={};E.paths.forEach(p=>D.links[p.id]={frm:p.frm,to:p.to,total:p.total_m,ref:p.ref_m,steps:p.steps.filter(s=>s.t=='cable').map(s=>[s.cable,s.name,(E.cables[s.cable]||{}).ma_cap||'',s.cores,s.len_m,s.frm,s.to])});
  D.cprof=E.profiles}
 derive();
@@ -407,9 +412,9 @@ function aggGrid(rows){return '<div class="ports" style="grid-template-columns:r
 function aggOdfHtml(st){const rows=D.aggodf.filter(r=>r.station==st);const odfs=[...new Set(rows.map(r=>r.odf))];
  return odfs.map(o=>{const rs=rows.filter(r=>r.odf==o);const sw=rs.some(r=>r.port!=r.core);return `<h4 style="margin:10px 0 2px">${st} · ${o} <small class="mut">cáp ${rs[0].cable}</small></h4>${sw?'<div class="mut">Hai hàng số: cổng ODF → core cáp (ghi “→c”).</div>':''}`+aggGrid(rs)+'<div class="mut">'+[...new Set(rs.filter(r=>r.note).map(r=>r.port+': '+r.note))].slice(0,3).join(' · ')+'</div>'}).join('')+'<div class="leg"><span><i style="background:var(--ok)"></i>link ring</span><span><i style="background:var(--warn)"></i>đối tác / liên kết khác</span><span><i style="background:var(--bad)"></i>hư</span></div>'}
 function coreChips(st){const S=D.stn[st];if(!S)return '';
- return '<h4 style="margin:10px 0 2px">Core thực tế đến từng hướng</h4><div class="mut">Xanh: đang chạy link · vàng: hàn thông chưa gán link · xám: chưa ghi hàn · đỏ: hư</div>'+Object.entries(S).map(([cid,c])=>{
+ return '<h4 style="margin:10px 0 2px">Core thực tế đến từng hướng</h4><div class="mut">Mỗi ô: cổng ODF (suy theo thứ tự hướng, chờ xác nhận) · core. Xanh: đang chạy link · vàng: hàn thông chưa gán link · xám: chưa ghi hàn · đỏ: hư</div>'+Object.entries(S).map(([cid,c])=>{
   const chips=c.cores.map(x=>{const col=x[1]=='hư'?'var(--bad)':x[3].length?'var(--ok)':x[1]=='station'?'var(--warn)':'';
-   return `<div class="port" title="${x[4]}" style="${col?tint(col):''}"><b>${x[0]}</b>${x[3].length?x[3][0]:(x[1]=='station'?x[2]:'·')}</div>`}).join('');
+   return `<div class="port" title="${x[4]}" style="${col?tint(col):''}"><b>${x[6]?'ODF '+x[6]+' · ':''}c${x[0]}</b>${x[3].length?x[3][0]:(x[1]=='station'?x[2]:'·')}</div>`}).join('');
   const sum=[...new Set(c.cores.filter(x=>x[3].length).map(x=>x[3].join('+')+'→'+x[2]))].join('; ');
   return `<div style="margin-top:6px"><span class="b" onclick="goCab('${cid}')" style="cursor:pointer">${cid}</span> <span class="mut">${c.ma_cap||''} ${c.fo}FO → ${c.other}${c.ports?' · ODF '+c.ports+' cổng':''}</span><div class="ports" style="grid-template-columns:repeat(${Math.min(c.fo,12)>6?6:6},1fr)">${chips}</div><div class="mut">${sum}</div></div>`}).join('')}
 function showNode(id){const n=D.nodes[id];const into=D.segments.filter(s=>s.z==id),out=D.segments.filter(s=>s.a==id);

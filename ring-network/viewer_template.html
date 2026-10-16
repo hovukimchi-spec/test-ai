@@ -64,7 +64,7 @@ const D={};
 function derive(){
  E=RingEngine.compute(RAW);
  D.aggodf=E.aggOdf.map(r=>({station:r.station,odf:r.odf,cable:r.cable,port:r.port,core:r.core,dest:r.dest,note:r.note,kind:r.kind,end:r.end,links:r.links}));
- D.stn={};E.stationCores.forEach(r=>{const c=D.stn[r.station]=D.stn[r.station]||{};const x=c[r.cable]=c[r.cable]||{name:r.name,ma_cap:r.ma_cap,fo:r.fo,other:r.other_end,ports:r.odf_ports,cores:[]};x.cores.push([r.core,r.kind,r.dest,r.links,r.text,r.port_note])});
+ D.stn={};E.stationCores.forEach(r=>{const c=D.stn[r.station]=D.stn[r.station]||{};const x=c[r.cable]=c[r.cable]||{name:r.name,ma_cap:r.ma_cap,fo:r.fo,other:r.other_end,ports:r.odf_ports,cores:[]};x.cores.push([r.core,r.kind,r.dest,r.links,r.text,r.port_note,r.odf_port])});
  D.links={};E.paths.forEach(p=>D.links[p.id]={frm:p.frm,to:p.to,total:p.total_m,ref:p.ref_m,steps:p.steps.filter(s=>s.t=='cable').map(s=>[s.cable,s.name,(E.cables[s.cable]||{}).ma_cap||'',s.cores,s.len_m,s.frm,s.to])});
  D.cprof=E.profiles}
 derive();
@@ -128,9 +128,9 @@ function aggGrid(rows){return '<div class="ports" style="grid-template-columns:r
 function aggOdfHtml(st){const rows=D.aggodf.filter(r=>r.station==st);const odfs=[...new Set(rows.map(r=>r.odf))];
  return odfs.map(o=>{const rs=rows.filter(r=>r.odf==o);const sw=rs.some(r=>r.port!=r.core);return `<h4 style="margin:10px 0 2px">${st} · ${o} <small class="mut">cáp ${rs[0].cable}</small></h4>${sw?'<div class="mut">Hai hàng số: cổng ODF → core cáp (ghi “→c”).</div>':''}`+aggGrid(rs)+'<div class="mut">'+[...new Set(rs.filter(r=>r.note).map(r=>r.port+': '+r.note))].slice(0,3).join(' · ')+'</div>'}).join('')+'<div class="leg"><span><i style="background:var(--ok)"></i>link ring</span><span><i style="background:var(--warn)"></i>đối tác / liên kết khác</span><span><i style="background:var(--bad)"></i>hư</span></div>'}
 function coreChips(st){const S=D.stn[st];if(!S)return '';
- return '<h4 style="margin:10px 0 2px">Core thực tế đến từng hướng</h4><div class="mut">Xanh: đang chạy link · vàng: hàn thông chưa gán link · xám: chưa ghi hàn · đỏ: hư</div>'+Object.entries(S).map(([cid,c])=>{
+ return '<h4 style="margin:10px 0 2px">Core thực tế đến từng hướng</h4><div class="mut">Mỗi ô: cổng ODF (suy theo thứ tự hướng, chờ xác nhận) · core. Xanh: đang chạy link · vàng: hàn thông chưa gán link · xám: chưa ghi hàn · đỏ: hư</div>'+Object.entries(S).map(([cid,c])=>{
   const chips=c.cores.map(x=>{const col=x[1]=='hư'?'var(--bad)':x[3].length?'var(--ok)':x[1]=='station'?'var(--warn)':'';
-   return `<div class="port" title="${x[4]}" style="${col?tint(col):''}"><b>${x[0]}</b>${x[3].length?x[3][0]:(x[1]=='station'?x[2]:'·')}</div>`}).join('');
+   return `<div class="port" title="${x[4]}" style="${col?tint(col):''}"><b>${x[6]?'ODF '+x[6]+' · ':''}c${x[0]}</b>${x[3].length?x[3][0]:(x[1]=='station'?x[2]:'·')}</div>`}).join('');
   const sum=[...new Set(c.cores.filter(x=>x[3].length).map(x=>x[3].join('+')+'→'+x[2]))].join('; ');
   return `<div style="margin-top:6px"><span class="b" onclick="goCab('${cid}')" style="cursor:pointer">${cid}</span> <span class="mut">${c.ma_cap||''} ${c.fo}FO → ${c.other}${c.ports?' · ODF '+c.ports+' cổng':''}</span><div class="ports" style="grid-template-columns:repeat(${Math.min(c.fo,12)>6?6:6},1fr)">${chips}</div><div class="mut">${sum}</div></div>`}).join('')}
 function showNode(id){const n=D.nodes[id];const into=D.segments.filter(s=>s.z==id),out=D.segments.filter(s=>s.a==id);

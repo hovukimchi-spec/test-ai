@@ -55,7 +55,7 @@ def expected(d):
       ledger=[[r['cable'],r['core'],r['status'],r['labels'],r['stations'],r['other']] for r in d['ledger']],
       conflicts=[list(c) for c in d['ledger_conflicts']],
       profiles=[{k:p[k] for k in('id','run','hu','other','lab','lab_stations','free','effect','kind','rule','n_links','used_cores','lost')} for p in d['cable_profiles']],
-      station=[[r['station'],r['cable'],r['core'],r['kind'],r['dest'],r['links'],r['srcs'],r['text'],r['odf_ports'],r['port_note']] for r in d['station_cores']],
+      station=[[r['station'],r['cable'],r['core'],r['kind'],r['dest'],r['links'],r['srcs'],r['text'],r['odf_ports'],r['port_note'],r['odf_port']] for r in d['station_cores']],
       agg=[[r['station'],r['odf'],r['port'],r['core'],r['kind'],r['end'],r['links'],r['srcs']] for r in d['agg_odf']],
       pairs=len(d['mx_pairs']),warn=len(d['mx_warn']),
       aggcheck=[[c[0],c[1],c[2],c[3],c[5]] for c in model.agg_check(d)])

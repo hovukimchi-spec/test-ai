@@ -378,12 +378,20 @@ def core_graph(d):
     for p in d['ov_pairs']:add(p['a'][4:],p['core_a'],p['b'][4:],p['core_b'],p['mx'],'nhập tay')
     return E
 
+def _use(d):
+    if '_use' not in d:
+        u={}
+        for r in d['ledger']:u[(r['cable'],r['core'])]=r['links']
+        d['_use']=u
+    return d['_use']
+
 def trace_core(d,E,cable,core,from_node):
     """Đi từ đầu from_node của cáp theo core: trả (loại, trạm/MX cuối, danh sách bước, nguồn, link)."""
     cables=d['phys_cables'];hops=[];srcs=[];links=set();cur,cc,frm=cable,core,from_node
     for _ in range(60):
         c=cables[cur];far=c['to'] if c['frm']==frm else c['frm']
         hops.append((cur,cc,far));st=station_of(far)
+        links.update(_use(d).get((cur,cc),[]))
         if st:return ('station',st,far,hops,srcs,sorted(links))
         nxt=E.get((cur,cc,far))
         if not nxt:return ('dead',far,far,hops,srcs,sorted(links))
@@ -408,6 +416,26 @@ def station_core_table(d):
     for lk in d['paths']:
         for s_ in lk['steps']:
             if s_['t']=='cable':use.setdefault(s_['cable'],set()).add(lk['id'])
+    # cổng ODF suy theo thứ tự hướng (phía NBE12 trước, phía NBE22 sau), mỗi cáp chiếm fo cổng liên tiếp; chỉ áp dụng khi tổng FO ≤ số cổng ODF
+    def ring_idx(n):
+        if n=='NBE12':return -1
+        if n=='NBE22':return 999
+        r=d['nodes'].get(n,{}).get('ring');ch=d['rings'].get(r,{}).get('csg',[])
+        return ch.index(n) if n in ch else None
+    pofs={}
+    for st_ in {station_of(c[e]) for c in cables.values() for e in ('frm','to')}-{None,'NBE12','NBE22'}:
+        items=[];ok=True
+        for cid,c in cables.items():
+            if station_of(c['frm'])==st_ or station_of(c['to'])==st_:
+                nb={(next(x for x in d['paths'] if x['id']==l)['to'] if next(x for x in d['paths'] if x['id']==l)['frm']==st_ else next(x for x in d['paths'] if x['id']==l)['frm']) for l in use.get(cid,[])}
+                if len(nb)!=1:ok=False;break
+                ix=ring_idx(next(iter(nb)));ix2=ring_idx(st_)
+                if ix is None or ix2 is None:ok=False;break
+                items.append((ix,cid,c['fo']))
+        nport=sum(1 for o in d['odf'] if o['node']==st_)
+        if ok and items and sum(f for _,_,f in items)<=nport:
+            off=0
+            for ix,cid,fo in sorted(items):pofs[(st_,cid)]=off;off+=fo
     for cid,c in cables.items():
         for end,other in (('frm','to'),('to','frm')):
             node=c[end];st=station_of(node)
@@ -436,7 +464,7 @@ def station_core_table(d):
                     elif not srcs:text='sợi nối trực tiếp → '+dest+' (chưa rõ đã hàn pigtail ở ODF hai đầu)'
                     else:text='hàn thông theo nhãn sơ đồ → '+dest+' (chưa gán link)'
                 else:text='chưa ghi hàn tại '+via+' (dự phòng / chưa rõ / không hàn)'
-                rows.append(dict(text=text,port_note=port_note,odf_ports=ports,station=st,node=node,cable=cid,name=c['name'],ma_cap=c['ma_cap'],fo=c['fo'],other_end=c[other],core=core,kind=kind,dest=dest,via=via,srcs=sorted(set(srcs)),links=links,status=lr['status']))
+                rows.append(dict(odf_port=(pofs[(st,cid)]+core) if (st,cid) in pofs else None,text=text,port_note=port_note,odf_ports=ports,station=st,node=node,cable=cid,name=c['name'],ma_cap=c['ma_cap'],fo=c['fo'],other_end=c[other],core=core,kind=kind,dest=dest,via=via,srcs=sorted(set(srcs)),links=links,status=lr['status']))
     return rows
 
 def agg_odf_table(d):
