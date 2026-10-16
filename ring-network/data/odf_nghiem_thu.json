@@ -1,0 +1,686 @@
+[
+ {
+  "stt": 1,
+  "frm": "NBE12",
+  "to": "HNB066",
+  "odf_frm": "VTC-02",
+  "ports_frm": [
+   9,
+   10
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 15.415,
+  "db1": 6.031,
+  "db2": 6.138
+ },
+ {
+  "stt": 2,
+  "frm": "HNB066",
+  "to": "HNB016",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.506,
+  "db1": 0.104,
+  "db2": 0.202
+ },
+ {
+  "stt": 3,
+  "frm": "HNB016",
+  "to": "HNB038",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   9,
+   10
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   9,
+   10
+  ],
+  "km": 0.621,
+  "db1": 0.204,
+  "db2": 0.204
+ },
+ {
+  "stt": 4,
+  "frm": "HNB038",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC-01",
+  "ports_to": [
+   9,
+   10
+  ],
+  "km": 2.651,
+  "db1": 0.899,
+  "db2": 0.598
+ },
+ {
+  "stt": 5,
+  "frm": "NBE12",
+  "to": "HNB005",
+  "odf_frm": "VTC-02",
+  "ports_frm": [
+   11,
+   12
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 16.219,
+  "db1": 9.624,
+  "db2": 9.945
+ },
+ {
+  "stt": 6,
+  "frm": "HNB005",
+  "to": "HNB062",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 1.268,
+  "db1": 0.384,
+  "db2": 0.386
+ },
+ {
+  "stt": 7,
+  "frm": "HNB062",
+  "to": "HNB021",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 1.041,
+  "db1": 0.222,
+  "db2": 0.201
+ },
+ {
+  "stt": 8,
+  "frm": "HNB021",
+  "to": "HNB013",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.978,
+  "db1": 0.422,
+  "db2": 0.366
+ },
+ {
+  "stt": 9,
+  "frm": "HNB013",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC-01",
+  "ports_to": [
+   19,
+   20
+  ],
+  "km": 0.688,
+  "db1": 0.227,
+  "db2": 0.604
+ },
+ {
+  "stt": 10,
+  "frm": "NBE12",
+  "to": "HNB086",
+  "odf_frm": "VTC-01",
+  "ports_frm": [
+   19,
+   20
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 3.075,
+  "db1": 0.99,
+  "db2": 0.943
+ },
+ {
+  "stt": 11,
+  "frm": "HNB086",
+  "to": "HNB024",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 2.014,
+  "db1": 0.616,
+  "db2": 0.578
+ },
+ {
+  "stt": 12,
+  "frm": "HNB024",
+  "to": "HNB027",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 0.862,
+  "db1": 0.185,
+  "db2": 0.177
+ },
+ {
+  "stt": 13,
+  "frm": "HNB027",
+  "to": "HNB031",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 2.896,
+  "db1": 0.959,
+  "db2": 1.017
+ },
+ {
+  "stt": 14,
+  "frm": "HNB031",
+  "to": "HNB020",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.178,
+  "db1": 0.291,
+  "db2": 0.298
+ },
+ {
+  "stt": 15,
+  "frm": "HNB020",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC-02",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 2.401,
+  "db1": 0.88,
+  "db2": 0.869
+ },
+ {
+  "stt": 16,
+  "frm": "NBE12",
+  "to": "HNB012",
+  "odf_frm": "VTC-01",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 8.469,
+  "db1": 3.149,
+  "db2": 3.149
+ },
+ {
+  "stt": 17,
+  "frm": "HNB012",
+  "to": "HNB014",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   5,
+   6
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 5.926,
+  "db1": 1.994,
+  "db2": 2.321
+ },
+ {
+  "stt": 18,
+  "frm": "HNB014",
+  "to": "HNB075",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.861,
+  "db1": 0.208,
+  "db2": 0.204
+ },
+ {
+  "stt": 19,
+  "frm": "HNB075",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC-01",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 11.73,
+  "db1": 5.237,
+  "db2": 4.735
+ },
+ {
+  "stt": 20,
+  "frm": "NBE12",
+  "to": "HNB011",
+  "odf_frm": "VTC-01",
+  "ports_frm": [
+   9,
+   10
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 9.62,
+  "db1": 3.502,
+  "db2": 3.203
+ },
+ {
+  "stt": 21,
+  "frm": "HNB011",
+  "to": "HNB056",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.861,
+  "db1": 0.445,
+  "db2": 0.358
+ },
+ {
+  "stt": 22,
+  "frm": "HNB056",
+  "to": "HNB071",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.325,
+  "db1": 0.341,
+  "db2": 0.343
+ },
+ {
+  "stt": 23,
+  "frm": "HNB071",
+  "to": "HNB073",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.772,
+  "db1": 0.21,
+  "db2": 0.229
+ },
+ {
+  "stt": 24,
+  "frm": "HNB073",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC-01",
+  "ports_to": [
+   3,
+   4
+  ],
+  "km": 9.562,
+  "db1": 3.348,
+  "db2": 3.501
+ },
+ {
+  "stt": 25,
+  "frm": "NBE12",
+  "to": "HNB055",
+  "odf_frm": "VTC-01",
+  "ports_frm": [
+   11,
+   12
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 10.406,
+  "db1": 3.794,
+  "db2": 3.842
+ },
+ {
+  "stt": 26,
+  "frm": "HNB055",
+  "to": "HNB065",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.018,
+  "db1": 0.247,
+  "db2": 0.248
+ },
+ {
+  "stt": 27,
+  "frm": "HNB065",
+  "to": "HNB094",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   3,
+   4
+  ],
+  "km": 2.219,
+  "db1": 0.804,
+  "db2": 0.803
+ },
+ {
+  "stt": 28,
+  "frm": "HNB094",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   5,
+   6
+  ],
+  "odf_to": "VTC-01",
+  "ports_to": [
+   5,
+   6
+  ],
+  "km": 7.704,
+  "db1": 2.812,
+  "db2": 2.636
+ },
+ {
+  "stt": 29,
+  "frm": "HNB094",
+  "to": "HNB018",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.448,
+  "db1": 0.62,
+  "db2": 0.621
+ },
+ {
+  "stt": 30,
+  "frm": "NBE12",
+  "to": "HNB054",
+  "odf_frm": "VTC-02",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 0.983,
+  "db1": 0.703,
+  "db2": 0.468
+ },
+ {
+  "stt": 31,
+  "frm": "HNB054",
+  "to": "HNB006",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   3,
+   4
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.433,
+  "db1": 0.591,
+  "db2": 0.366
+ },
+ {
+  "stt": 32,
+  "frm": "HNB006",
+  "to": "HNB091",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   3,
+   4
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 1.606,
+  "db1": 0.549,
+  "db2": 0.549
+ },
+ {
+  "stt": 33,
+  "frm": "HNB091",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC-02",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 16.027,
+  "db1": 9.59,
+  "db2": 9.911
+ },
+ {
+  "stt": 34,
+  "frm": "NBE12",
+  "to": "HNB059",
+  "odf_frm": "VTC-02",
+  "ports_frm": [
+   3,
+   4
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 4.668,
+  "db1": 1.664,
+  "db2": 3.069
+ },
+ {
+  "stt": 37,
+  "frm": "HNB059",
+  "to": "HNB060",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 3.085,
+  "db1": 1.024,
+  "db2": 1.024
+ },
+ {
+  "stt": 36,
+  "frm": "HNB060",
+  "to": "HNB048",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   7,
+   8
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   7,
+   8
+  ],
+  "km": 4.41,
+  "db1": 1.469,
+  "db2": 1.473
+ },
+ {
+  "stt": 35,
+  "frm": "HNB048",
+  "to": "NBE22",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   1,
+   2
+  ],
+  "odf_to": "VTC-02",
+  "ports_to": [
+   3,
+   4
+  ],
+  "km": 17.155,
+  "db1": 6.0,
+  "db2": 6.327
+ },
+ {
+  "stt": 38,
+  "frm": "HNB012",
+  "to": "HNB113",
+  "odf_frm": "VTC",
+  "ports_frm": [
+   9,
+   10
+  ],
+  "odf_to": "VTC",
+  "ports_to": [
+   1,
+   2
+  ],
+  "km": 1.04,
+  "db1": 0.19,
+  "db2": 0.241
+ }
+]

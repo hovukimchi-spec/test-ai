@@ -158,11 +158,44 @@ def build():
            vat_tu=_csv('vat_tu_odf_mx.csv'))
     d['issues']=detect_issues(d)
     d['paths']=load_paths(d)
+    d['odf_nt'],d['port_map']=load_nghiem_thu(d)
     d['ledger'],d['ledger_conflicts']=core_ledger(d)
     d['cable_profiles']=cable_profiles(d)
     d['station_cores']=station_core_table(d)
     d['agg_odf']=agg_odf_table(d)
     return d
+
+def load_nghiem_thu(d):
+    """Bảng nghiệm thu cổng ODF (data/odf_nghiem_thu.json): cổng ODF thực tế từng đầu link. CSG lấy theo bảng này; AGG chỉ đối chiếu.
+    Trả (danh sách dòng + id link, {(trạm, cáp, core): cổng ODF CSG})."""
+    p=os.path.join(DATA,'odf_nghiem_thu.json')
+    if not os.path.exists(p):return [],{}
+    rows=json.load(open(p,encoding='utf-8'));lk={(l['frm'],l['to']):l for l in d['paths']};pm={}
+    for r in rows:
+        l=lk.get((r['frm'],r['to']));r['link']=l['id'] if l else None
+        if not l:continue
+        cs=[s for s in l['steps'] if s['t']=='cable'];
+        for st,ports,cab in ((l['frm'],r['ports_frm'],cs[0]),(l['to'],r['ports_to'],cs[-1])):
+            if st.startswith('NBE'):continue
+            for core,port in zip(cab['cores'],ports):pm[(st,cab['cable'],core)]=port
+    return rows,pm
+
+def nt_compare(d):
+    """Đối chiếu bảng nghiệm thu với dữ liệu hiện có: (a) km/suy hao từng link; (b) ghi chú cổng ODF gốc so với đích suy từ nghiệm thu + đường đi."""
+    seg={s['id']:s for s in d['segments']};rows=[]
+    for r in d['odf_nt']:
+        s=seg.get(r['link']);dk=(r['km']-s['km_otdr']) if s and s['km_otdr'] is not None and r['km'] is not None else None
+        ours=[s['db1'],s['db2']] if s else [None,None]
+        dd=max([abs(a-b) for a,b in zip([r['db1'],r['db2']],ours) if a is not None and b is not None],default=None)
+        rows.append(dict(r,km_otdr=s['km_otdr'] if s else None,km_hd=s['km_hd'] if s else None,db_ours=ours,d_km=dk,d_db=dd))
+    conf=[]
+    for r in d['station_cores']:
+        p=r['odf_port']
+        if not p or r['kind']!='station':continue
+        o=[x for x in d['odf'] if x['node']==r['station'] and x['port']==p]
+        if o and o[0]['dest'] and not o[0]['dest'].startswith('MX') and o[0]['dest'].replace('AGG-','')!=r['dest'] and (r['station'],p) not in {(c[0],c[1]) for c in conf}:
+            conf.append((r['station'],p,o[0]['dest'],r['dest'],r['cable'],r['core'],r['links']))
+    return rows,conf
 
 def simulate_cut(d,seg_ids):
     """Đứt các đoạn (id) cùng lúc: trả {CSG: AGG còn tới được hoặc None}, và danh sách CSG mất kết nối."""
@@ -416,26 +449,6 @@ def station_core_table(d):
     for lk in d['paths']:
         for s_ in lk['steps']:
             if s_['t']=='cable':use.setdefault(s_['cable'],set()).add(lk['id'])
-    # cổng ODF suy theo thứ tự hướng (phía NBE12 trước, phía NBE22 sau), mỗi cáp chiếm fo cổng liên tiếp; chỉ áp dụng khi tổng FO ≤ số cổng ODF
-    def ring_idx(n):
-        if n=='NBE12':return -1
-        if n=='NBE22':return 999
-        r=d['nodes'].get(n,{}).get('ring');ch=d['rings'].get(r,{}).get('csg',[])
-        return ch.index(n) if n in ch else None
-    pofs={}
-    for st_ in {station_of(c[e]) for c in cables.values() for e in ('frm','to')}-{None,'NBE12','NBE22'}:
-        items=[];ok=True
-        for cid,c in cables.items():
-            if station_of(c['frm'])==st_ or station_of(c['to'])==st_:
-                nb={(next(x for x in d['paths'] if x['id']==l)['to'] if next(x for x in d['paths'] if x['id']==l)['frm']==st_ else next(x for x in d['paths'] if x['id']==l)['frm']) for l in use.get(cid,[])}
-                if len(nb)!=1:ok=False;break
-                ix=ring_idx(next(iter(nb)));ix2=ring_idx(st_)
-                if ix is None or ix2 is None:ok=False;break
-                items.append((ix,cid,c['fo']))
-        nport=sum(1 for o in d['odf'] if o['node']==st_)
-        if ok and items and sum(f for _,_,f in items)<=nport:
-            off=0
-            for ix,cid,fo in sorted(items):pofs[(st_,cid)]=off;off+=fo
     for cid,c in cables.items():
         for end,other in (('frm','to'),('to','frm')):
             node=c[end];st=station_of(node)
@@ -464,7 +477,7 @@ def station_core_table(d):
                     elif not srcs:text='sợi nối trực tiếp → '+dest+' (chưa rõ đã hàn pigtail ở ODF hai đầu)'
                     else:text='hàn thông theo nhãn sơ đồ → '+dest+' (chưa gán link)'
                 else:text='chưa ghi hàn tại '+via+' (dự phòng / chưa rõ / không hàn)'
-                rows.append(dict(odf_port=(pofs[(st,cid)]+core) if (st,cid) in pofs else None,text=text,port_note=port_note,odf_ports=ports,station=st,node=node,cable=cid,name=c['name'],ma_cap=c['ma_cap'],fo=c['fo'],other_end=c[other],core=core,kind=kind,dest=dest,via=via,srcs=sorted(set(srcs)),links=links,status=lr['status']))
+                rows.append(dict(odf_port=d['port_map'].get((st,cid,core)),text=text,port_note=port_note,odf_ports=ports,station=st,node=node,cable=cid,name=c['name'],ma_cap=c['ma_cap'],fo=c['fo'],other_end=c[other],core=core,kind=kind,dest=dest,via=via,srcs=sorted(set(srcs)),links=links,status=lr['status']))
     return rows
 
 def agg_odf_table(d):

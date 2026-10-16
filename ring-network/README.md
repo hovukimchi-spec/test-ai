@@ -13,3 +13,6 @@
 - Các sheet tính toán khác trong Excel (Quỹ core, Phối core…) **chỉ cập nhật khi dựng lại**: `python3 import_inputs.py <file.xlsx>` (ghi vào `data/`) rồi `python3 build_xlsx.py && python3 build_html.py`.
 - `export_data.py` xuất `raw.json`/`expected.json` để kiểm thử động cơ JS so với Python.
 Hoặc sửa trực tiếp các file nguồn gốc (sổ độ dài cáp, sơ đồ MX) rồi chạy `extract_sources.py <thư_mục>` + hai lệnh build.
+
+## Bảng nghiệm thu cổng ODF
+`python3 -I import_nghiem_thu.py cap_core_nghiem_thu.xlsx` → `data/odf_nghiem_thu.json`. Cổng ODF của các trạm CSG (hiện trong ô ODF: "ODF 7 · c1") lấy đúng theo bảng này; hai đầu AGG chỉ để đối chiếu. Sheet `Nghiệm thu ODF` và tab Đoạn trong HTML so km/suy hao nghiệm thu với dữ liệu hiện có.

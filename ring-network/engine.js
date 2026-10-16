@@ -155,11 +155,8 @@ function compute(RAW){
   const ledMap={}; ledger.forEach(r=>ledMap[r.cable+'|'+r.core]=r);
   const op={}; S.odf.forEach(r=>{ const dest=String(r.dest||'').replace('AGG-',''); if(dest){ (op[r.node]=op[r.node]||{}); op[r.node][dest]=(op[r.node][dest]||0)+1; } });
   const useByCable={}; paths.forEach(lk=>lk.steps.forEach(s=>{ if(s.t==='cable'){(useByCable[s.cable]=useByCable[s.cable]||new Set()).add(lk.id);} }));
-  const ringIdx=n=>{ if(n==='NBE12')return -1; if(n==='NBE22')return 999; const nd=nodeMap[n]; const ch=nd&&S.rings[nd.ring]?S.rings[nd.ring].csg:[]; const i=ch.indexOf(n); return i<0?null:i; };
-  const nodeMap={}; S.nodes.forEach(n=>nodeMap[n.id]=n);
-  const pofs={}; new Set(Object.values(cables).flatMap(c=>[stationOf(c.frm),stationOf(c.to)]).filter(x=>x&&x!=='NBE12'&&x!=='NBE22')).forEach(st=>{ const items=[]; let ok=true;
-    for(const c of Object.values(cables)){ if(stationOf(c.frm)===st||stationOf(c.to)===st){ const nb=new Set([...(useByCable[c.id]||[])].map(l=>{const lk=paths.find(x=>x.id===l);return lk.frm===st?lk.to:lk.frm;})); if(nb.size!==1){ok=false;break;} const ix=ringIdx([...nb][0]),ix2=ringIdx(st); if(ix===null||ix2===null){ok=false;break;} items.push([ix,c.id,c.fo]); } }
-    const nport=S.odf.filter(o=>o.node===st).length; if(ok&&items.length&&items.reduce((a,x)=>a+x[2],0)<=nport){ let off=0; items.sort((x,y)=>x[0]-y[0]||(x[1]<y[1]?-1:x[1]>y[1]?1:0)).forEach(([ix,cid,fo])=>{pofs[st+'|'+cid]=off;off+=fo;}); } });
+  const pmap={}; (S.odf_nt||[]).forEach(r=>{ const lk=paths.find(l=>l.frm===r.frm&&l.to===r.to); if(!lk)return; const cs=lk.steps.filter(s=>s.t==='cable'); if(!cs.length)return;
+    [[lk.frm,r.ports_frm,cs[0]],[lk.to,r.ports_to,cs[cs.length-1]]].forEach(([st,ports,cab])=>{ if(st.startsWith('NBE'))return; cab.cores.forEach((core,i)=>{ if(ports[i]!==undefined)pmap[st+'|'+cab.cable+'|'+core]=ports[i]; }); }); });
   const stationCores=[];
   Object.values(cables).forEach(c=>{ [['frm','to'],['to','frm']].forEach(([end,oth2])=>{ const node=c[end]; const st=stationOf(node); if(!st)return;
       const neigh=new Set(); (useByCable[c.id]?[...useByCable[c.id]]:[]).forEach(lid=>{ const lk=paths.find(x=>x.id===lid); const o=(lk.frm===st||stationOf(lk.frm)===st)?lk.to:lk.frm; if(o!==st)neigh.add(o); });
@@ -171,7 +168,7 @@ function compute(RAW){
         const srcSet=[...new Set(srcs)].sort(); let text;
         if(kind==='hư')text='HƯ'; else if(kind==='station'){ if(links.length)text='đang chạy link '+links.join(', ')+' → '+dest; else if(srcSet.length&&srcSet.every(x=>x==='MX thẳng (số mối hàn)')&&srcSet.length===1)text='hàn thông (MX thẳng, theo số mối hàn) → '+dest; else if(!srcs.length)text='sợi nối trực tiếp → '+dest+' (chưa rõ đã hàn pigtail ở ODF hai đầu)'; else text='hàn thông theo nhãn sơ đồ → '+dest+' (chưa gán link)'; }
         else text='chưa ghi hàn tại '+via+' (dự phòng / chưa rõ / không hàn)';
-        stationCores.push({odf_port:(pofs[st+'|'+c.id]!==undefined)?pofs[st+'|'+c.id]+core:null,text,port_note,odf_ports:ports,station:st,node,cable:c.id,name:c.name,ma_cap:c.ma_cap,fo:c.fo,other_end:c[oth2],core,kind,dest,via,srcs:srcSet,links,status:lr.status}); } }); });
+        stationCores.push({odf_port:(pmap[st+'|'+c.id+'|'+core]!==undefined)?pmap[st+'|'+c.id+'|'+core]:null,text,port_note,odf_ports:ports,station:st,node,cable:c.id,name:c.name,ma_cap:c.ma_cap,fo:c.fo,other_end:c[oth2],core,kind,dest,via,srcs:srcSet,links,status:lr.status}); } }); });
   /* --- bảng ODF AGG --- */
   const aggSpec=[['NBE12','ODF-01 (hướng NB)','C22','phai','ODF-01'],['NBE12','ODF-02 (hướng NVT)','C01','phai','ODF-02'],['NBE22','ODF-01 (cs 1816)','C35','trai','ODF-01'],['NBE22','ODF-02 (cs 1288)','C17','trai','ODF-02']];
   const aggOdf=[]; aggSpec.forEach(([st,name,cid,side,pre])=>{ const c=cables[cid]; if(!c)return; const node=stationOf(c.frm)===st?c.frm:c.to;

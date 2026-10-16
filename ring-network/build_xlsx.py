@@ -547,7 +547,7 @@ for nm,key,cols,wd in DLC:
 
 # ---------------- Đề xuất MX thẳng ----------------
 import suggest_straight
-SG=suggest_straight.suggest(d);XS=sheet('Đề xuất MX thẳng')
+SG=suggest_straight.suggest(d);XS=sheet('Đề xuất MX thẳng','Nghiệm thu ODF')
 title(XS,'Đề xuất: măng xông chỉ có trong KML (thẳng / nối dài) nằm trên cáp nào','MX thẳng = hàn nối dài đoạn cáp, core i↔i, không rẽ nhánh. Vị trí suy từ toạ độ KML so với đầu cáp (đầu chưa có toạ độ được nội suy theo chiều dài). Chỉ là ĐỀ XUẤT — xác nhận rồi điền cột "ends" của sheet DL_Cáp (dạng  Tên MX=@số_mét_từ_đầu_cáp) hoặc bấm "Gắn vào cáp" trong HTML.')
 header(XS,4,['MX trong KML','Vĩ độ','Kinh độ','Độ tin cậy','Cáp đề xuất','Mã cáp','FO','Từ → đến','Dài cáp (m)','Cách đầu "Từ" (m)','Lệch tuyến (m)','Link đi qua','Có thể trùng MX trong đường đi (khoảng cách m)'],[30,10,10,26,9,22,5,44,9,12,10,22,44])
 rr=5
@@ -564,6 +564,24 @@ rr+=1;XS.cell(rr,1,'MX trong đường đi tự khớp tên với KML:').font=Fo
 for k_,v in SG['alias'].items():rr+=1;XS.cell(rr,1,k_);XS.cell(rr,2,v)
 rr+=1;XS.cell(rr,1,'MX trong đường đi chưa có điểm KML trùng tên:').font=Font(bold=True)
 for k_ in SG['unlocated']:rr+=1;XS.cell(rr,1,k_)
+
+# ---------------- Nghiệm thu ODF ----------------
+NTR,NTC=model.nt_compare(d);XN=sheet('Nghiệm thu ODF')
+title(XN,'Bảng nghiệm thu cổng ODF (cap_core_nghiem_thu.xlsx) đối chiếu dữ liệu hiện có','Cổng ODF CSG lấy theo bảng nghiệm thu (thực tế thi công). Hai đầu AGG có thể đã thay đổi nên chỉ để đối chiếu. Ô vàng: lệch km > 0,1 hoặc lệch suy hao > 0,3 dB.')
+header(XN,4,['STT','Link','Từ','Đến','ODF đầu','Cổng đầu','ODF cuối','Cổng cuối','km nghiệm thu','km OTDR (hiện có)','km HĐ','Chênh km','dB1 nghiệm thu','dB2 nghiệm thu','dB1 hiện có','dB2 hiện có','Chênh dB lớn nhất'],[6,8,9,9,9,9,9,9,10,10,9,9,10,10,10,10,10])
+for i,r in enumerate(NTR,5):
+    v=[r['stt'],r['link'] or '(đã huỷ)',r['frm'],r['to'],r['odf_frm'],'-'.join(map(str,r['ports_frm'])),r['odf_to'],'-'.join(map(str,r['ports_to'])),r['km'],r['km_otdr'],r['km_hd'],r['d_km'],r['db1'],r['db2'],r['db_ours'][0],r['db_ours'][1],r['d_db']]
+    for j,x in enumerate(v,1):
+        c=XN.cell(i,j,round(x,3) if isinstance(x,float) else x)
+    if r['d_km'] is not None and abs(r['d_km'])>0.1:XN.cell(i,12).fill=WARN
+    if r['d_db'] is not None and r['d_db']>0.3:XN.cell(i,17).fill=WARN
+n_=5+len(NTR);box(XN,5,n_-1,1,17);XN.freeze_panes='C5'
+n_+=1;XN.cell(n_,1,'Cổng ODF CSG: ghi chú ODF gốc khác với đích suy ra từ nghiệm thu + đường đi (kiểm tra lại ghi chú ODF gốc hoặc đường đi)').font=Font(bold=True)
+n_+=1
+for j,h in enumerate(['Trạm','Cổng','ODF gốc ghi','Suy ra','Cáp','Core','Link'],1):XN.cell(n_,j,h).font=Font(bold=True)
+for c in NTC:
+    n_+=1
+    for j,x in enumerate([c[0],c[1],c[2],c[3],c[4],c[5],', '.join(c[6])],1):XN.cell(n_,j,x)
 
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
