@@ -57,7 +57,9 @@ const RAW=__RAW__;
 let E=null;
 const D={};
 (function(){const S=RAW.static;D.segments=S.segments.map(s=>Object.assign({},s,{status:s.db_ref==null?'Chưa đo':(s.ok_loss&&s.ok_core?'Đạt':'Cảnh báo')}));
- D.nodes={};S.nodes.forEach(n=>D.nodes[n.id]=n);D.rings={};Object.entries(S.rings).forEach(([k,v])=>D.rings[k]=v);D.odf=S.odf;D.closures=S.closures.map(c=>Object.assign({},c));D.issues=S.issues;D.fix=S.fix;})();
+ D.nodes={};S.nodes.forEach(n=>D.nodes[n.id]=n);
+ // KML có đoạn lưu polyline ngược chiều a→z: chuẩn hoá để điểm đầu gần nút a, điểm cuối gần nút z
+ D.segments.forEach(s=>{const A=D.nodes[s.a],Z=D.nodes[s.z],p=s.polyline;if(!A||!Z||p.length<2)return;const d=(q,n)=>Math.hypot(q[0]-n.lon,q[1]-n.lat);const f=p[0],l=p[p.length-1];if(d(f,A)+d(l,Z)>d(f,Z)+d(l,A))s.polyline=p.slice().reverse()});D.rings={};Object.entries(S.rings).forEach(([k,v])=>D.rings[k]=v);D.odf=S.odf;D.closures=S.closures.map(c=>Object.assign({},c));D.issues=S.issues;D.fix=S.fix;})();
 function derive(){
  E=RingEngine.compute(RAW);
  D.aggodf=E.aggOdf.map(r=>({station:r.station,odf:r.odf,cable:r.cable,port:r.port,core:r.core,dest:r.dest,note:r.note,kind:r.kind,end:r.end,links:r.links}));
