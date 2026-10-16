@@ -32,7 +32,7 @@ function cabEdit(c){const r=cabRow(c.id)||{};const mxs=Object.keys((E.cables[c.i
  <div class="fld"><label>Chỉ số cuối (m)</label><input type="text" id="ce_c" value="${esc_(r.cs_cuoi)}"></div>
  <div class="fld"><label>Chiều dài (m)</label><input type="number" id="ce_l" value="${esc_(r.len_m)}"></div>
  <div class="row"><button onclick="saveCab('${c.id}')" class="on">Lưu thay đổi</button><span class="mut">Cập nhật tức thì mọi bảng; nhớ bấm “Lưu Excel”.</span></div>
- ${mxs.length?'<div class="mut">Măng xông trên cáp: '+mxs.map(m=>`<a href="#" onclick="goMx('${m.replace(/'/g,"\\'")}');return false">${esc_(m)}</a>`).join(' · ')+'</div>':''}`}
+ ${mxs.length?'<div class="mut">Măng xông trên cáp: '+mxs.map(m=>`<a href="#" onclick="showMx('${m.replace(/'/g,"\\'")}');return false">${esc_(m)}</a>`).join(' · ')+'</div>':''}`}
 function saveCab(id){const r=cabRow(id);if(!r)return;r.ma_cap=$('#ce_ma').value.trim();r.cs_dau=$('#ce_d').value.trim();r.cs_cuoi=$('#ce_c').value.trim();const l=$('#ce_l').value;if(l!=='')r.len_m=+l;touch()}
 // ---- MX: dữ liệu
 const capRec={};RAW.static.mxcap.forEach(c=>capRec[c.cap_id]=c);
@@ -127,3 +127,34 @@ function sugBox(name){const s=SUG[name];if(!s)return '';const attached=Object.va
  if(s.maybe_same_as.length)h+='<div class="mut">Có thể chính là MX trong đường đi: '+s.maybe_same_as.map(m=>`<b>${esc_(m.mx)}</b> (cách ${m.dist_m} m)`).join(', ')+' — nếu đúng, hai tên là một điểm.</div>';
  return h+'</div>'}
 function attachSug(name,cid,off){const r=cabRow(cid);if(!r)return;const parts=String(r.ends||'').split(';').map(x=>x.trim()).filter(x=>x&&!x.startsWith(name+'='));parts.push(name+'=@'+off);r.ends=parts.join('; ');touch()}
+
+// ===== thu phóng / kéo bản đồ =====
+(function(){const svg=$('#map');let vb0=svg.getAttribute('viewBox').split(' ').map(Number);let vb=vb0.slice();
+ const set=()=>svg.setAttribute('viewBox',vb.map(v=>v.toFixed(1)).join(' '));
+ const pt=(cx,cy)=>{const r=svg.getBoundingClientRect(),s=Math.max(vb[2]/r.width,vb[3]/r.height);const ox=(r.width-vb[2]/s)/2,oy=(r.height-vb[3]/s)/2;return [vb[0]+(cx-r.left-ox)*s,vb[1]+(cy-r.top-oy)*s,s]};
+ function zoom(f,cx,cy){const r=svg.getBoundingClientRect();if(cx===undefined){cx=r.left+r.width/2;cy=r.top+r.height/2}const [px,py]=pt(cx,cy);let nw=vb[2]/f,nh=vb[3]/f;if(nw>vb0[2]*1.3||nw<vb0[2]/40){return}
+  vb=[px-(px-vb[0])/f,py-(py-vb[1])/f,nw,nh];set();svg.style.setProperty('--z',vb0[2]/vb[2])}
+ $('#zIn').onclick=()=>zoom(1.6);$('#zOut').onclick=()=>zoom(1/1.6);$('#zRst').onclick=()=>{vb=vb0.slice();set()};
+ svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY<0?1.2:1/1.2,e.clientX,e.clientY)},{passive:false});
+ const P=new Map();let moved=false,last=null,d0=0;
+ svg.addEventListener('pointerdown',e=>{P.set(e.pointerId,[e.clientX,e.clientY]);moved=false;if(P.size==1)last=[e.clientX,e.clientY];if(P.size==2){const [a,b]=[...P.values()];d0=Math.hypot(a[0]-b[0],a[1]-b[1])}});
+ svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const prev=P.get(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);
+  if(P.size==1){const dx=e.clientX-last[0],dy=e.clientY-last[1];if(!moved&&Math.hypot(dx,dy)<6)return;moved=true;const s=pt(0,0)[2];vb[0]-=dx*s;vb[1]-=dy*s;last=[e.clientX,e.clientY];set()}
+  else if(P.size==2){moved=true;const [a,b]=[...P.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d0){zoom(d/d0,(a[0]+b[0])/2,(a[1]+b[1])/2)}d0=d}});
+ const up=e=>{P.delete(e.pointerId);if(P.size<2)d0=0;if(P.size==1){last=[...P.values()][0]}};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+ svg.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true);
+})();
+
+// ===== popup (thay vì chuyển tab) =====
+let popFn=null;
+const _closeSheet=closeSheet;closeSheet=function(){popFn=null;_closeSheet()};
+function showCab(id){popFn=()=>{if(!D.cprof.find(x=>x.id==id))return;openSheet(cabCard(id)+`<div class="row"><button onclick="goCab('${id}')">Mở trong tab Cáp</button></div>`)};popFn()}
+function showMx(name){popFn=()=>{const cabs=mxCables(name),pairs=mxPairsFor(name,cabs),rec=allMx().find(m=>m.name==name);
+  const steps=[];E.paths.forEach(p=>p.steps.forEach(s=>{if(s.t=='mx'&&s.at==name)steps.push([p,s])}));const q=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  let h=`<h3 style="margin:0">${esc_(name)}</h3><div class="mut">${rec?[...rec.tags].join(' · '):''}</div>${sugBox(name)}${RAW.static.straight[name]!==undefined?`<div class="mut">MX thẳng: hàn thẳng core i↔i cho ${RAW.static.straight[name]} core đầu.</div>`:''}`;
+  cabs.forEach(x=>{h+=`<div style="margin-top:8px"><b style="cursor:pointer" onclick="showCab('${x.id}')">${x.id}</b> <span class="mut">${esc_(x.c.ma_cap||'(chưa mã)')} · ${x.c.fo}FO · ${esc_(x.c.frm)} → ${esc_(x.c.to)}</span><div class="cs">${x.cores.map(c=>`<div class="cc${c.ov?' ov':''}${c.hu?' hu':''}${c.links.length?' run':''}" onclick="goMx('${q}')"><div class="n"><i style="background:${fcol(c.n)}"></i>${c.n}</div><div class="l" style="color:${c.nhan?lcol(c.nhan):'var(--mut)'}">${esc_(c.nhan)||'·'}</div><div class="s">${esc_(c.tram)||(c.links.length?c.links[0]:'')}</div></div>`).join('')}</div></div>`});
+  if(!cabs.length)h+='<div class="mut">Chưa gắn cáp nào vào măng xông này.</div>';
+  if(pairs.length){const g={};pairs.forEach(p=>{const k=[p.src,p.label,p.a,p.b].join('|');(g[k]=g[k]||[]).push(p)});h+='<div class="b" style="margin-top:8px">Phối core</div><table><tr><th>Nguồn</th><th>Nhãn</th><th>Cáp A / core</th><th>Cáp B / core</th></tr>'+Object.values(g).map(L=>`<tr><td class="mut">${esc_(L[0].src)}</td><td class="b">${esc_(L[0].label)}</td><td>${L[0].a}<br><b>${RingEngine.rng(L.map(p=>p.ca))}</b></td><td>${L[0].b}<br><b>${RingEngine.rng(L.map(p=>p.cb))}</b></td></tr>`).join('')+'</table>'}
+  if(steps.length)h+='<div class="b" style="margin-top:8px">Link đi qua</div><table>'+steps.map(([p,s])=>`<tr><td class="b">${p.id}</td><td>${s.a_cable} ${s.cores_a.join('+')} ↔ ${s.b_cable} ${s.cores_b.join('+')}</td><td class="${/^khớp/.test(s.check)?'ok':/^chưa/.test(s.check)?'warn':'bad'}">${esc_(String(s.check).slice(0,40))}</td></tr>`).join('')+'</table>';
+  h+=`<div class="row"><button class="on" onclick="goMx('${q}')">Mở trang MX (sửa nhãn)</button></div>`;openSheet(h)};popFn()}
+const _refresh=refresh;refresh=function(){_refresh();if(popFn&&$('#sheet').classList.contains('on'))popFn()};
