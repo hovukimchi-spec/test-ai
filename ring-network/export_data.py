@@ -36,7 +36,7 @@ def layer(d):
 def static(d):
     segs=[]
     for s in d['segments']:
-        x={k:s[k] for k in('id','ring','seq','bbnt','a','z','kind','km_hd','km_otdr','km_kml','db1','db2','km_ref','db_ref','allow','delta','margin','roadside','rerouted','ok_core','ok_loss')}
+        x={k:s[k] for k in('id','ring','seq','bbnt','a','z','kind','km_hd','km_otdr','km_kml','db1','db2','km_ref','db_ref','allow','delta','margin','roadside','rerouted','ok_core','ok_loss','bbnt_km_otdr','bbnt_db1','bbnt_db2','nghiem_thu') if k in s}
         x['polyline']=[[round(a,5),round(b,5)] for a,b in s['polyline']];segs.append(x)
     nodes=[{k:v[k] for k in('id','type','lat','lon','ring','role') if k in v} for v in d['nodes'].values()]
     return dict(config=dict(drop_max_m=model.CONFIG['drop_max_m'],drop_min_fo=model.CONFIG['drop_min_fo']),

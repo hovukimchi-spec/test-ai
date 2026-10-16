@@ -113,6 +113,7 @@ def build():
             seg['ok_core']=None if seg['delta'] is None else seg['delta']<=CONFIG['core_delta_max']
             seg['ok_loss']=None if seg['db_ref'] is None else seg['db_ref']<=seg['allow']
             segments.append(seg)
+    apply_nghiem_thu(segments)
     # nút
     for rid,r in RINGS.items():
         for n in r['csg']:nodes[n]['ring']=rid;nodes[n]['role']='ring'
@@ -165,6 +166,19 @@ def build():
     d['agg_odf']=agg_odf_table(d)
     return d
 
+def apply_nghiem_thu(segments):
+    """Dùng số nghiệm thu (km, suy hao hai core) thay cho số BBNT/ước tính; giữ số cũ ở bbnt_km_otdr, bbnt_db1, bbnt_db2."""
+    p=os.path.join(DATA,'odf_nghiem_thu.json')
+    if not os.path.exists(p):return
+    nt={(r['frm'],r['to']):r for r in json.load(open(p,encoding='utf-8'))}
+    for s in segments:
+        r=nt.get((s['a'],s['z']))
+        if not r or r['km'] is None or r['db1'] is None:continue
+        s['bbnt_km_otdr'],s['bbnt_db1'],s['bbnt_db2']=s['km_otdr'],s['db1'],s['db2']
+        s['km_otdr']=r['km'];s['db1'],s['db2']=r['db1'],r['db2'];s['km_ref']=r['km'];s['db_ref']=max(r['db1'],r['db2']);s['nghiem_thu']=True
+        s['allow']=threshold(s['km_ref']);s['delta']=round(abs(s['db1']-s['db2']),3);s['margin']=round(s['allow']-s['db_ref'],2)
+        s['ok_core']=s['delta']<=CONFIG['core_delta_max'];s['ok_loss']=s['db_ref']<=s['allow']
+
 def load_nghiem_thu(d):
     """Bảng nghiệm thu cổng ODF (data/odf_nghiem_thu.json): cổng ODF thực tế từng đầu link. CSG lấy theo bảng này; AGG chỉ đối chiếu.
     Trả (danh sách dòng + id link, {(trạm, cáp, core): cổng ODF CSG})."""
@@ -184,10 +198,10 @@ def nt_compare(d):
     """Đối chiếu bảng nghiệm thu với dữ liệu hiện có: (a) km/suy hao từng link; (b) ghi chú cổng ODF gốc so với đích suy từ nghiệm thu + đường đi."""
     seg={s['id']:s for s in d['segments']};rows=[]
     for r in d['odf_nt']:
-        s=seg.get(r['link']);dk=(r['km']-s['km_otdr']) if s and s['km_otdr'] is not None and r['km'] is not None else None
-        ours=[s['db1'],s['db2']] if s else [None,None]
+        s=seg.get(r['link']);bk=(s.get('bbnt_km_otdr',s['km_otdr']) if s else None);dk=(r['km']-bk) if bk is not None and r['km'] is not None else None
+        ours=[s.get('bbnt_db1',s['db1']),s.get('bbnt_db2',s['db2'])] if s else [None,None]
         dd=max([abs(a-b) for a,b in zip([r['db1'],r['db2']],ours) if a is not None and b is not None],default=None)
-        rows.append(dict(r,km_otdr=s['km_otdr'] if s else None,km_hd=s['km_hd'] if s else None,db_ours=ours,d_km=dk,d_db=dd))
+        rows.append(dict(r,km_otdr=bk,km_hd=s['km_hd'] if s else None,db_ours=ours,d_km=dk,d_db=dd))
     conf=[]
     for r in d['station_cores']:
         p=r['odf_port']

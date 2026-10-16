@@ -363,7 +363,7 @@ for lk in d['paths']:
             ctext=(f"cổng {'+'.join(map(str,s['ports']))} ↔ core {'+'.join(map(str,s['cores']))}" if s.get('ports') and s['ports']!=s['cores'] else '+'.join(map(str,s['cores'])))
             vals=['ODF',f"{s['at']}: {s['name']}",'', ctext,None,None,'',s.get('note','')]
         elif s['t']=='cable':
-            vals=['cáp',s['name'],f"{s['frm']} → {s['to']}",'+'.join(map(str,s['cores'])),s['len_m'],f'=SUM(G{first}:G{rr})' ,'',s['src']]
+            vals=['cáp',f"{s['name']} ({s['fo']}FO)",f"{s['frm']} → {s['to']}",'+'.join(map(str,s['cores'])),s['len_m'],f'=SUM(G{first}:G{rr})' ,'',s['src']]
         elif s['t']=='mx':
             vals=['măng xông',s['at'],'',f"{'+'.join(map(str,s['cores_a']))} ↔ {'+'.join(map(str,s['cores_b']))}",None,None,f"{s['check']} — {s['check_detail']}",s.get('note','')]
         else:
