@@ -47,8 +47,9 @@ function mxCables(name){const ids=new Set();Object.values(E.cables).forEach(c=>{
  return [...ids].sort().map(id=>{const c=E.cables[id];const cap=(c.ends||{})[name];const rec=capRec[cap]||{};const dg=diag[cap]||{};
   const ov={};E.labs.forEach(r=>{if(r.mx==name&&r.cable==id)ov[r.core]=r});
   const cores=[];for(let n=1;n<=c.fo;n++){const g=dg[n]||{};const o=ov[n];const lab=o&&o.nhan?o.nhan:(g.nhan||'');
-   cores.push({n,ong:g.ong||tube(n),mau:g.mau_soi||'',nhan:lab,tram:(o&&o.tram)||g.tram||'',hu:!!(o&&o.hu)||/^h[ưu]$/i.test(lab),ov:!!o,links:(run[id]||{})[n]||[]})}
+   cores.push({n,ong:g.ong||tube(n),mau:g.mau_soi||'',nhan:lab,tram:(o&&o.tram)||g.tram||'',hu:!!(o&&o.hu)||/^h[ưu]$/i.test(lab),ov:!!o,links:(run[id]||{})[n]||((cap&&cap[0]=='@')?(ledOf(id,n)):[])})}
   return {id,c,cap,huong:rec.huong||'',cores}})}
+let _ledE=null,_ledM={};function ledOf(id,n){if(_ledE!==E){_ledE=E;_ledM={};E.ledger.forEach(r=>_ledM[r.cable+'|'+r.core]=r.links||[])}return _ledM[id+'|'+n]||[]}
 function mxPairsFor(name,cabs){const idOfCap={};cabs.forEach(x=>{if(x.cap)idOfCap[x.cap]=x.id});const out=[];
  E.mxpairs.forEach(p=>{if(p.mx==name&&idOfCap[p.a]&&idOfCap[p.b])out.push({label:p.label,a:idOfCap[p.a],ca:p.core_a,b:idOfCap[p.b],cb:p.core_b,station:p.station,src:'sơ đồ'+(p.balanced?'':' (không cân)')})});
  E.ovPairs.forEach(p=>{if(p.mx==name)out.push({label:p.label,a:p.a.slice(4),ca:p.core_a,b:p.b.slice(4),cb:p.core_b,station:p.station,src:'nhập tay'})});
@@ -80,9 +81,9 @@ function renderMx(name){const cabs=mxCables(name);const pairs=mxPairsFor(name,ca
  const note=RAW.static.closures.find(c=>c.name==name);const steps=[];E.paths.forEach(p=>p.steps.forEach(s=>{if(s.t=='mx'&&s.at==name)steps.push([p,s])}));
  let h=`<div class="card"><div class="row"><h3 style="margin:0;flex:1">${esc_(name)}</h3><button onclick="curMx=null;$('#mxDetail').innerHTML='';renderMxList()">đóng</button></div>
  <div class="mut">${rec?[...rec.tags].join(' · '):''}${note?` · ${note.lat.toFixed(5)}, ${note.lon.toFixed(5)} · <a target="_blank" href="https://maps.google.com/?q=${note.lat},${note.lon}">bản đồ</a>`:''}</div>${note?`<div class="mut">${esc_(note.desc)}</div>`:''}
- ${RAW.static.straight[name]!==undefined?`<div class="mut">MX thẳng: hàn thẳng core i↔i cho <b>${RAW.static.straight[name]}</b> core đầu (theo sổ MX).</div>`:''}`;
+ ${sugBox(name)}${RAW.static.straight[name]!==undefined?`<div class="mut">MX thẳng: hàn thẳng core i↔i cho <b>${RAW.static.straight[name]}</b> core đầu (theo sổ MX).</div>`:''}`;
  if(!cabs.length)h+='<div class="mut">Chưa gắn cáp nào vào măng xông này (xem sheet DL_Cáp cột “ends”).</div>';
- cabs.forEach(x=>{h+=`<div style="margin-top:10px"><span class="b" style="cursor:pointer" onclick="goCab('${x.id}')">${x.id}</span> <span class="mut">${esc_(x.c.ma_cap||'(chưa mã)')} · ${x.c.fo}FO · ${esc_(x.c.frm)} → ${esc_(x.c.to)}${x.huong?' · hướng '+esc_(x.huong):''} <small>(đầu ${esc_(x.cap?x.cap.split('|')[1]:'?')})</small></span><div class="cs">${x.cores.map(c=>coreChip(name,x.id,c)).join('')}</div></div>`});
+ cabs.forEach(x=>{h+=`<div style="margin-top:10px"><span class="b" style="cursor:pointer" onclick="goCab('${x.id}')">${x.id}</span> <span class="mut">${esc_(x.c.ma_cap||'(chưa mã)')} · ${x.c.fo}FO · ${esc_(x.c.frm)} → ${esc_(x.c.to)}${x.huong?' · hướng '+esc_(x.huong):''} <small>${x.cap&&x.cap[0]=='@'?'(MX thẳng giữa cáp, cách đầu “Từ” ~'+x.cap.slice(1)+' m)':'(đầu '+esc_(x.cap?x.cap.split('|')[1]:'?')+')'}</small></span><div class="cs">${x.cores.map(c=>coreChip(name,x.id,c)).join('')}</div></div>`});
  h+='<div class="leg"><span><i style="background:var(--ok)"></i>core đang chạy link</span><span><i style="background:var(--bad)"></i>hư</span><span style="box-shadow:inset 0 0 0 2px var(--acc);padding:0 4px;border-radius:4px">nhãn nhập tay</span><span>chấm màu = màu sợi (6 màu/ống)</span></div>';
  if(cabs.length>=2){const opts=[];for(let i=0;i<cabs.length;i++)for(let j=i+1;j<cabs.length;j++)opts.push([cabs[i].id,cabs[j].id]);
   if(!curPair||!opts.some(o=>o.join('|')==curPair)){const withP=opts.find(o=>pairs.some(p=>(p.a==o[0]&&p.b==o[1])||(p.a==o[1]&&p.b==o[0])));curPair=(withP||opts[0]).join('|')}
@@ -115,3 +116,14 @@ function suggestLabels(name){const items=[];E.paths.forEach(p=>p.steps.forEach(s
  if(!confirm('Thêm '+add.length+' nhãn đề xuất cho '+name+'?\n'+[...new Set(add.map(a=>a.nhan+' = '+a.tram))].join('\n')+'\n\nĐây chỉ là gợi ý từ đường đi bạn mô tả, không phải đọc từ sơ đồ gốc — kiểm tra lại với sơ đồ MX.'))return;
  add.forEach(a=>{const r=RAW.layer.labels.find(l=>l.mx==a.mx&&l.cable==a.cable&&ti(l.core)==a.core);if(r)Object.assign(r,a);else RAW.layer.labels.push(a)});touch()}
 renderSrc();renderMxList();
+
+// ---- đề xuất MX thẳng (từ suggest_straight.py)
+const SUG={};(RAW.static.suggest?RAW.static.suggest.items:[]).forEach(i=>SUG[i.name]=i);
+function sugBox(name){const s=SUG[name];if(!s)return '';const attached=Object.values(E.cables).some(c=>c.ends&&c.ends[name]&&String(c.ends[name])[0]=='@');
+ let h=`<div class="card" style="border-color:var(--warn)"><div class="b">Đề xuất vị trí (MX thẳng chỉ có trong KML)</div><div class="mut">MX thẳng = hàn nối dài cáp, core i↔i, không rẽ nhánh. Độ tin cậy: ${esc_(s.conf)}${attached?' · <b class="ok">đã gắn vào cáp</b>':''}</div>`;
+ if(!s.cables.length)h+='<div class="warn">Chưa xác định được cáp: cần biết chỉ số mét hoặc vị trí các MX lân cận.</div>';
+ s.cables.forEach(c=>{const row=cabRow(c.cable)||{};const on=String(((row.ends||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(name+'='))||'')).length>0;
+  h+=`<div class="row"><span><b style="cursor:pointer" onclick="goCab('${c.cable}')">${c.cable}</b> ${esc_(row.ma_cap||'')} ${c.fo}FO · ${esc_(c.frm)} → ${esc_(c.to)} · dài ${c.len_m} m<br>cách đầu “${esc_(c.frm)}” ≈ <b>${c.off_m} m</b> · lệch tuyến ${c.lat_m} m · link ${c.links.join(', ')}</span>${on?'<span class="ok">✓ đã gắn</span>':`<button onclick="attachSug('${name.replace(/'/g,"\\'")}','${c.cable}',${c.off_m})">Gắn vào ${c.cable}</button>`}</div>`});
+ if(s.maybe_same_as.length)h+='<div class="mut">Có thể chính là MX trong đường đi: '+s.maybe_same_as.map(m=>`<b>${esc_(m.mx)}</b> (cách ${m.dist_m} m)`).join(', ')+' — nếu đúng, hai tên là một điểm.</div>';
+ return h+'</div>'}
+function attachSug(name,cid,off){const r=cabRow(cid);if(!r)return;const parts=String(r.ends||'').split(';').map(x=>x.trim()).filter(x=>x&&!x.startsWith(name+'='));parts.push(name+'=@'+off);r.ends=parts.join('; ');touch()}

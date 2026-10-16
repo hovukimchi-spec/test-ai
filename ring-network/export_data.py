@@ -2,7 +2,7 @@
 Lớp sửa được (layer) có cùng cấu trúc với các sheet DL_* trong Excel."""
 import json,os,sys
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-import model
+import model,suggest_straight
 HERE=model.HERE;DATA=model.DATA
 
 FIX=[
@@ -44,7 +44,7 @@ def static(d):
         closures=[{k:c[k] for k in('name','straight','lat','lon','desc')} for c in d['closures']],
         odf=[{k:o[k] for k in('node','port','dest','cable')} for o in d['odf']],odf_agg=d['odf_agg'],odf_core_map=d['odf_core_map'],
         mxcap=d['mx_cables'],mxcore=d['mx_cores'],mx_notes=d['mx_notes'],straight=model.STRAIGHT,
-        issues=[list(i) for i in d['issues']],fix=FIX)
+        issues=[list(i) for i in d['issues']],fix=FIX,suggest=suggest_straight.suggest(d))
 
 def raw(d):return dict(static=static(d),layer=layer(d))
 

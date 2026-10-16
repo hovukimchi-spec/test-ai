@@ -545,6 +545,26 @@ for nm,key,cols,wd in DLC:
             if v!='' and v is not None:ws.cell(i,j,v)
     ws.freeze_panes='A2';ws.sheet_properties.tabColor='F6A623'
 
+# ---------------- Đề xuất MX thẳng ----------------
+import suggest_straight
+SG=suggest_straight.suggest(d);XS=sheet('Đề xuất MX thẳng')
+title(XS,'Đề xuất: măng xông chỉ có trong KML (thẳng / nối dài) nằm trên cáp nào','MX thẳng = hàn nối dài đoạn cáp, core i↔i, không rẽ nhánh. Vị trí suy từ toạ độ KML so với đầu cáp (đầu chưa có toạ độ được nội suy theo chiều dài). Chỉ là ĐỀ XUẤT — xác nhận rồi điền cột "ends" của sheet DL_Cáp (dạng  Tên MX=@số_mét_từ_đầu_cáp) hoặc bấm "Gắn vào cáp" trong HTML.')
+header(XS,4,['MX trong KML','Vĩ độ','Kinh độ','Độ tin cậy','Cáp đề xuất','Mã cáp','FO','Từ → đến','Dài cáp (m)','Cách đầu "Từ" (m)','Lệch tuyến (m)','Link đi qua','Có thể trùng MX trong đường đi (khoảng cách m)'],[30,10,10,26,9,22,5,44,9,12,10,22,44])
+rr=5
+for it in SG['items']:
+    cs=it['cables'] or [None]
+    for c in cs:
+        mm='; '.join(f"{m['mx']} ({m['dist_m']})" for m in it['maybe_same_as'])
+        vals=[it['name'],it['lat'],it['lon'],it['conf']]+([c['cable'],d['phys_cables'][c['cable']]['ma_cap'],c['fo'],f"{c['frm']} → {c['to']}",c['len_m'],c['off_m'],c['lat_m'],', '.join(c['links'])] if c else ['','','','','','','',''])+[mm]
+        for j,v in enumerate(vals,1):XS.cell(rr,j,v)
+        XS.cell(rr,4).fill=GOOD if it['conf'].startswith('tên') or it['conf'].endswith('(1 cáp)') else WARN
+        rr+=1
+box(XS,5,rr-1,1,13);XS.freeze_panes='B5'
+rr+=1;XS.cell(rr,1,'MX trong đường đi tự khớp tên với KML:').font=Font(bold=True)
+for k_,v in SG['alias'].items():rr+=1;XS.cell(rr,1,k_);XS.cell(rr,2,v)
+rr+=1;XS.cell(rr,1,'MX trong đường đi chưa có điểm KML trùng tên:').font=Font(bold=True)
+for k_ in SG['unlocated']:rr+=1;XS.cell(rr,1,k_)
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -567,7 +587,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Việc còn thiếu','DL_Cáp','DL_Link','DL_Bước','DL_Nhãn MX','ODF CSG thực tế','ODF AGG thực tế','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','ODF-01 NBE12 cổng↔core','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Việc còn thiếu','DL_Cáp','DL_Link','DL_Bước','DL_Nhãn MX','ODF CSG thực tế','ODF AGG thực tế','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','ODF-01 NBE12 cổng↔core','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đề xuất MX thẳng','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True
