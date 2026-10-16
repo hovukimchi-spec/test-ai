@@ -13,10 +13,11 @@
      "at": "NBE12",
      "name": "ODF-01 24FO hướng NB (POSTEF 11/2016)",
      "cores": [
-      11,
-      12
+      5,
+      6
      ],
-     "note": "ODF AGG ghi cổng 11-12 (core cáp 5,6): HNB055 ring 3"
+     "note": "ODF AGG: HNB055 ring 3",
+     "odf_ref": "ODF-01 NBE12"
     },
     {
      "t": "cable",

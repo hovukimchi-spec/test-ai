@@ -28,7 +28,7 @@ RINGS={
  'R2':dict(csg=['HNB054','HNB006','HNB091'],segs=[30,31,32,33],spurs=[]),
  'R3':dict(csg=['HNB055','HNB065','HNB094'],segs=[25,26,27,28],spurs=[29]),
  'R4':dict(csg=['HNB011','HNB056','HNB071','HNB073'],segs=[20,21,22,23,24],spurs=[]),
- 'R5':dict(csg=['HNB012','HNB014','HNB075'],segs=[16,17,18,19],spurs=['HNB113']),
+ 'R5':dict(csg=['HNB012','HNB014','HNB075'],segs=[16,17,18,19],spurs=[]),   # HNB113: tuyến đã huỷ
  'R6':dict(csg=['HNB086','HNB024','HNB027','HNB031','HNB020'],segs=[10,11,12,13,14,15],spurs=[]),
  'R7':dict(csg=['HNB005','HNB062','HNB021','HNB013'],segs=[5,6,7,8,9],spurs=[]),
  'R8':dict(csg=['HNB066','HNB016','HNB038'],segs=[1,2,3,4],spurs=[]),
@@ -117,6 +117,7 @@ def build():
         for n in r['csg']:nodes[n]['ring']=rid;nodes[n]['role']='ring'
         for n in r['spurs']:
             if isinstance(n,str):nodes[n]['ring']=rid;nodes[n]['role']='nhánh cụt (cấp 3)'
+    nodes['HNB113']['ring']='R5';nodes['HNB113']['role']='đã huỷ tuyến (không dùng)'
     nodes['HNB018']['ring']='R3';nodes['HNB018']['role']='nhánh cụt (cấp 3)'
     # ODF CSG
     odf=[]
@@ -178,7 +179,9 @@ def simulate_cut(d,seg_ids):
 def detect_issues(d):
     L=[]
     for s in d['segments']:
-        if s['km_otdr'] and s['km_hd'] and abs(s['km_otdr']-s['km_hd'])/s['km_hd']>CONFIG['hd_warn']:
+        if s['rerouted']:
+            L.append((s['id'],'đổi tuyến',f"HĐ {s['km_hd']} km là chiều dài thiết kế (qua cáp C11); tuyến thực tế sau khi chuyển hướng dài {s['km_otdr']} km"))
+        elif s['km_otdr'] and s['km_hd'] and abs(s['km_otdr']-s['km_hd'])/s['km_hd']>CONFIG['hd_warn']:
             L.append((s['id'],'chiều dài',f"BBNT: HĐ {s['km_hd']} km vs OTDR {s['km_otdr']} km (lệch {round((s['km_otdr']/s['km_hd']-1)*100)}%)"))
         if s['km_otdr'] and s['km_kml']:
             r=s['km_otdr']/s['km_kml']
@@ -244,6 +247,8 @@ def check_splice(pairs,a,ca,b,cb,subst=None,nominal_b=None):
 
 def load_paths(d):
     cables={c['id']:c for c in json.load(open(os.path.join(DATA,'cables.json'),encoding='utf-8'))}
+    omap=json.load(open(os.path.join(DATA,'odf_core_map.json'),encoding='utf-8'))
+    d['odf_core_map']=omap
     so=_csv('cap_tong_hop.csv')
     for c in cables.values():
         r=so[c['so_row']-2] if c.get('so_row') else None
@@ -264,18 +269,54 @@ def load_paths(d):
                 if st['t']=='mx':
                     ea=cables[st['a_cable']]['ends'].get(st['at']);eb=cables[st['b_cable']]['ends'].get(st['at'])
                     r['check'],r['check_detail']=check_splice(d['mx_pairs'],ea,st['cores_a'],eb,st['cores_b'],st.get('subst'),st.get('nominal_b'))
+                if st['t']=='odf' and st.get('odf_ref'):
+                    inv={v:int(k) for k,v in omap[st['odf_ref']].items()}
+                    r['ports']=[inv.get(c,c) for c in st['cores']]
                 rows.append(r)
             bb=lk.get('bbnt_otdr_m')
             if bb is None:
                 sg=next((s for s in d['segments'] if s['id']==lk['id']),None)
                 bb=round(sg['km_otdr']*1000) if sg and sg.get('km_otdr') else None
             ref=(lk.get('odf_otdr_m') or [None])[0] or bb
-            out.append(dict(ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=bb,rerouted=lk.get('rerouted',False),note=lk.get('note',''),odf_otdr_m=lk.get('odf_otdr_m'),ref_m=ref,complete=lk.get('complete',True),steps=rows))
+            dz=sum(cables[c]['len_m'] for c in lk.get('design_cables',[])) or None
+            out.append(dict(design_m=dz,ring=P['ring'],id=lk['id'],frm=lk['frm'],to=lk['to'],total_m=tot,bbnt_otdr_m=bb,rerouted=lk.get('rerouted',False),note=lk.get('note',''),odf_otdr_m=lk.get('odf_otdr_m'),ref_m=ref,complete=lk.get('complete',True),steps=rows))
+    return out
+
+
+AGG_ODF={'C01':('phai','ODF-02'),'C22':('phai','ODF-01'),'C35':('trai','ODF-01'),'C17':('trai','ODF-02')}
+
+def agg_odf_use(d):
+    """Cổng ODF AGG -> (cáp, core): link ring (so khớp đường đi) và dùng khác (đối tác, liên kết AGG–AGG, hư)."""
+    omap={int(k):v for k,v in d['odf_core_map']['ODF-01 NBE12'].items()}
+    other={};linkport=[]
+    for cid,(side,odfn) in AGG_ODF.items():
+        for r in d['odf_agg']:
+            if r['phia']!=side or not r['odf'].startswith(odfn):continue
+            p=int(r['cong']);core=omap.get(p,p) if cid=='C22' else p
+            dest=(r['dich'] or '').strip();note=(r['ghi_chu'] or '').strip()
+            if re.search(r'HNB\d+\s*ring',dest):linkport.append((cid,p,core,norm(dest.split()[0]),dest))
+            else:
+                bad=any(re.fullmatch(r'h[uư]',str(r[k]).strip().lower()) for k in('cot1','cot2','cot3'))
+                other[(cid,core)]=(dest or '(trống)')+((' — '+note) if note else '')+(' [hư]' if bad else '')
+    return other,linkport
+
+def agg_check(d):
+    """So khớp: mỗi link có đầu AGG phải dùng đúng core mà ODF AGG ghi cho trạm đó."""
+    other,linkport=agg_odf_use(d);out=[];used={}
+    for lk in d['paths']:
+        csg=lk['to'] if lk['frm'].startswith('NBE') else lk['frm'] if lk['to'].startswith('NBE') else None
+        if not csg:continue
+        cabs=[s for s in lk['steps'] if s['t']=='cable']
+        end=cabs[0] if lk['frm'].startswith('NBE') else cabs[-1]
+        used[(end['cable'],tuple(end['cores']),csg)]=lk['id']
+    for cid,p,core,csg,dest in linkport:
+        hit=[v for (c,cs_,g),v in used.items() if c==cid and g==csg and core in cs_]
+        out.append((cid,p,core,csg,dest,hit[0] if hit else None))
     return out
 
 def core_ledger(d):
     """Quỹ core từng cáp: dùng bởi link nào, hư, nhãn sơ đồ, xung đột. Loại trừ dần: core đã dùng/hư không còn là ứng viên."""
-    cables=d['phys_cables'];usage={}
+    cables=d['phys_cables'];usage={};other,_=agg_odf_use(d)
     for lk in d['paths']:
         for st in lk['steps']:
             if st['t']=='cable':
@@ -292,8 +333,9 @@ def core_ledger(d):
                 if l and (l[0] or l[1]):lab.append(f"{node}: {l[0] or '·'}");tr+= [l[1]] if l[1] else []
             hu=any('HƯ' in x for x in lab)
             if len(use)>1:conf.append((cid,core,use))
-            status='HƯ' if hu else ('dùng '+'+'.join(use) if use else ('có nhãn, chưa gán link' if lab else 'trống/chưa rõ'))
-            rows.append(dict(cable=cid,name=c['name'],route=f"{c['frm']} → {c['to']}",core=core,status=status,labels='; '.join(lab),stations=', '.join(dict.fromkeys(tr)),links=use))
+            ot=other.get((cid,core),'')
+            status='HƯ' if (hu or re.search(r'\bh[uư]\b|\[hư\]',ot.lower())) else ('dùng '+'+'.join(use) if use else ('dùng khác (ODF AGG)' if ot else ('có nhãn, chưa gán link' if lab else 'trống/chưa rõ')))
+            rows.append(dict(cable=cid,name=c['name'],route=f"{c['frm']} → {c['to']}",core=core,status=status,other=ot,labels='; '.join(lab),stations=', '.join(dict.fromkeys(tr)),links=use))
     return rows,conf
 
 
@@ -314,9 +356,11 @@ def cable_profiles(d):
     seg_ids={s['id'] for s in d['segments']}
     out=[]
     for cid,c in d['phys_cables'].items():
-        rows=led[cid];run={};hu=[];lab=[];free=[];stn={}
+        rows=led[cid];run={};hu=[];lab=[];free=[];stn={};oth={}
         for r in rows:
+            if r['other']:oth.setdefault(r['other'],[]).append(r['core'])
             if r['status']=='HƯ':hu.append(r['core'])
+            elif r['status'].startswith('dùng khác'):pass
             elif r['status'].startswith('dùng'):
                 for l in r['links']:run.setdefault(l,[]).append(r['core'])
             elif r['status'].startswith('có nhãn'):
@@ -329,7 +373,7 @@ def cable_profiles(d):
         out.append(dict(id=cid,name=c['name'],ma_cap=c['ma_cap'] or '(chưa ghi mã cáp trong sổ)',fo=c['fo'],frm=c['frm'],to=c['to'],len_m=c['len_m'],
             cs_dau=c['cs_dau'],cs_cuoi=c['cs_cuoi'],so_row=c.get('so_row'),so_dau_cuoi=c.get('so_dau_cuoi',''),
             run='; '.join(f"{_rng(run[l])} ({l})" for l in links) or '—',run_cores=sorted(sum(run.values(),[])),
-            hu=_rng(hu) or '—',lab=_rng(lab) or '—',lab_stations='; '.join(f"{k}: {_rng(v)}" for k,v in stn.items()) or '—',free=_rng(free) or '—',
+            hu=_rng(hu) or '—',other='; '.join(f'{_rng(v)}: {k}' for k,v in oth.items()) or '—',lab=_rng(lab) or '—',lab_stations='; '.join(f"{k}: {_rng(v)}" for k,v in stn.items()) or '—',free=_rng(free) or '—',
             n_free=len(free),links=links,lost=', '.join(lost) or '—',
             effect=('MẤT KẾT NỐI: '+', '.join(lost)) if lost else ('các link '+', '.join(links)+' mất một hướng, ring vẫn bảo vệ' if links else 'chưa có link mô tả'),
             link_status=run))

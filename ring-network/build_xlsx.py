@@ -145,7 +145,7 @@ for i,x in enumerate(d['odf'],4):
 OD.auto_filter.ref=f'A3:G{3+len(d["odf"])}';OD.freeze_panes='A4'
 OA=sheet('ODF AGG')
 title(OA,'ODF tại hai trạm AGG (NBE22 trái / Nguyễn Bình–Nguyễn Văn Tạo phải)','Các cột số là giá trị OTDR/chỉ số ghi tay (mét), ngày ghi trong file nguồn 10–11/2020; ý nghĩa từng cột chưa được xác nhận.')
-header(OA,4,['Phía','ODF','Cổng','Cột O','Đích ghi chú','Số 1 (m)','Số 2 (m)','Số 3 (m)','Ghi chú','Cột T','Cột U'],[7,34,6,7,22,9,9,9,40,9,9])
+header(OA,4,['Phía','ODF','Cổng ODF','Core cáp (cột O; chỉ ODF-01 NB)','Đích ghi chú','Số 1 (m)','Số 2 (m)','Số 3 (m)','Ghi chú','Cột T','Cột U'],[7,34,6,7,22,9,9,9,40,9,9])
 for i,x in enumerate(d['odf_agg'],5):
     for j,k in enumerate(['phia','odf','cong','cot_O','dich','cot1','cot2','cot3','ghi_chu','cot_T','cot_U'],1):
         v=x[k];OA.cell(i,j,int(v) if str(v).isdigit() else v)
@@ -349,7 +349,7 @@ for i,lk in enumerate(d['paths']):
     else:PA.cell(r,8,'Chưa có số tham chiếu')
     if not lk['complete']:PA.cell(r,8,'Chưa hoàn chỉnh (còn tiếp)')
     ref_txt=('ODF AGG ghi '+'/'.join(map(str,lk['odf_otdr_m']))+' m') if lk['odf_otdr_m'] else ('BBNT (số thống nhất)' if ref else '—')
-    PA.cell(r,9,'OTDR tham chiếu: '+ref_txt+(' | ĐỔI TUYẾN so với thiết kế' if lk.get('rerouted') else '')+((' | '+lk['note']) if lk.get('note') else ''))
+    PA.cell(r,9,'OTDR tham chiếu: '+ref_txt+(' | ĐỔI TUYẾN so với thiết kế' if lk.get('rerouted') else '')+((f" | thiết kế qua C11: {lk['design_m']} m") if lk.get('design_m') else '')+((' | '+lk['note']) if lk.get('note') else ''))
 box(PA,r0,r0+nl_-1,1,9)
 hr=r0+nl_+2;PA.cell(hr,1,'Chi tiết từng bước').font=Font(bold=True,size=12)
 header(PA,hr+1,['Link','Bước','Loại','Vị trí / cáp','Từ → Đến','Core','Dài (m)','Cộng dồn (m)','Đối chiếu sơ đồ MX','Ghi chú'],None)
@@ -360,7 +360,8 @@ for lk in d['paths']:
     for k,s in enumerate(lk['steps'],1):
         PA.cell(rr,1,lk['id']);PA.cell(rr,2,k)
         if s['t']=='odf':
-            vals=['ODF',f"{s['at']}: {s['name']}",'', '+'.join(map(str,s['cores'])),None,None,'',s.get('note','')]
+            ctext=(f"cổng {'+'.join(map(str,s['ports']))} ↔ core {'+'.join(map(str,s['cores']))}" if s.get('ports') and s['ports']!=s['cores'] else '+'.join(map(str,s['cores'])))
+            vals=['ODF',f"{s['at']}: {s['name']}",'', ctext,None,None,'',s.get('note','')]
         elif s['t']=='cable':
             vals=['cáp',s['name'],f"{s['frm']} → {s['to']}",'+'.join(map(str,s['cores'])),s['len_m'],f'=SUM(G{first}:G{rr})' ,'',s['src']]
         elif s['t']=='mx':
@@ -383,9 +384,11 @@ PD=sheet('Phối core từ đường đi')
 title(PD,'Bảng phối core dựng lại từ đường đi người dùng mô tả','Mỗi dòng = một core hàn tại một măng xông, theo từng link. Cột đối chiếu so với nhãn trong sơ đồ MX gốc (nếu có). Hoàn thiện dần khi có thêm đường đi.')
 header(PD,4,['Măng xông','Link','Cáp A','Core A','↔','Cáp B','Core B','Đối chiếu sơ đồ MX','Ghi chú'],[26,8,38,7,4,38,7,30,60])
 rr=5
-for lk in d['paths']:
-    for s in lk['steps']:
-        if s['t']!='mx':continue
+splices=[(s['at'],lk['id'],s) for lk in d['paths'] for s in lk['steps'] if s['t']=='mx']
+splices.sort(key=lambda t:(t[0],t[1]))
+for _mx,_lk,s in splices:
+    lk={'id':_lk}
+    if True:
         ca=d['phys_cables'][s['a_cable']];cb_=d['phys_cables'][s['b_cable']]
         for x,y in zip(s['cores_a'],s['cores_b']):
             for j,v in enumerate([s['at'],lk['id'],f"{s['a_cable']} {ca['name']} {ca['fo']}FO",x,'↔',f"{s['b_cable']} {cb_['name']} {cb_['fo']}FO",y,s['check'],s.get('note','')],1):PD.cell(rr,j,v)
@@ -397,40 +400,41 @@ box(PD,5,rr-1,1,9);PD.freeze_panes='A5';PD.auto_filter.ref=f'A4:I{rr-1}'
 QC=sheet('Quỹ core')
 title(QC,'Quỹ core từng cáp — loại trừ dần','Core đã dùng cho link (theo đường đi mô tả) hoặc hư thì không còn là ứng viên; "có nhãn, chưa gán link" = sơ đồ MX gán nhóm nhưng đường đi chưa mô tả. Trống/chưa rõ = còn quỹ.')
 nph=len(d['phys_cables'])
-header(QC,4,['Mã cáp','Cáp','Tuyến','Số FO','Dùng','Hư','Có nhãn chưa gán','Trống/chưa rõ','Cặp trống tối đa'],[8,44,48,7,7,7,16,14,14])
+header(QC,4,['Mã cáp','Cáp','Tuyến','Số FO','Dùng cho link','Hư','Có nhãn chưa gán','Trống/chưa rõ','Cặp trống tối đa','Dùng khác (ODF AGG)'],[8,44,48,7,12,7,16,14,14,16])
 dr0=5+nph+3
 for i,(cid,c) in enumerate(d['phys_cables'].items(),5):
     QC.cell(i,1,cid);QC.cell(i,2,c['name']);QC.cell(i,3,f"{c['frm']} → {c['to']}");QC.cell(i,4,c['fo'])
-    QC.cell(i,5,f'=COUNTIFS($A${dr0}:$A$2000,A{i},$E${dr0}:$E$2000,"dùng*")')
+    QC.cell(i,5,f'=COUNTIFS($A${dr0}:$A$2000,A{i},$E${dr0}:$E$2000,"dùng R*")')
     QC.cell(i,6,f'=COUNTIFS($A${dr0}:$A$2000,A{i},$E${dr0}:$E$2000,"HƯ")')
     QC.cell(i,7,f'=COUNTIFS($A${dr0}:$A$2000,A{i},$E${dr0}:$E$2000,"có nhãn*")')
-    QC.cell(i,8,f'=D{i}-E{i}-F{i}-G{i}');QC.cell(i,9,f'=INT(H{i}/2)')
-box(QC,5,4+nph,1,9)
+    QC.cell(i,10,f'=COUNTIFS($A${dr0}:$A$2000,A{i},$E${dr0}:$E$2000,"dùng khác*")')
+    QC.cell(i,8,f'=D{i}-E{i}-F{i}-G{i}-J{i}');QC.cell(i,9,f'=INT(H{i}/2)')
+box(QC,5,4+nph,1,10)
 QC.cell(dr0-2,1,'Chi tiết từng core').font=Font(bold=True,size=12)
 header(QC,dr0-1,['Mã cáp','Cáp','Core','Màu sợi','Trạng thái','Nhãn trong sơ đồ MX','Trạm (sơ đồ)','Link dùng'],None)
 TUBE=['xanh dương','cam','xanh lá','nâu','xám','trắng']
 for i,r in enumerate(d['ledger'],dr0):
     for j,v in enumerate([r['cable'],r['name'],r['core'],TUBE[(r['core']-1)%6],r['status'],r['labels'],r['stations'],', '.join(r['links'])],1):QC.cell(i,j,v)
-    QC.cell(i,5).fill=GOOD if r['status'].startswith('dùng') else BAD if r['status']=='HƯ' else WARN if r['status'].startswith('có nhãn') else PatternFill()
+    QC.cell(i,5).fill=GOOD if r['status'].startswith('dùng R') else GREY if r['status'].startswith('dùng khác') else BAD if r['status']=='HƯ' else WARN if r['status'].startswith('có nhãn') else PatternFill()
 box(QC,dr0,dr0+len(d['ledger'])-1,1,8);QC.freeze_panes='A5';QC.auto_filter.ref=f'A{dr0-1}:H{dr0+len(d["ledger"])-1}'
 
 # ---------------- Hồ sơ cáp (xử lý sự cố) ----------------
 HC=sheet('Hồ sơ cáp')
 title(HC,'Hồ sơ cáp: mã cáp, core đang chạy / hư / trống — dùng khi đo kiểm và xử lý sự cố','Core đang chạy theo đường đi người dùng mô tả; "nhãn chưa gán" = sơ đồ MX gán nhóm/trạm nhưng chưa mô tả link; "trống" = chưa dùng, chưa nhãn, không hư. Mã cáp lấy từ sổ độ dài (ô trống = sổ chưa ghi, cần bổ sung).')
-header(HC,4,['Mã nội bộ','Mã cáp (sổ)','FO','Từ','Đến','Dài (m)','cs đầu','cs cuối','Dòng sổ','Core đang chạy (link)','Core hư','Core có nhãn, chưa gán','Trạm ghi trong nhãn','Core trống','Hệ quả khi đứt cáp'],[9,24,5,34,34,9,8,8,8,34,9,18,36,12,48])
+header(HC,4,['Mã nội bộ','Mã cáp (sổ)','FO','Từ','Đến','Dài (m)','cs đầu','cs cuối','Dòng sổ','Core đang chạy (link)','Core hư','Core có nhãn, chưa gán','Trạm ghi trong nhãn','Core trống','Hệ quả khi đứt cáp','Dùng khác (ODF AGG)'],[9,24,5,34,34,9,8,8,8,34,9,18,36,12,48,48])
 for i,p in enumerate(d['cable_profiles'],5):
-    vals=[p['id'],p['ma_cap'],p['fo'],p['frm'],p['to'],p['len_m'],p['cs_dau'],p['cs_cuoi'],p['so_row'],p['run'],p['hu'],p['lab'],p['lab_stations'],p['free'],p['effect']]
+    vals=[p['id'],p['ma_cap'],p['fo'],p['frm'],p['to'],p['len_m'],p['cs_dau'],p['cs_cuoi'],p['so_row'],p['run'],p['hu'],p['lab'],p['lab_stations'],p['free'],p['effect'],p['other']]
     for j,v in enumerate(vals,1):
         x=HC.cell(i,j,model._f(v) if j in(7,8) and model._f(v) is not None else v);x.alignment=Alignment(wrap_text=True,vertical='top')
     if p['effect'].startswith('MẤT'):HC.cell(i,15).fill=BAD
     if p['hu']!='—':HC.cell(i,11).fill=WARN
     if p['ma_cap'].startswith('('):HC.cell(i,2).fill=INP
-hl=4+len(d['cable_profiles']);box(HC,5,hl,1,15);HC.freeze_panes='B5';HC.auto_filter.ref=f'A4:O{hl}'
+hl=4+len(d['cable_profiles']);box(HC,5,hl,1,16);HC.freeze_panes='B5';HC.auto_filter.ref=f'A4:P{hl}'
 TC=sheet('Tra cứu cáp')
 title(TC,'Tra cứu cáp khi có sự cố','Chọn mã nội bộ ở ô vàng (C01…) hoặc xem bảng Hồ sơ cáp.')
 TC['A4']='Mã nội bộ';TC['B4']='C04';TC['B4'].fill=INP;TC['A4'].font=Font(bold=True)
 dv3=DataValidation(type='list',formula1=f"='Hồ sơ cáp'!$A$5:$A${hl}");TC.add_data_validation(dv3);dv3.add('B4')
-labels_=[('Mã cáp (sổ)','B'),('Số FO','C'),('Từ','D'),('Đến','E'),('Dài (m)','F'),('Chỉ số mét đầu','G'),('Chỉ số mét cuối','H'),('Dòng sổ cáp','I'),('Core đang chạy (link)','J'),('Core hư','K'),('Core có nhãn, chưa gán','L'),('Trạm ghi trong nhãn','M'),('Core trống','N'),('Hệ quả khi đứt cáp','O')]
+labels_=[('Dùng khác (ODF AGG)','P'),('Mã cáp (sổ)','B'),('Số FO','C'),('Từ','D'),('Đến','E'),('Dài (m)','F'),('Chỉ số mét đầu','G'),('Chỉ số mét cuối','H'),('Dòng sổ cáp','I'),('Core đang chạy (link)','J'),('Core hư','K'),('Core có nhãn, chưa gán','L'),('Trạm ghi trong nhãn','M'),('Core trống','N'),('Hệ quả khi đứt cáp','O')]
 for k,(t_,col) in enumerate(labels_,6):
     TC.cell(k,1,t_).font=Font(bold=True);c=TC.cell(k,2,f"=INDEX('Hồ sơ cáp'!{col}$5:{col}${hl},MATCH($B$4,'Hồ sơ cáp'!$A$5:$A${hl},0))&\"\"");c.alignment=Alignment(wrap_text=True,vertical='top')
 TC.column_dimensions['A'].width=26;TC.column_dimensions['B'].width=80;box(TC,6,5+len(labels_),1,2)
@@ -448,6 +452,60 @@ for i,p in enumerate(ps,5):
     if p['n_links']>=3 :CB2.cell(i,6).fill=WARN
 cb_l=4+len(ps);box(CB2,5,cb_l,1,11);CB2.freeze_panes='B5';CB2.auto_filter.ref=f'A4:K{cb_l}'
 CB2.conditional_formatting.add(f'I5:I{cb_l}',CellIsRule(operator='greaterThan',formula=['0.5'],fill=WARN))
+
+# ---------------- ODF-01 NBE12: số cổng ↔ core cáp ----------------
+OM=sheet('ODF-01 NBE12 cổng↔core')
+title(OM,'ODF-01 tại NBE12 (Long Thới, hướng NB): hai hàng số','Hàn nhầm nhóm xanh dương–cam nên có 2 hàng số: số cổng trên ODF và số core trên cáp POSTEF 11/2016 24FO (C22) chạy đi. Cổng 1–6 ↔ core 7–12, cổng 7–12 ↔ core 1–6; cổng 13–24 trùng core.')
+header(OM,4,['Cổng ODF','Core cáp C22','Ống/màu (cổng)','Ống/màu (core)','Đích ghi trên ODF','Link (đường đi)','Ghi chú'],[10,12,16,16,28,14,50])
+TUB=['xanh dương','cam','xanh lá','nâu','xám','trắng']
+dest={}
+for r_ in d['odf_agg']:
+    if r_['phia']=='phai' and 'ODF-01' in r_['odf']:dest[int(r_['cong'])]=(r_['dich'].strip(),r_['ghi_chu'])
+linkof={}
+for lk in d['paths']:
+    s0=lk['steps'][0]
+    if s0['t']=='odf' and s0.get('odf_ref')=='ODF-01 NBE12':
+        for p_ in s0['ports']:linkof[p_]=lk['id']
+omap={int(k):v for k,v in d['odf_core_map']['ODF-01 NBE12'].items()}
+for i,p_ in enumerate(range(1,25),5):
+    c_=omap[p_]
+    for j,v in enumerate([p_,c_,f"ống {(p_-1)//6+1}, {TUB[(p_-1)%6]}",f"ống {(c_-1)//6+1}, {TUB[(c_-1)%6]}",dest.get(p_,('',''))[0],linkof.get(p_,''),dest.get(p_,('',''))[1]],1):OM.cell(i,j,v)
+    if p_!=c_:OM.cell(i,2).fill=WARN
+box(OM,5,28,1,7);OM.freeze_panes='A5'
+
+# ---------------- Việc còn thiếu ----------------
+TD=sheet('Việc còn thiếu')
+title(TD,'Thông tin còn thiếu để hoàn thiện (tự tổng hợp từ dữ liệu hiện có)','Ô vàng để ghi kết quả/xác nhận. Dữ liệu gợi ý lấy từ đường đi đã lần.')
+header(TD,4,['Nhóm','Đối tượng','Còn thiếu','Gợi ý từ dữ liệu có sẵn','Xác nhận / kết quả'],[22,34,46,70,36])
+rows_=[]
+for c in d['phys_cables'].values():
+    if not c['ma_cap']:rows_.append(('Mã cáp',f"{c['id']}: {c['frm']} → {c['to']}",'Mã cáp (hãng/năm) trống trong sổ',f"{c['fo']}FO, {c['len_m']} m, dòng sổ {c.get('so_row') or '—'}"))
+for c in d['phys_cables'].values():
+    if c.get('so_row') and (not c['cs_dau'] or not c['cs_cuoi']):rows_.append(('Chỉ số mét',f"{c['id']}: {c['frm']} → {c['to']}",'cs đầu/cuối cáp còn trống (cần để đổi OTDR ↔ vị trí)',f"có: đầu={c['cs_dau'] or '—'}, cuối={c['cs_cuoi'] or '—'}"))
+mxn={}
+for lk in d['paths']:
+    for s in lk['steps']:
+        if s['t']=='mx' and s['check'].startswith('chưa'):mxn.setdefault(s['at'],set()).add(lk['id'])
+for k,v in sorted(mxn.items()):rows_.append(('Nhãn măng xông',k,'Sơ đồ MX chưa ghi nhãn/chưa có sơ đồ',f"đã dựng từ đường đi các link: {', '.join(sorted(v))} (xem sheet Phối core từ đường đi)"))
+for n in ['HNB014','HNB054','HNB006','HNB091','HNB048','HNB060','HNB059']:
+    rows_.append(('ODF CSG',f'ODF-{n}','Chưa ghi hướng/cổng trong file ODF','đường đi đã cho biết cáp và core từng hướng (xem Đường đi link)'))
+other_,_ = model.agg_odf_use(d)
+rows_.append(('Đối tác','ODF AGG (TTC, MTC/VNN, DWDM Vinanet, CRAN HNB072)','Chưa có số core cụ thể trên từng đoạn mạng và thời hạn',f"{len(other_)} core ở 4 cáp AGG đang ghi dùng khác/liên kết AGG–AGG/hư (xem Hồ sơ cáp, cột Dùng khác)"))
+rows_.append(('Độ dài','R5-02 HNB012 → HNB014','Cộng sổ cáp 5905 m, BBNT 5553 m (+6,3%)','Người dùng sẽ kiểm tra sau'))
+rows_.append(('Độ dài','Cáp chéo NVT_02A ↔ NVT_02B','Chiều dài thật','Hai MX đối diện hai lề, dưới 100 m; mô hình dùng 30 m ước tính'))
+rows_.append(('Số liệu','BBNT: HĐ 0,827 km lặp 5 lần','Số hợp đồng các đoạn 7, 8, 12, 22, 26','Nghi số điền mẫu; BBNT chỉ là con số thống nhất'))
+for i,x in enumerate(rows_,5):
+    for j,v in enumerate(x,1):TD.cell(i,j,v).alignment=Alignment(wrap_text=True,vertical='top')
+    TD.cell(i,5).fill=INP
+box(TD,5,4+len(rows_),1,5);TD.freeze_panes='A5';TD.auto_filter.ref=f'A4:E{4+len(rows_)}'
+# đã xác nhận
+cf=len(rows_)+7
+TD.cell(cf,1,'Đã xác nhận trong phiên').font=Font(bold=True,size=12)
+for k,t in enumerate(['HNB113: tuyến đã huỷ (không còn link, không dùng cáp C76); trạm nối về HNB012 trước đây',
+  'R7-01 (HNB005) và R8-01 (HNB066): thiết kế đi qua cáp C11; C11 đã chạy đủ 7 link nên chuyển hướng sang hành lang NVT (dài hơn)',
+  'Cáp 48FO băng sông (HNB012): dùng core 1,2 (xác nhận)',
+  'ODF-01 NBE12 có 2 hàng số (cổng ODF và core cáp) do hàn nhầm nhóm xanh dương–cam (xem sheet ODF-01 NBE12 cổng↔core)',
+  'MX thẳng HTP: hết đoạn 600 m từ SG mới trên đường HTP (10.680424, 106.748376)'],cf+1):TD.cell(k,1,t) if False else TD.cell(cf+1+ (k-cf-1),1,t)
 
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
@@ -471,7 +529,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Việc còn thiếu','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','ODF-01 NBE12 cổng↔core','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True

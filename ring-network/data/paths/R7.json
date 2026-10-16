@@ -9,7 +9,7 @@
    "to": "HNB005",
    "odf_otdr_m": null,
    "rerouted": true,
-   "note": "nhóm kênh HNB005 đã đổi tuyến so với thiết kế (dài hơn BBNT 11 101 m)",
+   "note": "Thiết kế ban đầu đi qua cáp C11 (TPKL 24FO); C11 đã chạy đủ 7 link nên chuyển sang hành lang NVT",
    "steps": [
     {
      "t": "odf",
@@ -246,6 +246,15 @@
      ],
      "note": ""
     }
+   ],
+   "design_cables": [
+    "C22",
+    "C11",
+    "C30",
+    "C31",
+    "C32",
+    "C33",
+    "C47"
    ]
   },
   {

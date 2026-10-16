@@ -65,10 +65,10 @@ function draw(){map.innerHTML='';const g=el('g',{ns:NS});map.appendChild(g);
   const pl=el('polyline',{ns:NS,points:pts,class:'seg'+(cut.has(s.id)?' cut':''),stroke:RC[s.ring]});if(s.kind!='ring')pl.style.strokeDasharray='2 3';
   const hit=el('polyline',{ns:NS,points:pts,class:'hit'});hit.onclick=()=>sim?toggleCut(s.id):showSeg(s.id);g.appendChild(pl);g.appendChild(hit)});
  D.closures.forEach(c=>{const [x,y]=T(c.pm);const t=el('path',{ns:NS,d:`M${x},${y-4}l3.5,6.5h-7z`,fill:'#f6a623',stroke:'#8a5a00','stroke-width':.5});t.style.cursor='pointer';t.onclick=()=>showMx(c);g.appendChild(t)});
- Object.values(D.nodes).forEach(n=>{const [x,y]=T(n.pm);const agg=n.type=='AGG';let col='var(--card)';
-  if(sim&&!agg){const r=res[n.id]||[1,1];const c=(r[0]?1:0)+(r[1]?1:0);col=c==0?'var(--bad)':c==1?'var(--warn)':'var(--ok)'}
+ Object.values(D.nodes).forEach(n=>{const [x,y]=T(n.pm);const agg=n.type=='AGG';let col='var(--card)';const dead=n.role&&n.role.includes('huỷ');
+  if(sim&&!agg&&!dead){const r=res[n.id]||[1,1];const c=(r[0]?1:0)+(r[1]?1:0);col=c==0?'var(--bad)':c==1?'var(--warn)':'var(--ok)'}
   const sh=agg?el('rect',{ns:NS,x:x-6,y:y-6,width:12,height:12,fill:'#000'}):el('circle',{ns:NS,cx:x,cy:y,r:5,fill:col,stroke:'#222','stroke-width':1.3});
-  sh.style.cursor='pointer';sh.onclick=()=>showNode(n.id);g.appendChild(sh);
+  sh.style.cursor='pointer';sh.onclick=()=>showNode(n.id);if(dead)sh.setAttribute('opacity','.3');g.appendChild(sh);
   const t=el('text',{ns:NS,x:x+7,y:y-5},n.id.replace('HNB',''));t.setAttribute('style',agg?'font-weight:700;font-size:12px':'');if(agg)t.textContent=n.id;g.appendChild(t)});
  const sh=$('#simOut');if(sim){sh.style.display='';const lost=Object.entries(res).filter(([c,v])=>!v[0]&&!v[1]).map(x=>x[0]),one=Object.entries(res).filter(([c,v])=>(v[0]?1:0)+(v[1]?1:0)==1&&D.nodes[c].role=='ring').map(([c,v])=>c+'→'+(v[0]||v[1]));
   const cs=[...cut].map(i=>{const s=segById[i];return `${i} (${s.a}→${s.z})`}).join(', ')||'—';

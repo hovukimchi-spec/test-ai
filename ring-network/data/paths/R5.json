@@ -13,10 +13,11 @@
      "at": "NBE12",
      "name": "ODF-01 24FO hướng NB (POSTEF 11/2016)",
      "cores": [
-      7,
-      8
+      1,
+      2
      ],
-     "note": "ODF AGG ghi cổng 7-8 (core cáp 1,2): HNB012 ring 5"
+     "note": "ODF AGG: HNB012 ring 5",
+     "odf_ref": "ODF-01 NBE12"
     },
     {
      "t": "cable",
@@ -301,7 +302,8 @@
      ],
      "note": ""
     }
-   ]
+   ],
+   "note": "Độ dài cộng sổ cáp lệch +6,3% so với BBNT: người dùng sẽ kiểm tra sau"
   },
   {
    "id": "R5-03",
@@ -554,134 +556,6 @@
       2
      ],
      "note": "ODF AGG ghi cổng 1-2: HNB075 ring 5"
-    }
-   ]
-  },
-  {
-   "id": "R5-S1",
-   "frm": "HNB113",
-   "to": "HNB014",
-   "note": "Mâu thuẫn: ODF-HNB113 ghi \"To HNB012\", nhưng sơ đồ MX_PHẠM HÙNG ghép nhãn B giữa cáp HNB113 và cáp về HNB014",
-   "steps": [
-    {
-     "t": "odf",
-     "at": "HNB113",
-     "name": "ODF-HNB113",
-     "cores": [
-      1,
-      2
-     ],
-     "note": ""
-    },
-    {
-     "t": "cable",
-     "cable": "C76",
-     "cores": [
-      1,
-      2
-     ]
-    },
-    {
-     "t": "mx",
-     "at": "MX_PHẠM HÙNG",
-     "a_cable": "C76",
-     "cores_a": [
-      1,
-      2
-     ],
-     "b_cable": "C72",
-     "cores_b": [
-      5,
-      6
-     ],
-     "note": "nhãn B (sơ đồ MX): HNB113 ghép với cáp hướng HNB014"
-    },
-    {
-     "t": "cable",
-     "cable": "C72",
-     "cores": [
-      5,
-      6
-     ]
-    },
-    {
-     "t": "mx",
-     "at": "MX thẳng Phạm Hùng",
-     "a_cable": "C72",
-     "cores_a": [
-      5,
-      6
-     ],
-     "b_cable": "C73",
-     "cores_b": [
-      5,
-      6
-     ],
-     "note": ""
-    },
-    {
-     "t": "cable",
-     "cable": "C73",
-     "cores": [
-      5,
-      6
-     ]
-    },
-    {
-     "t": "mx",
-     "at": "MX cầu NVL 2",
-     "a_cable": "C73",
-     "cores_a": [
-      5,
-      6
-     ],
-     "b_cable": "C74",
-     "cores_b": [
-      5,
-      6
-     ],
-     "note": ""
-    },
-    {
-     "t": "cable",
-     "cable": "C74",
-     "cores": [
-      5,
-      6
-     ]
-    },
-    {
-     "t": "mx",
-     "at": "MX cầu NVL 1",
-     "a_cable": "C74",
-     "cores_a": [
-      5,
-      6
-     ],
-     "b_cable": "C75",
-     "cores_b": [
-      5,
-      6
-     ],
-     "note": ""
-    },
-    {
-     "t": "cable",
-     "cable": "C75",
-     "cores": [
-      5,
-      6
-     ]
-    },
-    {
-     "t": "odf",
-     "at": "HNB014",
-     "name": "ODF-HNB014 (hướng HNB113)",
-     "cores": [
-      5,
-      6
-     ],
-     "note": ""
     }
    ]
   }

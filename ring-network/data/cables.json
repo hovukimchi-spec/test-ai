@@ -909,26 +909,13 @@
   "ends": {}
  },
  {
-  "id": "C76",
-  "name": "FOCAL 2020 MX_PHẠM HÙNG → HNB113 (6FO)",
-  "fo": 6,
-  "frm": "MX_PHẠM HÙNG",
-  "to": "HNB113",
-  "len_m": 760,
-  "src": "Sổ độ dài cáp (Tổng Hợp): 760 m",
-  "so_row": 74,
-  "ends": {
-   "MX_PHẠM HÙNG": "MX_PHẠM HÙNG|C17"
-  }
- },
- {
   "id": "C77",
   "name": "8FO chéo đường NVT_02A ↔ NVT_02B",
   "fo": 8,
   "frm": "MX_NVT_02A",
   "to": "MX_NVT_02B",
   "len_m": 30,
-  "src": "Chưa có trong sổ cáp: ước tính 30 m từ toạ độ hai măng xông (cần xác nhận)",
+  "src": "Chưa có trong sổ cáp: hai MX ở hai bên lề đối diện, dưới 100 m (người dùng); dùng 30 m ước tính theo toạ độ",
   "so_row": null,
   "ends": {
    "MX_NVT_02A": "MX_NVT_02A|AQ174",

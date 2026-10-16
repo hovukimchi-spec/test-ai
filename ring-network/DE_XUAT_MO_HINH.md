@@ -166,3 +166,13 @@ Suy luận chủ yếu từ **tên trạm ghi sát nhãn trong sơ đồ MX** (c
 - Nhánh HNB113: ODF-HNB113 ghi "To HNB012" nhưng sơ đồ MX_PHẠM HÙNG ghép nhãn B giữa cáp HNB113 và cáp hướng HNB014; hiện mô hình theo sơ đồ (cần xác nhận).
 - Cáp 8FO chéo đường NVT_02A↔02B: sổ không có, chiều dài ước tính 30 m theo toạ độ.
 - Tải cáp: C32 (POSTEF 9/2019 12FO, LVL-03→HTP-01, 4644 m) mang 5 link của 5 ring, dùng 10/12 core (còn 1 cặp). C11 (24FO TPKL) mang 5 link; C01, C02, C04, C10, C22, C33, C34 mang 4 link. Không cáp nào làm cô lập CSG ring ngoài các cáp vào trạm (C03, C05, C49) mà quy tắc chấp nhận; HNB018/HNB113 là nhánh cụt.
+
+## 18. Cập nhật theo xác nhận của người dùng (16/10)
+- **HNB113**: tuyến đã huỷ; bỏ link R5-S1 và cáp C76 khỏi mô hình (nút ghi "đã huỷ tuyến"). Chỉ còn nhánh cụt HNB018.
+- **R5-02** (HNB012→HNB014, lệch +6,3% so với BBNT): để nguyên, người dùng kiểm tra sau.
+- **Cáp chéo NVT_02A↔02B**: hai MX ở hai lề đối diện, dưới 100 m (mô hình dùng 30 m ước tính).
+- **Cáp 48FO băng sông**: core 1,2 (xác nhận).
+- **R7-01 (HNB005) và R8-01 (HNB066)**: thiết kế ban đầu đi qua cáp C11 (TPKL 24FO). Cộng theo sổ cáp: HNB005 11 035 m (HĐ 10 856 m), HNB066 10 203 m (HĐ 10 236 m) — khớp số hợp đồng. C11 đã chạy đủ 7 link nên hai link này chuyển sang hành lang NVT (15 624 m và 14 792 m). **Đính chính**: trước đây tôi ghi HĐ 10,236 km của đoạn 1 là "sai"; thực ra đó là chiều dài thiết kế, OTDR 15,404 km là tuyến sau khi đổi.
+- **ODF-01 NBE12 (Long Thới, hướng NB)**: hàn nhầm nhóm xanh dương–cam nên có hai hàng số: số cổng ODF và số core cáp C22. Cổng 1–6 ↔ core 7–12, cổng 7–12 ↔ core 1–6, cổng 13–24 trùng core (`data/odf_core_map.json`; sheet `ODF-01 NBE12 cổng↔core`). Các bước ODF trong đường đi hiển thị cả "cổng" và "core".
+- **Đối chiếu ODF AGG ↔ đường đi**: 32 cổng ODF AGG ghi ring/trạm đều khớp đúng core mà đường đi đã lần (0 sai lệch). Các core còn lại ở 4 cáp AGG (C01, C17, C22, C35) được gắn "dùng khác": đối tác (TTC, MTC/VNN, DWDM Vinanet, CRAN HNB072), liên kết AGG–AGG, hoặc hư.
+- Sheet `Việc còn thiếu` tổng hợp thông tin cần bổ sung (mã cáp, chỉ số mét hai đầu cáp, nhãn măng xông, ODF CSG chưa ghi, số core đối tác).
