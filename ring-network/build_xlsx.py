@@ -507,6 +507,54 @@ for k,t in enumerate(['HNB113: tuyến đã huỷ (không còn link, không dùn
   'ODF-01 NBE12 có 2 hàng số (cổng ODF và core cáp) do hàn nhầm nhóm xanh dương–cam (xem sheet ODF-01 NBE12 cổng↔core)',
   'MX thẳng HTP: hết đoạn 600 m từ SG mới trên đường HTP (10.680424, 106.748376)'],cf+1):TD.cell(k,1,t) if False else TD.cell(cf+1+ (k-cf-1),1,t)
 
+# ---------------- ODF CSG thực tế ----------------
+OS=sheet('ODF CSG thực tế')
+title(OS,'Core tại từng trạm: đi đến đâu thực tế (phụ thuộc măng xông phối core, hàn hết hay không, sợi nối trực tiếp)','Suy từ đường đi đã lần + số mối hàn MX thẳng + nhãn sơ đồ MX. "Chưa ghi hàn" = chưa có dữ liệu hàn tại măng xông đó (có thể dự phòng hoặc không hàn). Cột "Cổng ODF" giả định cổng i ↔ core i (cần xác nhận).')
+header(OS,4,['Trạm','Cáp','Mã cáp','FO','Đầu kia','Core','Cổng ODF (giả định)','Trạng thái','Đích','Link','Nguồn dữ liệu','Qua'],[9,7,22,5,34,6,22,64,10,12,24,70])
+for i,r in enumerate(sorted(d['station_cores'],key=lambda r:(r['station'],r['cable'],r['core'])),5):
+    portx=(str(r['core']) if r['odf_ports'] is None or r['core']<=r['odf_ports'] else r['port_note'])
+    for j,v in enumerate([r['station'],r['cable'],r['ma_cap'],r['fo'],r['other_end'],r['core'],portx,r['text'],r['dest'],', '.join(r['links']),', '.join(r['srcs']),r['via']],1):OS.cell(i,j,v)
+    f=GOOD if r['links'] else BAD if r['kind']=='hư' else GREY if r['kind']=='dead' else WARN
+    OS.cell(i,8).fill=f
+ol=4+len(d['station_cores']);box(OS,5,ol,1,12);OS.freeze_panes='C5';OS.auto_filter.ref=f'A4:L{ol}'
+# ---------------- ODF AGG thực tế ----------------
+OG=sheet('ODF AGG thực tế')
+title(OG,'4 ODF tại hai AGG (NBE12: ODF-01 hướng NB, ODF-02 hướng NVT; NBE22: ODF-01 cs 1816, ODF-02 cs 1288)','Mỗi dòng một cổng. "Đích ghi trên ODF" lấy từ file ODF; "Truy vết" là kết quả đi theo core qua các măng xông theo dữ liệu hiện có. ODF-01 NBE12 có hai hàng số (cổng ↔ core).')
+header(OG,4,['Trạm','ODF','Cáp','Cổng','Core cáp','Đích ghi trên ODF','Ghi chú ODF','Truy vết tới','Link'],[8,22,7,7,9,26,50,18,12])
+for i,r in enumerate(d['agg_odf'],5):
+    tv=r['end'] if r['kind']=='station' else ('dừng tại '+r['end'])
+    for j,v in enumerate([r['station'],r['odf'],r['cable'],r['port'],r['core'],r['dest'],r['note'],tv,', '.join(r['links'])],1):OG.cell(i,j,v)
+    OG.cell(i,8).fill=GOOD if r['links'] else GREY if r['kind']=='dead' else WARN
+    if r['port']!=r['core']:OG.cell(i,5).fill=WARN
+box(OG,5,4+len(d['agg_odf']),1,9);OG.freeze_panes='A5';OG.auto_filter.ref=f'A4:I{4+len(d["agg_odf"])}'
+# ---------------- Nhập mã cáp / nhãn MX ----------------
+NI=sheet('Nhập mã cáp')
+title(NI,'Nhập mã cáp, chỉ số mét, chiều dài','Điền vào ô vàng rồi gửi lại file này: công cụ đọc lại (import_inputs.py) và dựng lại Excel + HTML. Ô trống = giữ nguyên.')
+header(NI,4,['Mã nội bộ','Cáp','Tuyến','FO','Mã cáp hiện có','Mã cáp (nhập)','cs đầu (nhập)','cs cuối (nhập)','Dài m (nhập)'],[9,40,54,5,24,26,14,14,12])
+for i,(cid,c) in enumerate(d['phys_cables'].items(),5):
+    for j,v in enumerate([cid,c['name'],f"{c['frm']} → {c['to']}",c['fo'],c['ma_cap']],1):NI.cell(i,j,v)
+    for j in (6,7,8,9):NI.cell(i,j).fill=INP
+box(NI,5,4+len(d['phys_cables']),1,9);NI.freeze_panes='B5'
+NLB=sheet('Nhập nhãn MX')
+title(NLB,'Nhãn core cho măng xông chưa có nhãn (đề xuất từ đường đi)','Cột "Đề xuất" là nhãn do công cụ gợi ý từ đường đi đã lần (cùng nhãn = hàn với nhau). Đánh x vào cột "Chốt" để nhận đề xuất, hoặc gõ nhãn khác vào "Nhãn (nhập)". Cột "Trạm" là CSG của link đi qua nhóm core đó.')
+header(NLB,4,['Măng xông','Mã cáp nội bộ','Cáp','Core','Đề xuất','Trạm (link)','Chốt (x)','Nhãn (nhập)'],[26,10,50,6,9,16,9,12])
+rr=5
+by={}
+for lk in d['paths']:
+    for s in lk['steps']:
+        if s['t']=='mx' and s['check'].startswith('chưa'):by.setdefault(s['at'],[]).append((lk,s))
+for mxn_,items in sorted(by.items()):
+    letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';k=0;seen={}
+    for lk,s in items:
+        key=(s['a_cable'],tuple(s['cores_a']),s['b_cable'],tuple(s['cores_b']))
+        if key not in seen:seen[key]=letters[k%26];k+=1
+        lab=seen[key];csg=lk['to'] if lk['frm'].startswith('NBE') else lk['frm']
+        for cab_,cores_ in ((s['a_cable'],s['cores_a']),(s['b_cable'],s['cores_b'])):
+            for c_ in cores_:
+                for j,v in enumerate([mxn_,cab_,f"{d['phys_cables'][cab_]['name']} ({d['phys_cables'][cab_]['fo']}FO)",c_,lab,csg],1):NLB.cell(rr,j,v)
+                NLB.cell(rr,7).fill=INP;NLB.cell(rr,8).fill=INP;rr+=1
+box(NLB,5,rr-1,1,8);NLB.freeze_panes='C5';NLB.auto_filter.ref=f'A4:H{rr-1}'
+
 # ---------------- Tổng quan ----------------
 T=wb.create_sheet('Tổng quan',0);T.sheet_view.showGridLines=False
 title(T,'Mạng ring CSG Nhà Bè — tổng quan','Dữ liệu từ file ghi tay (BBNT, ODF, MX, độ dài cáp, KML). Công thức sống; sửa Tham số để tính lại.')
@@ -529,7 +577,7 @@ T.merge_cells('A20:H20');T.merge_cells('A21:H21');T.merge_cells('A22:H22');T.mer
 for r in range(20,24):T.row_dimensions[r].height=32
 for c in 'CDEFGH':T.column_dimensions[c].width=14
 
-order=['Tổng quan','Việc còn thiếu','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','ODF-01 NBE12 cổng↔core','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
+order=['Tổng quan','Việc còn thiếu','Nhập mã cáp','Nhập nhãn MX','ODF CSG thực tế','ODF AGG thực tế','Hồ sơ cáp','Tra cứu cáp','Cân đối cáp','Đường đi link','Phối core từ đường đi','Quỹ core','Phối core MX','Core theo trạm','Cáp tại MX','Core MX','Cảnh báo phối core','Ring','Đoạn & quỹ suy hao','Sự cố đứt cáp','Nút','ODF CSG','ODF chi tiết','ODF AGG','ODF-01 NBE12 cổng↔core','Cáp','Măng xông','Hàn nối bổ sung','Tuyến lề NVT','Đối tác dùng core trống','Dữ liệu cần xác nhận','Khắc phục sự cố','Vật tư','Tra cứu','Tham số']
 wb._sheets=[wb[n] for n in order]
 for ws in wb:
     ws.page_setup.orientation='landscape';ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0;ws.sheet_properties.pageSetUpPr.fitToPage=True

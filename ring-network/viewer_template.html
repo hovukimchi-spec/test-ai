@@ -88,9 +88,20 @@ function odfGrid(node){const ps=D.odf.filter(o=>o.node==node);if(!ps.length)retu
  h+='</div>';const info={};ps.forEach(p=>{if(p.dest&&!info[p.dest])info[p.dest]=p.cable});
  return h+Object.entries(info).map(([k,v])=>`<div class="mut"><b>${k}</b>: ${v}</div>`).join('')}
 const dc={};function destCol(d){if(!dc[d])dc[d]=['#3d85c6','#e06666','#6aa84f','#8e7cc3','#f6a623','#17a2a2'][Object.keys(dc).length%6];return dc[d]}
+const tint=(c)=>`background:color-mix(in srgb,${c} 28%,transparent)`;
+function aggGrid(rows){return '<div class="ports" style="grid-template-columns:repeat(6,1fr)">'+rows.map(r=>{const lk=r.links&&r.links.length;const dead=/h[uư]/i.test(r.dest)||/h[uư]/i.test(r.note);const col=dead?'var(--bad)':lk?'var(--ok)':r.dest?'var(--warn)':'';
+ return `<div class="port" style="${col?tint(col):''}"><b>${r.port}${r.core!=r.port?'→c'+r.core:''}</b>${lk?r.links[0]:(r.dest||'').replace(/ring ?\d/,'').slice(0,10)}</div>`}).join('')+'</div>'}
+function aggOdfHtml(st){const rows=D.aggodf.filter(r=>r.station==st);const odfs=[...new Set(rows.map(r=>r.odf))];
+ return odfs.map(o=>{const rs=rows.filter(r=>r.odf==o);const sw=rs.some(r=>r.port!=r.core);return `<h4 style="margin:10px 0 2px">${st} · ${o} <small class="mut">cáp ${rs[0].cable}</small></h4>${sw?'<div class="mut">Hai hàng số: cổng ODF → core cáp (ghi “→c”).</div>':''}`+aggGrid(rs)+'<div class="mut">'+[...new Set(rs.filter(r=>r.note).map(r=>r.port+': '+r.note))].slice(0,3).join(' · ')+'</div>'}).join('')+'<div class="leg"><span><i style="background:var(--ok)"></i>link ring</span><span><i style="background:var(--warn)"></i>đối tác / liên kết khác</span><span><i style="background:var(--bad)"></i>hư</span></div>'}
+function coreChips(st){const S=D.stn[st];if(!S)return '';
+ return '<h4 style="margin:10px 0 2px">Core thực tế đến từng hướng</h4><div class="mut">Xanh: đang chạy link · vàng: hàn thông chưa gán link · xám: chưa ghi hàn · đỏ: hư</div>'+Object.entries(S).map(([cid,c])=>{
+  const chips=c.cores.map(x=>{const col=x[1]=='hư'?'var(--bad)':x[3].length?'var(--ok)':x[1]=='station'?'var(--warn)':'';
+   return `<div class="port" title="${x[4]}" style="${col?tint(col):''}"><b>${x[0]}</b>${x[3].length?x[3][0]:(x[1]=='station'?x[2]:'·')}</div>`}).join('');
+  const sum=[...new Set(c.cores.filter(x=>x[3].length).map(x=>x[3].join('+')+'→'+x[2]))].join('; ');
+  return `<div style="margin-top:6px"><span class="b" onclick="goCab('${cid}')" style="cursor:pointer">${cid}</span> <span class="mut">${c.ma_cap||''} ${c.fo}FO → ${c.other}${c.ports?' · ODF '+c.ports+' cổng':''}</span><div class="ports" style="grid-template-columns:repeat(${Math.min(c.fo,12)>6?6:6},1fr)">${chips}</div><div class="mut">${sum}</div></div>`}).join('')}
 function showNode(id){const n=D.nodes[id];const into=D.segments.filter(s=>s.z==id),out=D.segments.filter(s=>s.a==id);
  const row=s=>`<tr onclick="showSeg('${s.id}')" style="cursor:pointer"><td>${s.id}</td><td>${s.a}→${s.z}</td><td>${fmt(s.km_ref)} km</td><td>${pill(s)}</td></tr>`;
- openSheet(`<h3 style="margin:0">${id} <small>${n.type}${n.ring?' · ring '+n.ring:''}${n.role&&n.role!='ring'?' · '+n.role:''}</small></h3><div class="mut">${n.lat.toFixed(5)}, ${n.lon.toFixed(5)} · <a href="https://maps.google.com/?q=${n.lat},${n.lon}" target="_blank">bản đồ</a></div><table>${into.concat(out).map(row).join('')}</table><h4>ODF ${id}</h4>${odfGrid(id.replace('NBE','NBE'))}`)}
+ openSheet(`<h3 style="margin:0">${id} <small>${n.type}${n.ring?' · ring '+n.ring:''}${n.role&&n.role!='ring'?' · '+n.role:''}</small></h3><div class="mut">${n.lat.toFixed(5)}, ${n.lon.toFixed(5)} · <a href="https://maps.google.com/?q=${n.lat},${n.lon}" target="_blank">bản đồ</a></div><table>${into.concat(out).map(row).join('')}</table>${n.type=='AGG'?aggOdfHtml(id):coreChips(id)+'<h4 style="margin:10px 0 2px">ODF ghi chú gốc (file ODF)</h4>'+odfGrid(id)}`)}
 function showMx(c){const rows=D.mxpairs[c.name]||[],cab=D.mxcab[c.name]||[];
  let h=`<h3 style="margin:0">${c.name}</h3><div class="mut">${c.straight?'MX thẳng':'MX phối/rẽ'} · ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}</div><p class="mut">${c.desc}</p>`;
  h+=cab.length?'<div class="b">Đầu cáp</div><table>'+cab.map(x=>`<tr><td>${x[1]}</td><td class="mut">${x[2]} core có nhãn</td></tr>`).join('')+'</table>':'';
@@ -110,8 +121,8 @@ $('#rings').innerHTML=Object.entries(D.rings).map(([rid,r])=>{const ss=r.segs.ma
 // ---- Đoạn
 $('#segT').innerHTML='<tr><th>Mã</th><th>Từ→Đến</th><th>km</th><th>dB</th><th>Ngưỡng</th><th>Dư</th><th></th></tr>'+D.segments.map(s=>`<tr onclick="showSeg('${s.id}')" style="cursor:pointer"><td>${s.id}</td><td>${s.a}→${s.z}</td><td>${fmt(s.km_ref)}</td><td>${fmt(s.db_ref)}</td><td>${s.allow}</td><td>${fmt(s.margin)}</td><td>${pill(s)}</td></tr>`).join('');
 // ---- ODF
-const nodesOdf=[...new Set(D.odf.map(o=>o.node))];$('#odfSel').innerHTML=nodesOdf.map(n=>`<option>${n}</option>`).join('');
-const upO=()=>$('#odfOut').innerHTML=`<b>ODF-${$('#odfSel').value}</b>`+odfGrid($('#odfSel').value);$('#odfSel').onchange=upO;upO();
+const nodesOdf=[...new Set(D.odf.map(o=>o.node))];$('#odfSel').innerHTML='<option value="AGG|NBE12">AGG NBE12 (2 ODF)</option><option value="AGG|NBE22">AGG NBE22 (2 ODF)</option>'+nodesOdf.map(n=>`<option value="${n}">${n}</option>`).join('');
+const upO=()=>{const v=$('#odfSel').value;$('#odfOut').innerHTML=v.startsWith('AGG|')?aggOdfHtml(v.slice(4)):`<b>ODF-${v}</b>`+coreChips(v)+'<h4 style="margin:10px 0 2px">ODF ghi chú gốc (file ODF)</h4>'+odfGrid(v)};$('#odfSel').onchange=upO;upO();
 // ---- OTDR → vị trí
 $('#oSeg').innerHTML=D.segments.map(s=>`<option value="${s.id}">${s.id} ${s.a}→${s.z}</option>`).join('');
 const upF=()=>{const s=segById[$('#oSeg').value];$('#oFrom').innerHTML=`<option value="a">đo từ ${s.a}</option><option value="z">đo từ ${s.z}</option>`};$('#oSeg').onchange=upF;upF();

@@ -39,7 +39,12 @@ for lk in d['paths']:
     links[lk['id']]=dict(frm=lk['frm'],to=lk['to'],total=lk['total_m'],ref=lk['ref_m'],steps=[
       [s['cable'],s['name'],d['phys_cables'][s['cable']]['ma_cap'],s['cores'],s['len_m'],s['frm'],s['to']] for s in lk['steps'] if s['t']=='cable'])
 cprof=[{k:p[k] for k in('id','ma_cap','fo','frm','to','len_m','cs_dau','cs_cuoi','run','hu','lab','lab_stations','free','effect')} for p in d['cable_profiles']]
-data=dict(links=links,cprof=cprof,mxpairs=mxs,mxcab=mxcab,segments=segs,nodes=nodes,rings=rings,odf=odf,closures=[{k:c[k] for k in('name','straight','lat','lon','desc')} for c in d['closures']],
+aggodf=[{k:r[k] for k in('station','odf','cable','port','core','dest','note','kind','end','links')} for r in d['agg_odf']]
+stn={}
+for r in d['station_cores']:
+    c=stn.setdefault(r['station'],{}).setdefault(r['cable'],dict(name=r['name'],ma_cap=r['ma_cap'],fo=r['fo'],other=r['other_end'],ports=r['odf_ports'],cores=[]))
+    c['cores'].append([r['core'],r['kind'],r['dest'],r['links'],r['text'],r['port_note']])
+data=dict(aggodf=aggodf,stn=stn,links=links,cprof=cprof,mxpairs=mxs,mxcab=mxcab,segments=segs,nodes=nodes,rings=rings,odf=odf,closures=[{k:c[k] for k in('name','straight','lat','lon','desc')} for c in d['closures']],
           issues=[list(i) for i in d['issues']],fix=[
  ['CSG mất một hướng','Đứt/hỏng một đoạn kề','OTDR từ đầu trạm, đổi sang vị trí (tab OTDR → vị trí); báo thi công; theo dõi hướng còn lại'],
  ['CSG mất cả hai hướng','Hai đoạn cùng ring đứt cùng lúc hoặc trạm nhánh cụt','Dùng nút Giả lập sự cố để xác định; ưu tiên khôi phục đoạn có CSG cô lập'],

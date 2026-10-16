@@ -56,7 +56,7 @@ def hav(a,b):
     h=math.sin((la2-la1)/2)**2+math.cos(la1)*math.cos(la2)*math.sin((lo2-lo1)/2)**2
     return 2*R*math.asin(math.sqrt(h))
 
-def splice_pairs(ends):
+def splice_pairs(ends,with_flag=False):
     """Quy ước nhãn hàn (người dùng): cùng nhãn = cùng nhóm hàn; trong một nhãn, sợi nhỏ hàn sợi nhỏ.
     ends: {tên_đầu_cáp: ['A','A','B',...]} (nhãn của sợi 1..n; '' = không hàn).
     Trả (cặp, cảnh_báo): cặp = [(nhãn, đầu1, sợi1, đầu2, sợi2)]."""
@@ -68,7 +68,8 @@ def splice_pairs(ends):
         if len(names)>2:warn.append(f'nhãn {lab}: có ở {len(names)} đầu cáp, cần chỉ định cặp');continue
         a,b=names
         if len(pos[a])!=len(pos[b]):warn.append(f'nhãn {lab}: số sợi khác nhau ({a}:{len(pos[a])} vs {b}:{len(pos[b])})')
-        pairs+= [(lab,a,x,b,y) for x,y in zip(pos[a],pos[b])]
+        bal=len(pos[a])==len(pos[b])
+        pairs+= [((lab,a,x,b,y,bal) if with_flag else (lab,a,x,b,y)) for x,y in zip(pos[a],pos[b])]
     return pairs,warn
 
 def build():
@@ -146,10 +147,10 @@ def build():
             rows=[r for r in mxo if r['cap_id']==i];n=max(int(r['core']) for r in rows);ends[i]=['']*n
             for r in rows:ends[i][int(r['core'])-1]=r['nhan']
             info[i]={int(r['core']):r for r in rows}
-        pr,wr=splice_pairs(ends)
-        for lab,a,x,b,y in pr:
+        pr,wr=splice_pairs(ends,True)
+        for lab,a,x,b,y,bal in pr:
             ra,rb=info[a][x],info[b][y]
-            pairs.append(dict(mx=mx,label=lab,a=a,core_a=x,color_a=ra['mau_soi'],tube_a=ra['ong'],b=b,core_b=y,color_b=rb['mau_soi'],tube_b=rb['ong'],station=ra['tram'] or rb['tram']))
+            pairs.append(dict(mx=mx,label=lab,a=a,core_a=x,color_a=ra['mau_soi'],tube_a=ra['ong'],b=b,core_b=y,color_b=rb['mau_soi'],tube_b=rb['ong'],station=ra['tram'] or rb['tram'],balanced=bal))
         mxwarn+=[(mx,w) for w in wr]
         for i in ids:
             if not any(ends[i]):mxwarn.append((mx,f"{cab[i]['o_goc']}: chưa ghi nhãn core (chưa có dữ liệu phối)"))
@@ -159,6 +160,8 @@ def build():
     d['paths']=load_paths(d)
     d['ledger'],d['ledger_conflicts']=core_ledger(d)
     d['cable_profiles']=cable_profiles(d)
+    d['station_cores']=station_core_table(d)
+    d['agg_odf']=agg_odf_table(d)
     return d
 
 def simulate_cut(d,seg_ids):
@@ -249,12 +252,32 @@ def load_paths(d):
     cables={c['id']:c for c in json.load(open(os.path.join(DATA,'cables.json'),encoding='utf-8'))}
     omap=json.load(open(os.path.join(DATA,'odf_core_map.json'),encoding='utf-8'))
     d['odf_core_map']=omap
+    ov_path=os.path.join(DATA,'overrides.json')
+    ov=json.load(open(ov_path,encoding='utf-8')) if os.path.exists(ov_path) else {}
+    d['overrides']=ov
+    ov_pairs=[]
+    grp={}
+    for r_ in ov.get('mx_labels',[]):
+        if r_.get('nhan'):grp.setdefault((r_['mx'],r_['nhan']),[]).append(r_)
+    for (mx_,lab_),rs_ in grp.items():
+        bycab={}
+        for r_ in rs_:bycab.setdefault(r_['cable'],[]).append(r_)
+        if len(bycab)!=2:continue
+        (ca_,la_),(cb_,lb_)=sorted(bycab.items())
+        la_=sorted(la_,key=lambda x:x['core']);lb_=sorted(lb_,key=lambda x:x['core'])
+        for x_,y_ in zip(la_,lb_):
+            ov_pairs.append(dict(mx=mx_,label=lab_,a='CAB:'+ca_,core_a=x_['core'],b='CAB:'+cb_,core_b=y_['core'],station=x_.get('tram') or y_.get('tram') or '',source='nhập tay'))
+    d['ov_pairs']=ov_pairs
     so=_csv('cap_tong_hop.csv')
     for c in cables.values():
         r=so[c['so_row']-2] if c.get('so_row') else None
         c['ma_cap']=(r['ma_cap'].strip() if r else '') or ''
         c['cs_dau']=r['cs_dau'] if r else '';c['cs_cuoi']=r['cs_cuoi'] if r else '';c['so_ghi_chu']=r['ghi_chu'] if r else ''
         c['so_dau_cuoi']=f"{r['dau']} → {r['cuoi']}" if r else ''
+    for cid_,o in ov.get('cables',{}).items():
+        if cid_ in cables:
+            for k_,v_ in o.items():
+                if v_ not in (None,''):cables[cid_][k_]=v_
     d['phys_cables']=cables
     out=[]
     for f in sorted(os.listdir(os.path.join(DATA,'paths'))):
@@ -267,8 +290,11 @@ def load_paths(d):
                 if st['t']=='cable':
                     c=cables[st['cable']];tot+=c['len_m'];r.update(name=c['name'],fo=c['fo'],frm=c['frm'],to=c['to'],len_m=c['len_m'],src=c['src'],cum=tot)
                 if st['t']=='mx':
-                    ea=cables[st['a_cable']]['ends'].get(st['at']);eb=cables[st['b_cable']]['ends'].get(st['at'])
+                    ea=cables[st['a_cable']]['ends'].get(st['at']) or 'CAB:'+st['a_cable'];eb=cables[st['b_cable']]['ends'].get(st['at']) or 'CAB:'+st['b_cable']
                     r['check'],r['check_detail']=check_splice(d['mx_pairs'],ea,st['cores_a'],eb,st['cores_b'],st.get('subst'),st.get('nominal_b'))
+                    if r['check'].startswith('chưa') and d['ov_pairs']:
+                        c2,t2=check_splice(d['ov_pairs'],'CAB:'+st['a_cable'],st['cores_a'],'CAB:'+st['b_cable'],st['cores_b'],st.get('subst'),st.get('nominal_b'))
+                        if not c2.startswith('chưa'):r['check'],r['check_detail']=c2+' (nhãn nhập tay)',t2
                 if st['t']=='odf' and st.get('odf_ref'):
                     inv={v:int(k) for k,v in omap[st['odf_ref']].items()}
                     r['ports']=[inv.get(c,c) for c in st['cores']]
@@ -312,6 +338,120 @@ def agg_check(d):
     for cid,p,core,csg,dest in linkport:
         hit=[v for (c,cs_,g),v in used.items() if c==cid and g==csg and core in cs_]
         out.append((cid,p,core,csg,dest,hit[0] if hit else None))
+    return out
+
+# MX thẳng: số mối hàn theo sổ "Sheet2" (thiết kế + phát sinh). Giả định: core i hàn thẳng core i (i ≤ số mối hàn). Phần suy ra tên MX là phỏng đoán.
+STRAIGHT={'MX nhập đài Long Thới–NVT':12,'MX thẳng 66-16':6,'MX thẳng 62-21':8,'MX thẳng 13-21':8,'MX thẳng 11-56':6,
+ 'MX thẳng Phạm Hùng':8,'MX cầu NVL 1':8,'MX cầu NVL 2':8,'MX thẳng đi LVL':12,'MX thẳng LVL-05/DST':12,'MX thẳng LVL-01/075':8,
+ 'MX thẳng HTP':12,'MX băng sông 1':6,'MX băng sông 2':4}
+
+def station_of(name):
+    n=name.upper()
+    if n.startswith('HNB'):return re.match(r'HNB\d+',n).group(0)
+    if 'NBE22' in n:return 'NBE22'
+    if 'NBE12' in n or 'VNPT LONG THỚI' in n.replace('Ớ','Ớ'):return 'NBE12'
+    return None
+
+def core_graph(d):
+    """Đồ thị core: (cáp, core, MX) -> [(cáp kế, core kế, nguồn, link)]. Nguồn: mô tả > MX thẳng (số mối hàn) > nhập tay > sơ đồ MX."""
+    cables=d['phys_cables'];E={}
+    def add(c1,k1,c2,k2,mx,src,link=''):
+        for a_,ka,b_,kb in ((c1,k1,c2,k2),(c2,k2,c1,k1)):
+            lst=E.setdefault((a_,ka,mx),[])
+            if not any(x[0]==b_ and x[1]==kb for x in lst):lst.append((b_,kb,src,link))
+    for lk in d['paths']:
+        for st in lk['steps']:
+            if st['t']=='mx':
+                for x,y in zip(st['cores_a'],st['cores_b']):add(st['a_cable'],x,st['b_cable'],y,st['at'],'mô tả',lk['id'])
+    for mx_,n in STRAIGHT.items():
+        cs=[c for c in cables.values() if mx_ in (c['frm'],c['to'])]
+        if len(cs)==2:
+            a,b=cs
+            for i in range(1,min(n,a['fo'],b['fo'])+1):add(a['id'],i,b['id'],i,mx_,'MX thẳng (số mối hàn)')
+    cap2={}
+    for c in cables.values():
+        for mx_,cap in c['ends'].items():cap2[cap]=(c['id'],mx_)
+    for p in d['mx_pairs']:
+        if p.get('balanced',True) and p['a'] in cap2 and p['b'] in cap2:
+            (ca,ma),(cb_,mb)=cap2[p['a']],cap2[p['b']]
+            if ma==mb:add(ca,p['core_a'],cb_,p['core_b'],ma,'sơ đồ MX')
+    for p in d['ov_pairs']:add(p['a'][4:],p['core_a'],p['b'][4:],p['core_b'],p['mx'],'nhập tay')
+    return E
+
+def trace_core(d,E,cable,core,from_node):
+    """Đi từ đầu from_node của cáp theo core: trả (loại, trạm/MX cuối, danh sách bước, nguồn, link)."""
+    cables=d['phys_cables'];hops=[];srcs=[];links=set();cur,cc,frm=cable,core,from_node
+    for _ in range(60):
+        c=cables[cur];far=c['to'] if c['frm']==frm else c['frm']
+        hops.append((cur,cc,far));st=station_of(far)
+        if st:return ('station',st,far,hops,srcs,sorted(links))
+        nxt=E.get((cur,cc,far))
+        if not nxt:return ('dead',far,far,hops,srcs,sorted(links))
+        n=nxt[0]
+        srcs.append(n[2])
+        if n[3]:links.add(n[3])
+        cur,cc,frm=n[0],n[1],far
+    return ('dead','vòng lặp','',hops,srcs,sorted(links))
+
+def odf_ports(d):
+    """Số cổng ODF CSG theo từng hướng (từ file ODF): {trạm: {đích: số cổng}}."""
+    out={}
+    for r in d['odf']:
+        dest=r['dest'].replace('AGG-','')
+        if dest:out.setdefault(r['node'],{}).setdefault(dest,0);out[r['node']][dest]+=1
+    return out
+
+def station_core_table(d):
+    """Mỗi cáp kết thúc tại trạm: từng core đi đến đâu (hàn thông / chưa ghi hàn / hư), phụ thuộc măng xông và sợi nối trực tiếp."""
+    E=core_graph(d);cables=d['phys_cables'];led={(r['cable'],r['core']):r for r in d['ledger']};rows=[];op=odf_ports(d)
+    use={}
+    for lk in d['paths']:
+        for s_ in lk['steps']:
+            if s_['t']=='cable':use.setdefault(s_['cable'],set()).add(lk['id'])
+    for cid,c in cables.items():
+        for end,other in (('frm','to'),('to','frm')):
+            node=c[end];st=station_of(node)
+            if not st:continue
+            neigh=set()
+            for lid in use.get(cid,[]):
+                lk_=next(x for x in d['paths'] if x['id']==lid);o_=lk_['to'] if lk_['frm']==st or station_of(lk_['frm'])==st else lk_['frm']
+                if o_!=st:neigh.add(o_.replace('NBE12','NBE12'))
+            ports=None
+            if st in op:
+                tot=[op[st].get(n_) for n_ in neigh if op[st].get(n_)]
+                ports=sum(tot) if tot else None
+            for core in range(1,c['fo']+1):
+                lr=led[(cid,core)]
+                if lr['status']=='HƯ':kind,dest,via,srcs,links='hư','','',[],[]
+                else:
+                    res=trace_core(d,E,cid,core,node)
+                    kind,dest,via,srcs,links=res[0],(res[1] if res[0]=='station' else ''),'→'.join(h[2] for h in res[3]),res[4],res[5]
+                    if res[0]=='dead':via=res[1]
+                port_note=''
+                if ports is not None and core>ports:port_note=f'không có cổng ODF (ODF chỉ có {ports} cổng hướng này)'
+                if kind=='hư':text='HƯ'
+                elif kind=='station':
+                    if links:text='đang chạy link '+', '.join(links)+' → '+dest
+                    elif srcs and set(srcs)=={'MX thẳng (số mối hàn)'}:text='hàn thông (MX thẳng, theo số mối hàn) → '+dest
+                    elif not srcs:text='sợi nối trực tiếp → '+dest+' (chưa rõ đã hàn pigtail ở ODF hai đầu)'
+                    else:text='hàn thông theo nhãn sơ đồ → '+dest+' (chưa gán link)'
+                else:text='chưa ghi hàn tại '+via+' (dự phòng / chưa rõ / không hàn)'
+                rows.append(dict(text=text,port_note=port_note,odf_ports=ports,station=st,node=node,cable=cid,name=c['name'],ma_cap=c['ma_cap'],fo=c['fo'],other_end=c[other],core=core,kind=kind,dest=dest,via=via,srcs=sorted(set(srcs)),links=links,status=lr['status']))
+    return rows
+
+def agg_odf_table(d):
+    """4 ODF ở hai AGG: cổng, core cáp, đích ghi trên ODF, kết quả truy vết theo đồ thị."""
+    E=core_graph(d);omap={int(k):v for k,v in d['odf_core_map']['ODF-01 NBE12'].items()}
+    spec=[('NBE12','ODF-01 (hướng NB)','C22','phai','ODF-01'),('NBE12','ODF-02 (hướng NVT)','C01','phai','ODF-02'),('NBE22','ODF-01 (cs 1816)','C35','trai','ODF-01'),('NBE22','ODF-02 (cs 1288)','C17','trai','ODF-02')]
+    other,_=agg_odf_use(d);out=[]
+    for st,name,cid,side,pre in spec:
+        c=d['phys_cables'][cid];node=c['frm'] if station_of(c['frm'])==st else c['to']
+        for r in d['odf_agg']:
+            if r['phia']!=side or not r['odf'].startswith(pre):continue
+            p=int(r['cong']);core=omap.get(p,p) if cid=='C22' else p
+            res=trace_core(d,E,cid,core,node)
+            dest=(r['dich'] or '').strip();note=(r['ghi_chu'] or '').strip()
+            out.append(dict(station=st,odf=name,cable=cid,port=p,core=core,dest=dest,note=note,kind=res[0],end=res[1],links=res[5],srcs=sorted(set(res[4]))))
     return out
 
 def core_ledger(d):
