@@ -183,3 +183,9 @@ Suy luận chủ yếu từ **tên trạm ghi sát nhãn trong sơ đồ MX** (c
 - Giả định cần xác nhận: (1) tên MX thẳng trong sổ MX thiết kế ↔ MX thẳng trong mô hình (14 MX, xem `model.STRAIGHT`); (2) cổng ODF CSG i ↔ core i; (3) sợi nối trực tiếp giữa hai trạm: chưa rõ đã hàn pigtail ở ODF hai đầu.
 - **ODF hai AGG**: 4 ODF (NBE12: ODF-01 hướng NB, ODF-02 hướng NVT; NBE22: ODF-01 cs 1816, ODF-02 cs 1288) hiển thị đủ 24 cổng trong HTML (bấm nút AGG hoặc tab ODF) và sheet `ODF AGG thực tế`, kèm hàng số core cáp của ODF-01 NBE12.
 - **Nhập liệu**: sheet `Nhập mã cáp`, `Nhập nhãn MX`; `import_inputs.py` đọc lại vào `data/overrides.json`; nhãn nhập tay được dùng để kiểm tra mối hàn và truy vết. Đã chạy thử vòng nhập → dựng lại (mã cáp xuất hiện ở Hồ sơ cáp; 20 dòng nhãn của MX_NVT_01 biến 5 mối hàn thành "khớp sơ đồ (nhãn nhập tay)").
+
+## 20. Liên kết Excel ↔ HTML và giao diện măng xông
+- Nguồn chính của phần sửa được là 4 sheet `DL_Cáp`, `DL_Link`, `DL_Bước`, `DL_Nhãn MX` (thay cho `Nhập mã cáp`/`Nhập nhãn MX`). HTML đọc/ghi các sheet này trực tiếp trong file .xlsx (ghi tại chỗ, giữ nguyên phần còn lại).
+- Động cơ tính được cài trong HTML (`engine.js`), kiểm tra khớp Python trên 37 link, 76 cáp, 488 dòng core–trạm, 4 ODF AGG. Vòng Excel → `import_inputs.py` → dựng lại cho kết quả giống hệt.
+- Tab **Măng xông**: danh sách tìm kiếm (59 tên gồm sơ đồ, KML, đường đi, MX thẳng); chi tiết từng MX: các cáp với dải core (màu sợi, nhãn, trạm, core đang chạy, hư), hình nối core giữa hai cáp, bảng phối core theo nguồn (sơ đồ / nhập tay / mô tả đường đi / MX thẳng), link đi qua và kết quả đối chiếu, sửa nhãn từng core, đề xuất nhãn từ đường đi.
+- Giới hạn: sửa đường đi link (DL_Link/DL_Bước) hiện làm trong Excel rồi bấm “Mở Excel” lại; các sheet tính toán khác của Excel cần dựng lại bằng Python.

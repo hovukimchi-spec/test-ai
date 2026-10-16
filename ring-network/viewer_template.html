@@ -23,13 +23,26 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{border-bottom:1
 .port b{display:block;color:var(--mut);font-size:10px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
 .pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid var(--line)}
 small,.mut{color:var(--mut)}@media(min-width:900px){main{max-width:1100px;margin:auto}}
+
+header .tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}#src{font-size:12px;color:var(--mut);padding:2px 12px 6px;background:var(--card);border-bottom:1px solid var(--line)}
+#src .dirty{color:var(--warn);font-weight:700}
+.mxl{max-height:30vh;overflow:auto;margin-bottom:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.mxi{border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer;background:var(--card)}.mxi.sel{outline:2px solid var(--acc)}
+.mxi .t{font-weight:600;font-size:13px}.tag{display:inline-block;font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:0 6px;margin:1px 2px 0 0;color:var(--mut)}
+.cs{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.cc{width:54px;border:1px solid var(--line);border-radius:8px;padding:2px 2px 3px;text-align:center;font-size:11px;line-height:1.15;cursor:pointer;background:var(--card);position:relative}
+.cc .n{display:flex;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:10px}.cc .n i{width:9px;height:9px;border-radius:50%;border:1px solid #0005;display:inline-block}
+.cc .l{font-weight:700;font-size:13px;min-height:16px}.cc .s{font-size:9.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cc.ov{box-shadow:inset 0 0 0 2px var(--acc)}.cc.hu{background:color-mix(in srgb,var(--bad) 25%,transparent)}.cc.run{border-color:var(--ok)}
+.cc.sel{outline:2px solid var(--warn)}
+.fld{display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;margin:4px 0}.fld input[type=text],.fld input[type=number]{width:100%}
+.mxsvg text{font:10px system-ui}
 </style></head><body>
-<header><h1>Ring CSG Nhà Bè <small id="sub"></small></h1><button id="theme" aria-label="sáng/tối">◐</button></header>
+<header><h1>Ring CSG Nhà Bè <small id="sub"></small></h1><div class="tools"><button id="bOpen">📂 Mở Excel</button><button id="bSave">💾 Lưu Excel</button><button id="theme" aria-label="sáng/tối">◐</button></div><input type="file" id="fIn" accept=".xlsx" style="display:none"></header>
+<div id="src"></div>
 <nav id="tabs"></nav>
 <main>
 <section class="pane on" id="p-map"><div class="row"><button id="simBtn">⚡ Giả lập sự cố</button><span class="mut" id="simHint">Bấm đoạn/nút để xem chi tiết.</span></div>
 <svg id="map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg><div class="leg" id="leg"></div>
 <div class="card" id="simOut" style="display:none"></div></section>
+<section class="pane" id="p-mx"><div class="row"><input id="mxQ" type="search" placeholder="Tìm măng xông (tên, trạm, cáp)…" style="flex:1;min-width:160px"><label class="mut"><input type="checkbox" id="mxOnlyL"> chỉ MX có nhãn/ghi chú thiếu</label></div><div class="mxl" id="mxList"></div><div id="mxDetail"></div></section>
 <section class="pane" id="p-ring"><div id="rings"></div></section>
 <section class="pane" id="p-seg"><div class="card" style="overflow:auto"><table id="segT"></table></div></section>
 <section class="pane" id="p-odf"><div class="row"><select id="odfSel"></select></div><div class="card" id="odfOut"></div></section>
@@ -38,7 +51,20 @@ small,.mut{color:var(--mut)}@media(min-width:900px){main{max-width:1100px;margin
 <section class="pane" id="p-fix"><div id="fixOut"></div></section>
 </main><div id="sheet"><button class="x" onclick="closeSheet()">✕</button><div id="sheetBody"></div></div>
 <script>
-const D=__DATA__;
+__ENGINE__
+__XLSX__
+const RAW=__RAW__;
+let E=null;
+const D={};
+(function(){const S=RAW.static;D.segments=S.segments.map(s=>Object.assign({},s,{status:s.db_ref==null?'Chưa đo':(s.ok_loss&&s.ok_core?'Đạt':'Cảnh báo')}));
+ D.nodes={};S.nodes.forEach(n=>D.nodes[n.id]=n);D.rings={};Object.entries(S.rings).forEach(([k,v])=>D.rings[k]=v);D.odf=S.odf;D.closures=S.closures.map(c=>Object.assign({},c));D.issues=S.issues;D.fix=S.fix;})();
+function derive(){
+ E=RingEngine.compute(RAW);
+ D.aggodf=E.aggOdf.map(r=>({station:r.station,odf:r.odf,cable:r.cable,port:r.port,core:r.core,dest:r.dest,note:r.note,kind:r.kind,end:r.end,links:r.links}));
+ D.stn={};E.stationCores.forEach(r=>{const c=D.stn[r.station]=D.stn[r.station]||{};const x=c[r.cable]=c[r.cable]||{name:r.name,ma_cap:r.ma_cap,fo:r.fo,other:r.other_end,ports:r.odf_ports,cores:[]};x.cores.push([r.core,r.kind,r.dest,r.links,r.text,r.port_note])});
+ D.links={};E.paths.forEach(p=>D.links[p.id]={frm:p.frm,to:p.to,total:p.total_m,ref:p.ref_m,steps:p.steps.filter(s=>s.t=='cable').map(s=>[s.cable,s.name,(E.cables[s.cable]||{}).ma_cap||'',s.cores,s.len_m,s.frm,s.to])});
+ D.cprof=E.profiles}
+derive();
 const $=s=>document.querySelector(s),el=(t,a={},h='')=>{const e=document.createElementNS(a.ns||null,t);for(const k in a)if(k!='ns')e.setAttribute(k,a[k]);e.innerHTML=h;return e};
 const RC={R1:'#3d85c6',R2:'#e06666',R3:'#6aa84f',R4:'#8e7cc3',R5:'#f6a623',R6:'#17a2a2',R7:'#a0653f',R8:'#e56aa8'};
 const NS='http://www.w3.org/2000/svg';
@@ -64,7 +90,7 @@ function draw(){map.innerHTML='';const g=el('g',{ns:NS});map.appendChild(g);
  D.segments.forEach(s=>{const pts=s.pm.map(p=>T(p).map(v=>v.toFixed(1)).join(',')).join(' ');
   const pl=el('polyline',{ns:NS,points:pts,class:'seg'+(cut.has(s.id)?' cut':''),stroke:RC[s.ring]});if(s.kind!='ring')pl.style.strokeDasharray='2 3';
   const hit=el('polyline',{ns:NS,points:pts,class:'hit'});hit.onclick=()=>sim?toggleCut(s.id):showSeg(s.id);g.appendChild(pl);g.appendChild(hit)});
- D.closures.forEach(c=>{const [x,y]=T(c.pm);const t=el('path',{ns:NS,d:`M${x},${y-4}l3.5,6.5h-7z`,fill:'#f6a623',stroke:'#8a5a00','stroke-width':.5});t.style.cursor='pointer';t.onclick=()=>showMx(c);g.appendChild(t)});
+ D.closures.forEach(c=>{const [x,y]=T(c.pm);const t=el('path',{ns:NS,d:`M${x},${y-4}l3.5,6.5h-7z`,fill:'#f6a623',stroke:'#8a5a00','stroke-width':.5});t.style.cursor='pointer';t.onclick=()=>goMx(c.name);g.appendChild(t)});
  Object.values(D.nodes).forEach(n=>{const [x,y]=T(n.pm);const agg=n.type=='AGG';let col='var(--card)';const dead=n.role&&n.role.includes('huỷ');
   if(sim&&!agg&&!dead){const r=res[n.id]||[1,1];const c=(r[0]?1:0)+(r[1]?1:0);col=c==0?'var(--bad)':c==1?'var(--warn)':'var(--ok)'}
   const sh=agg?el('rect',{ns:NS,x:x-6,y:y-6,width:12,height:12,fill:'#000'}):el('circle',{ns:NS,cx:x,cy:y,r:5,fill:col,stroke:'#222','stroke-width':1.3});
@@ -81,7 +107,8 @@ function showSeg(id){const s=segById[id];openSheet(`<h3 style="margin:0 0 6px">$
  <table><tr><th>km HĐ</th><th>km OTDR</th><th>km KML</th><th>km tính</th></tr><tr><td>${fmt(s.km_hd,3)}</td><td>${fmt(s.km_otdr,3)}</td><td>${fmt(s.km_kml,3)}</td><td class="b">${fmt(s.km_ref,3)}</td></tr></table>
  <table><tr><th>dB core 1</th><th>dB core 2</th><th>Ngưỡng</th><th>Dư</th><th>Chênh core</th></tr><tr><td>${fmt(s.db1)}</td><td>${fmt(s.db2)}</td><td>${s.allow}</td><td class="b">${fmt(s.margin)}</td><td>${fmt(s.delta)}</td></tr></table>
  ${D.links[s.id]?'<div class="b" style="margin-top:8px">Cáp trên đường đi ('+D.links[s.id].total+' m)</div><table>'+D.links[s.id].steps.map(x=>`<tr onclick="goCab('${x[0]}')" style="cursor:pointer"><td>${x[0]}</td><td>${x[2]||x[1]}</td><td>core ${x[3].join('+')}</td><td>${x[4]} m</td></tr>`).join('')+'</table>':''}<div class="mut">Mã BBNT ${s.bbnt??'—'} · ngưỡng theo chiều dài đoạn (${s.km_ref<10?'<10 km':s.km_ref<=40?'10–40 km':'>40 km'}).</div>${issuesFor(s.id)}`)}
-function goCab(id){document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-cab'));[...$('#tabs').children].forEach((x,i)=>x.classList.toggle('on',tabs[i][0]=='cab'));$('#cabSel').value=id;$('#cabOut').innerHTML=cabCard(id);closeSheet()}
+function goTab(id){document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-'+id));[...$('#tabs').children].forEach((x,i)=>x.classList.toggle('on',tabs[i][0]==id));closeSheet();scrollTo(0,0)}
+function goCab(id){goTab('cab');$('#cabSel').value=id;upC()}
 function issuesFor(id){const L=D.issues.filter(i=>i[0]==id);return L.length?'<div class="card warn">'+L.map(i=>`<div>⚠ ${i[1]}: ${i[2]}</div>`).join('')+'</div>':''}
 function odfGrid(node){const ps=D.odf.filter(o=>o.node==node);if(!ps.length)return '<div class="mut">Chưa có dữ liệu ODF cho trạm này.</div>';
  const cols=Object.keys(RC);let h='<div class="ports">';ps.forEach(p=>{h+=`<div class="port" style="${p.dest?'background:color-mix(in srgb,'+destCol(p.dest)+' 25%,transparent)':''}"><b>${p.port}</b>${(p.dest||'').replace('AGG-','')}</div>`});
@@ -102,13 +129,13 @@ function coreChips(st){const S=D.stn[st];if(!S)return '';
 function showNode(id){const n=D.nodes[id];const into=D.segments.filter(s=>s.z==id),out=D.segments.filter(s=>s.a==id);
  const row=s=>`<tr onclick="showSeg('${s.id}')" style="cursor:pointer"><td>${s.id}</td><td>${s.a}→${s.z}</td><td>${fmt(s.km_ref)} km</td><td>${pill(s)}</td></tr>`;
  openSheet(`<h3 style="margin:0">${id} <small>${n.type}${n.ring?' · ring '+n.ring:''}${n.role&&n.role!='ring'?' · '+n.role:''}</small></h3><div class="mut">${n.lat.toFixed(5)}, ${n.lon.toFixed(5)} · <a href="https://maps.google.com/?q=${n.lat},${n.lon}" target="_blank">bản đồ</a></div><table>${into.concat(out).map(row).join('')}</table>${n.type=='AGG'?aggOdfHtml(id):coreChips(id)+'<h4 style="margin:10px 0 2px">ODF ghi chú gốc (file ODF)</h4>'+odfGrid(id)}`)}
-function showMx(c){const rows=D.mxpairs[c.name]||[],cab=D.mxcab[c.name]||[];
+function showMxOld(c){const rows=D.mxpairs[c.name]||[],cab=D.mxcab[c.name]||[];
  let h=`<h3 style="margin:0">${c.name}</h3><div class="mut">${c.straight?'MX thẳng':'MX phối/rẽ'} · ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}</div><p class="mut">${c.desc}</p>`;
  h+=cab.length?'<div class="b">Đầu cáp</div><table>'+cab.map(x=>`<tr><td>${x[1]}</td><td class="mut">${x[2]} core có nhãn</td></tr>`).join('')+'</table>':'';
  h+=rows.length?'<div class="b" style="margin-top:8px">Phối core (cùng nhãn hàn với nhau)</div><table><tr><th>Nhãn</th><th>Cáp A / core</th><th>Cáp B / core</th><th>Trạm</th></tr>'+rows.map(r=>`<tr><td class="b">${r[0]}</td><td>${r[1]}<br><b>core ${r[2]}</b></td><td>${r[3]}<br><b>core ${r[4]}</b></td><td>${r[5]}</td></tr>`).join('')+'</table>':'<div class="mut">Chưa có nhãn phối core cho măng xông này trong sơ đồ gốc.</div>';
  openSheet(h)}
 // ---- tabs
-const tabs=[['map','Bản đồ'],['ring','Ring'],['seg','Đoạn'],['odf','ODF'],['cab','Cáp'],['otdr','OTDR → vị trí'],['fix','Khắc phục']];
+const tabs=[['map','Bản đồ'],['mx','Măng xông'],['ring','Ring'],['seg','Đoạn'],['odf','ODF'],['cab','Cáp'],['otdr','OTDR → vị trí'],['fix','Khắc phục']];
 tabs.forEach(([id,t],i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id=='p-'+id));[...$('#tabs').children].forEach(x=>x.classList.toggle('on',x==b));closeSheet()};if(!i)b.classList.add('on');$('#tabs').appendChild(b)});
 $('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme=='dark'?'':'dark';try{localStorage.setItem('th',r.dataset.theme)}catch(e){}};try{if(localStorage.getItem('th')=='dark')document.documentElement.dataset.theme='dark'}catch(e){}
 $('#leg').innerHTML=Object.entries(RC).map(([r,c])=>`<span><i style="background:${c}"></i>${r}</span>`).join('')+'<span>■ AGG</span><span>○ CSG</span><span style="color:#f6a623">▲ MX</span>';
@@ -138,11 +165,12 @@ $('#oGo').onclick=()=>{const s=segById[$('#oSeg').value],m=+$('#oM').value,from=
  h+=`<div class="b">Điểm nghi đứt: ${(f*100).toFixed(0)}% chiều dài đoạn ${s.id} tính từ ${from=='a'?s.a:s.z}</div><div>Vị trí ước tính (phân bổ dự trữ đều): <a href="https://maps.google.com/?q=${lat.toFixed(6)},${lon.toFixed(6)}" target="_blank">${lat.toFixed(5)}, ${lon.toFixed(5)}</a></div>`;
  h+=`<div class="mut">Trước điểm: ${before?before.c.name+' (~'+Math.round((pos-before.al)/(L||1)*tot)+' m cáp)':'—'}<br>Sau điểm: ${after?after.c.name+' (~'+Math.round((after.al-pos)/(L||1)*tot)+' m cáp)':'—'}</div><div class="mut">Chỉ ước tính theo hình KML ± dự trữ cáp; cần chỉ số mét hai đầu từng cáp để chính xác. ${s.rerouted?'<span class="warn">Đoạn đã đổi tuyến: KML có thể không còn đúng.</span>':''}</div>`;$('#oOut').innerHTML=h};
 // ---- Hồ sơ cáp
-$('#cabSel').innerHTML=D.cprof.map(c=>`<option value="${c.id}">${c.id} · ${c.ma_cap} · ${c.frm} → ${c.to}</option>`).join('');
+function fillCab(){const v=$('#cabSel').value;$('#cabSel').innerHTML=D.cprof.map(c=>`<option value="${c.id}">${c.id} · ${c.ma_cap||'(chưa mã)'} · ${c.frm} → ${c.to}</option>`).join('');if(v)$('#cabSel').value=v}fillCab();
 function cabCard(id){const c=D.cprof.find(x=>x.id==id);return `<h3 style="margin:0">${c.id} · ${c.ma_cap} · ${c.fo}FO</h3><div class="mut">${c.frm} → ${c.to} · ${c.len_m} m · cs ${c.cs_dau||'—'} → ${c.cs_cuoi||'—'}</div>
- <table><tr><td class="b">Core đang chạy</td><td>${c.run}</td></tr><tr><td class="b bad">Core hư</td><td>${c.hu}</td></tr><tr><td class="b">Có nhãn, chưa gán</td><td>${c.lab}<br><span class="mut">${c.lab_stations}</span></td></tr><tr><td class="b ok">Core trống</td><td>${c.free}</td></tr><tr><td class="b">Khi đứt cáp</td><td class="${c.effect.startsWith('MẤT')?'bad':''}">${c.effect}</td></tr></table>`}
+ <table><tr><td class="b">Core đang chạy</td><td>${c.run}</td></tr><tr><td class="b bad">Core hư</td><td>${c.hu}</td></tr><tr><td class="b">Có nhãn, chưa gán</td><td>${c.lab}<br><span class="mut">${c.lab_stations}</span></td></tr><tr><td class="b ok">Core trống</td><td>${c.free}</td></tr><tr><td class="b">Khi đứt cáp</td><td class="${c.effect.startsWith('MẤT')?'bad':''}">${c.effect}</td></tr></table>${cabEdit(c)}`}
 const upC=()=>$('#cabOut').innerHTML=cabCard($('#cabSel').value);$('#cabSel').onchange=upC;upC();
 // ---- Khắc phục
 $('#fixOut').innerHTML='<div class="card"><table><tr><th>Triệu chứng</th><th>Xử lý</th></tr>'+D.fix.map(f=>`<tr><td>${f[0]}</td><td>${f[2]}</td></tr>`).join('')+'</table></div><div class="card"><div class="b">Cần xác nhận dữ liệu</div>'+D.issues.map(i=>`<div class="mut">• ${i[0]} — ${i[1]}: ${i[2]}</div>`).join('')+'</div>';
+__APP__
 draw();
 </script></body></html>
