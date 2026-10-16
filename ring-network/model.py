@@ -271,8 +271,8 @@ def load_paths(d):
     so=_csv('cap_tong_hop.csv')
     for c in cables.values():
         r=so[c['so_row']-2] if c.get('so_row') else None
-        c['ma_cap']=(r['ma_cap'].strip() if r else '') or ''
-        c['cs_dau']=r['cs_dau'] if r else '';c['cs_cuoi']=r['cs_cuoi'] if r else '';c['so_ghi_chu']=r['ghi_chu'] if r else ''
+        c['ma_cap']=(c.get('ma_cap') or '') or ((r['ma_cap'].strip() if r else '') or '')
+        c['cs_dau']=str(c.get('cs_dau') or '') or (r['cs_dau'] if r else '');c['cs_cuoi']=str(c.get('cs_cuoi') or '') or (r['cs_cuoi'] if r else '');c['so_ghi_chu']=r['ghi_chu'] if r else ''
         c['so_dau_cuoi']=f"{r['dau']} → {r['cuoi']}" if r else ''
     for cid_,o in ov.get('cables',{}).items():
         if cid_ in cables:
